@@ -19,24 +19,31 @@ void main() async {
 
   EnvService.setDebugMode(false);
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Firebase (Crashlytics) e OneSignal não têm suporte na web.
+  if (!kIsWeb) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  OneSignal.initialize('ccef00af-323d-4e75-8957-0fca60659b73');
-  OneSignal.Notifications.requestPermission(true);
+    OneSignal.initialize('ccef00af-323d-4e75-8957-0fca60659b73');
+    OneSignal.Notifications.requestPermission(true);
+  }
 
   await Supabase.initialize(
     url: EnvVariables.url,
     anonKey: EnvVariables.anonKey,
   );
 
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
-  };
+  if (!kIsWeb) {
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    };
 
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
 
   runApp(const AppWidget());
 }
