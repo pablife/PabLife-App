@@ -56,9 +56,9 @@ dependencies:
   # Charts e Gráficos
   fl_chart: ^0.69.0
 
+  # Cópia de strawti-apps/strautils @ d2e6154 (ver packages/strawti_utils)
   strawti_utils:
-    git:
-      url: https://github.com/strawti-apps/strautils.git
+    path: ../packages/strawti_utils
   http: ^1.6.0
 
   onesignal_flutter: ^5.0.4

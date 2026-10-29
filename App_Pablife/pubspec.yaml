@@ -20,9 +20,9 @@ dependencies:
   intl: ^0.20.2
   timezone: ^0.10.1
   brasil_fields: ^1.18.0
+  # Cópia de strawti-apps/strautils @ d2e6154 (ver packages/strawti_utils)
   strawti_utils:
-    git:
-      url: https://github.com/strawti-apps/strautils.git
+    path: ../packages/strawti_utils
   carousel_slider: ^5.1.1
   flutter_slidable: ^3.1.0
   material_symbols_icons: ^4.2874.0
