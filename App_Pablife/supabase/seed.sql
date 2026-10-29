@@ -1,0 +1,54 @@
+INSERT INTO public.tb_subscription_plans
+(
+  id,
+  preapproval_plan_id,
+  reason,
+  features,
+  transaction_amount,
+  currency_id,
+  duration_months,
+  created_at,
+  updated_at,
+  consultations,
+  image_path
+)
+VALUES
+(
+  '019bfa2c-7498-7440-ac34-3c30435a3c17',
+  'eedebd39564a4d97ac66c29dae936e0e',
+  'Lite',
+  ARRAY['Usar o aplicativo completo', 'Usar 1 consulta']::VARCHAR [],
+  118.00,
+  'BRL',
+  1,
+  NOW(),
+  NOW(),
+  1,
+  'https://codfvqwqsypxqewlcrcj.supabase.co/storage/v1/object/public/plans_images/lite.png'
+),
+(
+  '019bfa2c-a6bd-740d-bc42-e67ddf1f0974',
+  'c93accca4f374f318cac34c2168280fe',
+  'Plus',
+  ARRAY['Usar o aplicativo completo', 'Usar 3 consultas']::VARCHAR [],
+  325.00,
+  'BRL',
+  1,
+  NOW(),
+  NOW(),
+  3,
+  'https://codfvqwqsypxqewlcrcj.supabase.co/storage/v1/object/public/plans_images/intermediario.png'
+),
+(
+  '019bfa2c-c1fa-702e-9b8c-d7eb2d27b60b',
+  '414cd6a7615f4729b1d15655354835ae',
+  'Premium',
+  ARRAY['Usar o aplicativo completo', 'Usar 5 consultas']::VARCHAR [],
+  509.00,
+  'BRL',
+  1,
+  NOW(),
+  NOW(),
+  5,
+  'https://codfvqwqsypxqewlcrcj.supabase.co/storage/v1/object/public/plans_images/completo.png'
+);

@@ -1,0 +1,116 @@
+# =========================================================
+# PabLife — App (Flutter mobile) + Painel (Flutter web)
+# =========================================================
+
+# ---------- Segredos e credenciais (NUNCA versionar) ----------
+.env
+.env.*
+!.env.example
+**/supabase/functions/.env
+*.jks
+*.keystore
+*.p8
+*.p12
+*.pem
+*.key
+*.mobileprovision
+*.cer
+*.certSigningRequest
+**/android/key.properties
+**/android/local.properties
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+*firebase-adminsdk*.json
+*service-account*.json
+*service_account*.json
+.cursor/
+**/.cursor/
+.cursorignore
+AGENTS.md
+
+# ---------- Diversos ----------
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+Thumbs.db
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+playground/
+output/*.sql
+
+# ---------- IntelliJ / Android Studio ----------
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# ---------- Flutter / Dart / Pub ----------
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+app.*.symbols
+app.*.map.json
+
+# ---------- Android ----------
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/gradle/wrapper/gradle-wrapper.jar
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+**/android/.kotlin/
+**/android/**/GeneratedPluginRegistrant.java
+
+# ---------- iOS / macOS ----------
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/macos/Flutter/ephemeral/
+
+# ---------- Web / Firebase Hosting ----------
+.firebase/
+
+# ---------- Supabase CLI ----------
+**/supabase/.temp/
+**/supabase/.branches/
