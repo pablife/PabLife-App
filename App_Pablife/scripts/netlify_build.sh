@@ -31,4 +31,7 @@ EOF
 fi
 
 flutter pub get --enforce-lockfile
-flutter build web --release --no-wasm-dry-run
+# Sem o service worker do Flutter: cada publicação vale já na próxima visita.
+flutter build web --release --no-wasm-dry-run --pwa-strategy=none
+# Para quem ainda tem o worker antigo instalado (ver o arquivo).
+cp scripts/flutter_service_worker.js build/web/flutter_service_worker.js
