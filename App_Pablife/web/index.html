@@ -31,8 +31,42 @@
 
   <title>PabLife</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Tela de carregamento: aparece na hora e some quando o Flutter desenha o primeiro quadro. -->
+  <style>
+    html, body { margin: 0; height: 100%; background: #00343C; }
+    #loading {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+      background: #00343C;
+      transition: opacity .3s ease;
+    }
+    #loading.hidden { opacity: 0; pointer-events: none; }
+    #loading img { width: 96px; height: 96px; animation: pablife-pulse 1.6s ease-in-out infinite; }
+    #loading .bar { width: 120px; height: 4px; border-radius: 2px; background: rgba(193, 205, 255, .2); overflow: hidden; }
+    #loading .bar::after {
+      content: ""; display: block; width: 40%; height: 100%; border-radius: 2px;
+      background: #C1CDFF; animation: pablife-slide 1.2s ease-in-out infinite;
+    }
+    @keyframes pablife-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.92); opacity: .75; } }
+    @keyframes pablife-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+    @media (prefers-reduced-motion: reduce) {
+      #loading img, #loading .bar::after { animation: none; }
+    }
+  </style>
 </head>
 <body>
+  <div id="loading" role="progressbar" aria-label="Carregando o PabLife">
+    <img src="splash/logo.png" alt="PabLife">
+    <div class="bar"></div>
+  </div>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var el = document.getElementById('loading');
+      el.classList.add('hidden');
+      setTimeout(function () { el.remove(); }, 400);
+    });
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
