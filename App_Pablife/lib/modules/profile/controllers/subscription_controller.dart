@@ -59,9 +59,9 @@ class SubscriptionController extends GetxController {
         .order('created_at', ascending: false);
 
     final list = (openSubscriptions as List)
-        .map((row) => UserSubscriptionModel.fromMap(
-              row as Map<String, dynamic>,
-            ))
+        .map(
+          (row) => UserSubscriptionModel.fromMap(row as Map<String, dynamic>),
+        )
         .toList();
 
     activeSubscription = list.firstWhereOrNull(_isSubscriptionActiveNow);
@@ -92,9 +92,7 @@ class SubscriptionController extends GetxController {
     }
 
     if (activeSubscription != null) {
-      activeTransaction = await _fetchLatestTransaction(
-        activeSubscription!.id,
-      );
+      activeTransaction = await _fetchLatestTransaction(activeSubscription!.id);
     }
 
     update();

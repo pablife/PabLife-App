@@ -136,7 +136,8 @@ class SubscriptionPlanCard extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                               ],
-                              if (isCancelled == false && daysUntilRenewal != null)
+                              if (isCancelled == false &&
+                                  daysUntilRenewal != null)
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,

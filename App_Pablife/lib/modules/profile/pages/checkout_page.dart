@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/themes/app_colors.dart';
-import '../../../shared/utils/app_snackbar.dart';
 import '../../../widgets/design_system/app_bar_default.dart';
 import '../../../widgets/design_system/app_text_form_field.dart';
 import '../../../widgets/design_system/edge_button_rounded.dart';
@@ -110,7 +109,10 @@ class CheckoutPage extends StatelessWidget {
                               if (value == null || value.isEmpty) {
                                 return 'CPF/CNPJ do titular é obrigatório';
                               }
-                              final digits = value.replaceAll(RegExp(r'\D'), '');
+                              final digits = value.replaceAll(
+                                RegExp(r'\D'),
+                                '',
+                              );
                               if (digits.length == 11) {
                                 if (!UtilBrasilFields.isCPFValido(digits)) {
                                   return 'CPF/CNPJ inválido';
@@ -133,7 +135,8 @@ class CheckoutPage extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: _buildTextField(
-                                  controller: controller.expirationMonthController,
+                                  controller:
+                                      controller.expirationMonthController,
                                   label: 'Mês',
                                   hint: 'MM',
                                   keyboardType: TextInputType.number,
@@ -146,7 +149,9 @@ class CheckoutPage extends StatelessWidget {
                                       return 'Obrigatório';
                                     }
                                     final month = int.tryParse(value);
-                                    if (month == null || month < 1 || month > 12) {
+                                    if (month == null ||
+                                        month < 1 ||
+                                        month > 12) {
                                       return 'Inválido';
                                     }
                                     return null;
@@ -156,7 +161,8 @@ class CheckoutPage extends StatelessWidget {
                               const SizedBox(width: 16),
                               Expanded(
                                 child: _buildTextField(
-                                  controller: controller.expirationYearController,
+                                  controller:
+                                      controller.expirationYearController,
                                   label: 'Ano',
                                   hint: 'AAAA',
                                   keyboardType: TextInputType.number,
@@ -169,7 +175,8 @@ class CheckoutPage extends StatelessWidget {
                                       return 'Obrigatório';
                                     }
                                     final year = int.tryParse(value);
-                                    if (year == null || year < DateTime.now().year) {
+                                    if (year == null ||
+                                        year < DateTime.now().year) {
                                       return 'Inválido';
                                     }
                                     return null;
@@ -203,7 +210,7 @@ class CheckoutPage extends StatelessWidget {
                           const SizedBox(height: 16),
 
                           // Cupom de desconto
-                          const _CouponField(),
+                          _CouponField(controller: controller),
                           const SizedBox(height: 16),
 
                           // Resumo do Pagamento
@@ -297,10 +304,7 @@ class CheckoutPage extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF1A1F71),
-            Color(0xFF0F4C75),
-          ],
+          colors: [Color(0xFF1A1F71), Color(0xFF0F4C75)],
         ),
         boxShadow: [
           BoxShadow(
@@ -458,20 +462,45 @@ class CheckoutPage extends StatelessWidget {
               ),
             ],
           ),
+          if (controller.hasCoupon) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Cupom ${controller.couponCode}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF0F6E56),
+                  ),
+                ),
+                Text(
+                  '${controller.couponFreeDays} dias grátis',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F6E56),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Total',
-                style: TextStyle(
+              Text(
+                controller.hasCoupon ? 'Total hoje' : 'Total',
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.aqua,
                 ),
               ),
               Text(
-                'R\$ ${plan.transactionAmount.toStringAsFixed(2)}',
+                controller.hasCoupon
+                    ? 'R\$ 0.00'
+                    : 'R\$ ${plan.transactionAmount.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -486,10 +515,12 @@ class CheckoutPage extends StatelessWidget {
   }
 }
 
-// Campo de cupom. Por enquanto só visual: o desconto (primeiro mês grátis)
-// ainda precisa ser validado e aplicado pela função mercadopago-subscription.
+// Campo de cupom: confere o código (validate_coupon) e, se valer, a
+// assinatura começa com os dias grátis do cupom, sem cobrança agora.
 class _CouponField extends StatefulWidget {
-  const _CouponField();
+  final CheckoutController controller;
+
+  const _CouponField({required this.controller});
 
   @override
   State<_CouponField> createState() => _CouponFieldState();
@@ -505,15 +536,15 @@ class _CouponFieldState extends State<_CouponField> {
   }
 
   void _apply() {
-    if (_controller.text.trim().isEmpty) {
-      AppSnackbar.to.show('Digite o código do cupom');
-      return;
-    }
-    AppSnackbar.to.show('Cupons ainda não estão disponíveis');
+    if (widget.controller.isCheckingCoupon) return;
+    widget.controller.applyCoupon(_controller.text);
   }
 
   @override
   Widget build(BuildContext context) {
+    final checkout = widget.controller;
+    if (checkout.hasCoupon) return _buildApplied(checkout);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -577,12 +608,71 @@ class _CouponFieldState extends State<_CouponField> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  'Aplicar',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
+                child: checkout.isCheckingCoupon
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Aplicar',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildApplied(CheckoutController checkout) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFE6F7F1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF1D9E75)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          const Icon(Icons.local_offer_outlined, color: Color(0xFF0F6E56)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Cupom ${checkout.couponCode} aplicado',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF085041),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${checkout.couponFreeDays} dias grátis antes da primeira cobrança',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF0F6E56),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              _controller.clear();
+              checkout.removeCoupon();
+            },
+            child: const Text(
+              'Remover',
+              style: TextStyle(color: Color(0xFF0F6E56)),
+            ),
           ),
         ],
       ),

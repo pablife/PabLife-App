@@ -3,7 +3,9 @@ import { MpClient } from "./mpClient.ts";
 import type { MpPreapprovalResponse } from "./types.ts";
 
 export type SubscriptionPlanPayload = {
-  preapproval_plan_id: string;
+  // Sem plano no Mercado Pago (modo de teste), a assinatura usa só os valores
+  // de auto_recurring abaixo.
+  preapproval_plan_id: string | null;
   frequency: number;
   frequency_type: "months" | "days";
   transaction_amount: number;
@@ -18,6 +20,8 @@ export type CreateSubscriptionParams = {
   plan: SubscriptionPlanPayload;
   external_reference_sub: string;
   idempotency_key?: string;
+  // Primeira cobrança só a partir desta data (cupom de dias grátis).
+  start_date?: string;
 };
 
 export async function createSubscriptionNextCycle(
@@ -28,7 +32,9 @@ export async function createSubscriptionNextCycle(
   raw: MpPreapprovalResponse;
 }> {
   const payload = {
-    preapproval_plan_id: params.plan.preapproval_plan_id,
+    ...(params.plan.preapproval_plan_id
+      ? { preapproval_plan_id: params.plan.preapproval_plan_id }
+      : {}),
     payer_email: params.payer_email,
     reason: params.reason,
     external_reference: params.external_reference_sub,
@@ -39,6 +45,7 @@ export async function createSubscriptionNextCycle(
       frequency_type: params.plan.frequency_type,
       transaction_amount: params.plan.transaction_amount,
       currency_id: params.plan.currency_id,
+      ...(params.start_date ? { start_date: params.start_date } : {}),
     },
   };
 

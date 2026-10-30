@@ -72,8 +72,9 @@ class SubscriptionPage extends StatelessWidget {
                           isCancelled: isActive
                               ? controller.isSubscriptionCancelled
                               : false,
-                          daysUntilRenewal:
-                              isActive ? controller.getDaysUntilRenewal() : null,
+                          daysUntilRenewal: isActive
+                              ? controller.getDaysUntilRenewal()
+                              : null,
                           onCancelTap: isActive
                               ? () {
                                   controller.cancelSubscription();

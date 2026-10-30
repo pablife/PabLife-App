@@ -65,3 +65,37 @@ export async function getPlanOrThrow(
     preapproval_plan_id: result.data.preapproval_plan_id,
   };
 }
+
+/** Valores do plano guardados no banco (usados no modo de teste, em que o
+ * plano do Mercado Pago de produção não existe na conta de teste). */
+export async function getPlanPricingOrThrow(
+  adminClient: SupabaseClient,
+  planId: string,
+): Promise<{
+  reason: string;
+  transaction_amount: number;
+  currency_id: string;
+  frequency: number;
+}> {
+  const { data, error } = await adminClient
+    .from("tb_subscription_plans")
+    .select("reason, transaction_amount, currency_id, duration_months")
+    .eq("id", planId)
+    .maybeSingle<{
+      reason: string;
+      transaction_amount: number | string | null;
+      currency_id: string | null;
+      duration_months: number | null;
+    }>();
+
+  if (error || !data || data.transaction_amount === null) {
+    throw new AppError(500, "PLAN_FETCH_FAILED", "Failed to fetch plan pricing");
+  }
+
+  return {
+    reason: data.reason,
+    transaction_amount: Number(data.transaction_amount),
+    currency_id: data.currency_id ?? "BRL",
+    frequency: data.duration_months ?? 1,
+  };
+}

@@ -13,7 +13,20 @@ import {
   hasActiveSubscription,
   hasApprovedPayments,
 } from "./modules/db/userMetricsRepo.ts";
-import { getPlanOrThrow } from "./modules/db/plansRepo.ts";
+import {
+  getPlanOrThrow,
+  getPlanPricingOrThrow,
+} from "./modules/db/plansRepo.ts";
+import {
+  activateSubscriptionWithCoupon,
+  recordCouponRedemption,
+  validateCouponOrThrow,
+} from "./modules/db/couponsRepo.ts";
+import {
+  MP_ACCESS_TOKEN_ENV,
+  MP_PUBLIC_KEY_ENV,
+  TEST_MODE,
+} from "./modules/mode.ts";
 import {
   cancelUserSubscription,
   createPendingSubscription,
@@ -144,8 +157,8 @@ Deno.serve(async (req) => {
   const requestId = requireIdempotencyKey(req);
 
   try {
-    const mpAccessToken = requireEnv("MERCADOPAGO_ACCESS_TOKEN");
-    const mpPublicKey = requireEnv("MERCADOPAGO_PUBLIC_KEY");
+    const mpAccessToken = requireEnv(MP_ACCESS_TOKEN_ENV);
+    const mpPublicKey = requireEnv(MP_PUBLIC_KEY_ENV);
     const mpApiBase = requireEnv("MERCADOPAGO_API_BASE");
     const mpClient = new MpClient({
       accessToken: mpAccessToken,
@@ -167,9 +180,31 @@ Deno.serve(async (req) => {
         "preapproval_plan_id is required",
       );
     }
-    const mpPlan = await getPreapprovalPlan(mpClient, plan.preapproval_plan_id);
+    // No modo de teste o plano do Mercado Pago de produção não existe na conta
+    // de teste: os valores vêm do banco e a assinatura é criada sem plano.
+    const mpPlan = TEST_MODE
+      ? await (async () => {
+        const pricing = await getPlanPricingOrThrow(
+          createAdminClient(),
+          plan.id,
+        );
+        return {
+          id: plan.preapproval_plan_id,
+          reason: pricing.reason,
+          transaction_amount: pricing.transaction_amount,
+          currency_id: pricing.currency_id,
+          frequency: pricing.frequency,
+          frequency_type: "months" as const,
+        };
+      })()
+      : await getPreapprovalPlan(mpClient, plan.preapproval_plan_id);
 
     const reason = mpPlan.reason ?? plan.reason;
+
+    // Cupom de dias grátis: conferido antes de qualquer cobrança.
+    const coupon = input.coupon_code
+      ? await validateCouponOrThrow(userClient, input.coupon_code)
+      : null;
 
     const paymentToken = await createCardToken({
       card: input.card,
@@ -262,12 +297,14 @@ Deno.serve(async (req) => {
       currentSubscription.id,
     );
 
-    const authorizedSubscription = await findAuthorizedSubscription({
-      client: mpClient,
-      payer_email: email,
-      preapproval_plan_id: plan.preapproval_plan_id,
-      external_reference: external_reference_sub,
-    });
+    const authorizedSubscription = TEST_MODE
+      ? null
+      : await findAuthorizedSubscription({
+        client: mpClient,
+        payer_email: email,
+        preapproval_plan_id: plan.preapproval_plan_id,
+        external_reference: external_reference_sub,
+      });
 
     if (authorizedSubscription && !currentSubscription.has_preapproval) {
       currentSubscription = await updateSubscriptionAfterPreapproval(
@@ -277,6 +314,9 @@ Deno.serve(async (req) => {
           preapproval: {
             id: authorizedSubscription.id,
             status: authorizedSubscription.status,
+            auto_recurring: {
+              start_date: authorizedSubscription.start_date,
+            },
           },
           externalReference: external_reference_sub,
         },
@@ -308,7 +348,14 @@ Deno.serve(async (req) => {
       },
     };
 
-    if (!currentSubscription.has_first_payment) {
+    // Com cupom não há cobrança agora: a primeira mensalidade fica para o fim
+    // do período grátis.
+    const freePeriodStart = new Date();
+    const freePeriodEnd = coupon
+      ? new Date(freePeriodStart.getTime() + coupon.free_days * 86_400_000)
+      : null;
+
+    if (!coupon && !currentSubscription.has_first_payment) {
       try {
         safeLog("createImmediatePayment:", {
           client: mpClient,
@@ -435,7 +482,7 @@ Deno.serve(async (req) => {
         card_token_id: subscriptionToken.card_token_id,
         reason,
         plan: {
-          preapproval_plan_id: plan.preapproval_plan_id,
+          preapproval_plan_id: TEST_MODE ? null : plan.preapproval_plan_id,
           frequency: mpPlan.frequency,
           frequency_type: mpPlan.frequency_type,
           transaction_amount: mpPlan.transaction_amount,
@@ -443,6 +490,7 @@ Deno.serve(async (req) => {
         },
         external_reference_sub,
         idempotency_key: subKey,
+        start_date: freePeriodEnd?.toISOString(),
       });
 
       createdSubscription = {
@@ -458,6 +506,28 @@ Deno.serve(async (req) => {
           externalReference: external_reference_sub,
         },
       );
+    }
+
+    // Cupom: ativa já pelo período grátis e registra o uso.
+    if (coupon && freePeriodEnd) {
+      await activateSubscriptionWithCoupon(adminClient, {
+        subscriptionId: currentSubscription.id,
+        startDate: freePeriodStart,
+        endDate: freePeriodEnd,
+      });
+      await recordCouponRedemption(adminClient, {
+        couponId: coupon.coupon_id,
+        userId: user_id,
+        userSubscriptionId: currentSubscription.id,
+        planId: plan.id,
+        isTest: TEST_MODE,
+      });
+      currentSubscription = {
+        ...currentSubscription,
+        status: "active",
+        start_date: freePeriodStart.toISOString(),
+        end_date: freePeriodEnd.toISOString(),
+      };
     }
 
     const subscriptionStatus =
@@ -481,6 +551,10 @@ Deno.serve(async (req) => {
         status_detail: payment?.status_detail ?? null,
         external_reference: external_reference_pay,
       },
+      coupon: coupon && freePeriodEnd
+        ? { free_days: coupon.free_days, ends_at: freePeriodEnd.toISOString() }
+        : null,
+      test_mode: TEST_MODE,
     });
   } catch (error) {
     if (isAppError(error)) {

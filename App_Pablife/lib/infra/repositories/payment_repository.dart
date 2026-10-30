@@ -5,23 +5,47 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class PaymentRepository extends StrautilsTryThis {
   final _functions = Supabase.instance.client.functions;
 
+  /// Pagamentos de teste (Mercado Pago de teste, nada é cobrado): gerar o app
+  /// com `--dart-define=MP_TEST=true`. Sem isso, usa a função oficial.
+  static const useTestPayments = bool.fromEnvironment('MP_TEST');
+
+  /// Confere um cupom para o usuário logado, sem usar.
+  /// Devolve {valid, reason, free_days, coupon_id}.
+  FStrautilsResponse<Map<String, dynamic>> validateCoupon(String code) {
+    return tryThis(() async {
+      final data = await Supabase.instance.client.rpc(
+        'validate_coupon',
+        params: {'p_code': code},
+      );
+      return StrautilsResponse.success(Map<String, dynamic>.from(data as Map));
+    }, action: 'conferir cupom');
+  }
+
   /// Criar assinatura recorrente com cartão de crédito
   /// Utiliza a API de assinaturas do Mercado Pago (/preapproval)
   FStrautilsResponse<Map<String, dynamic>> createSubscription({
     required String planId,
     required Map<String, dynamic> card,
     required String idempotencyKey,
+    String? couponCode,
   }) {
     return tryThis(() async {
       if (idempotencyKey.trim().isEmpty) {
         return StrautilsResponse.error('Idempotency key inválida');
       }
 
-      final body = {'plan_id': planId, 'card': card};
+      final body = {
+        'plan_id': planId,
+        'card': card,
+        if (couponCode != null) 'coupon_code': couponCode,
+      };
 
-      debugPrint('Enviando requisição para criar assinatura: $body');
+      // Nunca registrar os dados do cartão no console.
+      debugPrint('Enviando requisição para criar assinatura (plano $planId)');
       final response = await _functions.invoke(
-        'mercadopago-subscription',
+        useTestPayments
+            ? 'mercadopago-subscription-test'
+            : 'mercadopago-subscription',
         body: body,
         headers: {'X-Idempotency-Key': idempotencyKey},
       );

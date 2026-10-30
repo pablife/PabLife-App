@@ -142,21 +142,7 @@ export async function createCardToken(params: {
     params.timeoutMs ?? DEFAULT_TIMEOUT_MS,
   );
 
-  console.log(
-    JSON.stringify({
-      cardholder: {
-        identification: {
-          type: documentType,
-          number: sanitizedDocument,
-        },
-        name: params.card.name,
-      },
-      card_number: sanitizedCardNumber,
-      expiration_month: params.card.expirationMonth,
-      expiration_year: params.card.expirationYear,
-      security_code: params.card.securityCode,
-    }),
-  );
+  // Nunca registrar os dados do cartão em log (número, CVV, documento).
 
   try {
     const response = await fetch(url, {
