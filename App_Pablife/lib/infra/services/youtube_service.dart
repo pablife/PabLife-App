@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YoutubeService {
@@ -38,6 +41,9 @@ class YoutubeService {
         return null;
       }
 
+      // No navegador o youtube_explode é bloqueado por CORS; o oEmbed não.
+      if (kIsWeb) return _getVideoInfoWeb(videoUrl, videoId);
+
       debugPrint('[YoutubeService] Buscando informações do vídeo: $videoId');
       final video = await _yt.videos.get(videoId);
 
@@ -64,6 +70,28 @@ class YoutubeService {
       debugPrint('[YoutubeService] Erro ao buscar informações: $e');
       return null;
     }
+  }
+
+  Future<YoutubeVideoInfo?> _getVideoInfoWeb(
+    String videoUrl,
+    String videoId,
+  ) async {
+    final uri = Uri.https('www.youtube.com', '/oembed', {
+      'url': 'https://www.youtube.com/watch?v=$videoId',
+      'format': 'json',
+    });
+    final response = await http.get(uri);
+    if (response.statusCode != 200) {
+      debugPrint('[YoutubeService] oEmbed falhou (${response.statusCode}): $videoUrl');
+      return null;
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return YoutubeVideoInfo(
+      title: data['title'] as String? ?? '',
+      thumbnailUrl: 'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
+      duration: Duration.zero,
+    );
   }
 
   Future<List<YoutubeVideoInfo>> getVideosInfo(List<String> videoUrls) async {

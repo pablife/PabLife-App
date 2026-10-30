@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -7,6 +8,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart'
 import '../../../widgets/design_system/app_bar_default.dart';
 import '../../../widgets/design_system/text_default.dart';
 import '../controllers/youtube_player_controller.dart';
+import '../widgets/youtube_web_embed.dart';
 
 class YoutubePlayerPage extends StatefulWidget {
   const YoutubePlayerPage({super.key});
@@ -66,6 +68,38 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                     child: Center(
                       child: CircularProgressIndicator(
                         color: Color(0xFFC1CDFF),
+                      ),
+                    ),
+                  )
+                else if (kIsWeb && controller.videoId != null)
+                  Expanded(
+                    child: Container(
+                      color: AppColors.second,
+                      child: Column(
+                        children: [
+                          AspectRatio(
+                            aspectRatio: 16 / 9,
+                            child: buildYoutubeWebEmbed(controller.videoId!),
+                          ),
+                          if (controller.videoTitle != null)
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFC1CDFF),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(30),
+                                  topRight: Radius.circular(30),
+                                ),
+                              ),
+                              child: TextDefault(
+                                controller.videoTitle!,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF00343C),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   )

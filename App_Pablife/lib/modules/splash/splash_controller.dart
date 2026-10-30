@@ -28,19 +28,24 @@ class SplashController extends GetxController with LoaderManagerMixin {
   void _checkAuthentication() async {
     changeLoading(true);
 
-    final updateAvailability = await getUpdateAvailability();
-    if (updateAvailability == UpdateAvailable()) {
-      Get.offAll(UpdateAvailabilityPage());
-      return;
+    // Na web não há loja de apps nem OneSignal.
+    if (!kIsWeb) {
+      final updateAvailability = await getUpdateAvailability();
+      if (updateAvailability == UpdateAvailable()) {
+        Get.offAll(UpdateAvailabilityPage());
+        return;
+      }
     }
 
     await AuthService.instance.initialize();
 
-    final oneSignalUserId = OneSignal.User.pushSubscription.id;
-    if (oneSignalUserId != null) {
-      await _userRepository.setOneSignalUserId(oneSignalUserId);
-    } else {
-      await _userRepository.setOneSignalUserId('');
+    if (!kIsWeb) {
+      final oneSignalUserId = OneSignal.User.pushSubscription.id;
+      if (oneSignalUserId != null) {
+        await _userRepository.setOneSignalUserId(oneSignalUserId);
+      } else {
+        await _userRepository.setOneSignalUserId('');
+      }
     }
 
     if (_authService.isAuthenticated) {

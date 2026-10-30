@@ -8,6 +8,7 @@ class YoutubePlayerController extends GetxController {
   final YoutubeService _youtubeService = YoutubeService.instance;
 
   yt_player.YoutubePlayerController? playerController;
+  String? videoId;
   String? videoTitle;
   String? videoDescription;
   bool isLoading = true;
@@ -57,6 +58,15 @@ class YoutubePlayerController extends GetxController {
 
       if (youtubeInfo != null) {
         videoDescription = youtubeInfo.title;
+      }
+
+      this.videoId = finalVideoId;
+
+      // Na web o vídeo toca pelo iframe do YouTube (ver YoutubePlayerPage).
+      if (kIsWeb) {
+        isLoading = false;
+        update();
+        return;
       }
 
       playerController = yt_player.YoutubePlayerController(
