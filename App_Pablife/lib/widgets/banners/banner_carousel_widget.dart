@@ -24,8 +24,13 @@ class BannerCarouselWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Calcula a largura do banner (85% da tela)
-    final bannerWidth = MediaQuery.of(context).size.width * 0.85;
+    return LayoutBuilder(builder: _buildCarousel);
+  }
+
+  Widget _buildCarousel(BuildContext context, BoxConstraints constraints) {
+    // Calcula a largura do banner (85% do espaço disponível; na web em
+    // colunas, isso é a coluna e não a tela inteira)
+    final bannerWidth = constraints.maxWidth * 0.85;
     // Calcula a altura baseada na proporção ou usa a altura fixa se fornecida
     final bannerHeight = height ?? (bannerWidth / aspectRatio);
 

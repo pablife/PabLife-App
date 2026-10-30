@@ -3,12 +3,14 @@ import 'package:get/get.dart';
 import 'package:pablife/infra/models/user_role.dart';
 import 'package:pablife/infra/services/auth_service.dart';
 import 'package:pablife/modules/dashboard/widgets/dashboard_navbar.dart';
+import 'package:pablife/modules/dashboard/widgets/dashboard_side_menu.dart';
 import 'package:pablife/modules/home/home_page.dart';
 import 'package:pablife/modules/calendar/calendar_page.dart';
 import 'package:pablife/modules/mentorias/mentorias_page.dart';
 import 'package:pablife/modules/patients/patients_page.dart';
 import 'package:pablife/modules/professionals/professionals_page.dart';
 import 'package:pablife/modules/profile/profile_page.dart';
+import 'package:pablife/shared/utils/wide_layout.dart';
 import 'dashboard_controller.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -32,6 +34,20 @@ class DashboardPage extends StatelessWidget {
 
     return GetBuilder<DashboardController>(
       builder: (controller) {
+        if (isWideLayout(context)) {
+          return Scaffold(
+            body: Row(
+              children: [
+                DashboardSideMenu(
+                  controller: controller,
+                  isProfessional: isProfessional,
+                ),
+                Expanded(child: pages[controller.currentIndex]),
+              ],
+            ),
+          );
+        }
+
         return Scaffold(
           extendBody: true,
           body: pages[controller.currentIndex],
