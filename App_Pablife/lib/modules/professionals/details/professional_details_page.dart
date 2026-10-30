@@ -308,41 +308,46 @@ class ProfessionalDetailsPage extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: isAction
-              ? Border.all(color: const Color(0xFF0C8DA1), width: 1)
-              : null,
-        ),
-        child: Row(
-          children: [
-            leading ??
-                Icon(
-                  icon,
-                  size: 20,
-                  color: isAction ? const Color(0xFF0C8DA1) : Colors.grey[600],
-                ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: isAction ? const Color(0xFF0C8DA1) : Colors.black87,
-                  fontWeight: isAction ? FontWeight.w600 : FontWeight.normal,
+      child: MouseRegion(
+        cursor: isAction ? SystemMouseCursors.click : MouseCursor.defer,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: isAction
+                ? Border.all(color: const Color(0xFF0C8DA1), width: 1)
+                : null,
+          ),
+          child: Row(
+            children: [
+              leading ??
+                  Icon(
+                    icon,
+                    size: 20,
+                    color: isAction
+                        ? const Color(0xFF0C8DA1)
+                        : Colors.grey[600],
+                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isAction ? const Color(0xFF0C8DA1) : Colors.black87,
+                    fontWeight: isAction ? FontWeight.w600 : FontWeight.normal,
+                  ),
                 ),
               ),
-            ),
-            if (isAction)
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 14,
-                color: Color(0xFF0C8DA1),
-              ),
-          ],
+              if (isAction)
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: Color(0xFF0C8DA1),
+                ),
+            ],
+          ),
         ),
       ),
     );

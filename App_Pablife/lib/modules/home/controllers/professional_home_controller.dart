@@ -129,10 +129,7 @@ class ProfessionalHomeController extends GetxController
   }
 
   Future<void> refreshDataSilent() async {
-    await Future.wait([
-      _loadDashboard(showLoader: false),
-      _loadBanners(),
-    ]);
+    await Future.wait([_loadDashboard(showLoader: false), _loadBanners()]);
   }
 
   List<ProfessionalAppointmentModel> get activeAppointments =>

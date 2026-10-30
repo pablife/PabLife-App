@@ -58,16 +58,18 @@ class WideScale extends StatelessWidget {
     if (scale == 1.0) return child;
 
     final scaledSize = size / scale;
+    // A OverflowBox fica por fora: ela tem o tamanho da tela, então aceita
+    // cliques em toda a área; o Transform reduz o conteúdo maior lá dentro.
     return ClipRect(
-      child: Transform.scale(
-        scale: scale,
+      child: OverflowBox(
         alignment: Alignment.topLeft,
-        child: OverflowBox(
+        minWidth: scaledSize.width,
+        maxWidth: scaledSize.width,
+        minHeight: scaledSize.height,
+        maxHeight: scaledSize.height,
+        child: Transform.scale(
+          scale: scale,
           alignment: Alignment.topLeft,
-          minWidth: scaledSize.width,
-          maxWidth: scaledSize.width,
-          minHeight: scaledSize.height,
-          maxHeight: scaledSize.height,
           child: MediaQuery(
             data: media.copyWith(size: scaledSize),
             child: child,

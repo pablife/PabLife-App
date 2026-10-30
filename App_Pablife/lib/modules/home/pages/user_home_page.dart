@@ -92,8 +92,9 @@ class UserHomePage extends StatelessWidget {
   }
 }
 
-/// Tela inicial em telas largas: as mesmas seções, em duas colunas, com os
-/// banners lado a lado na largura toda.
+/// Tela inicial em telas largas, em blocos: consulta e meta em andamento lado
+/// a lado (mesmo tamanho), tarefas e metas juntas ao lado do progresso
+/// semanal, e os banners e profissionais na largura toda.
 class _WideHomeContent extends StatelessWidget {
   final UserHomeController controller;
   const _WideHomeContent({required this.controller});
@@ -111,17 +112,19 @@ class _WideHomeContent extends StatelessWidget {
             child: Column(
               children: [
                 _columns(
+                  left: [UserHomeAppointmentsSection(controller: controller)],
+                  right: [UserHomeGoalsSection(controller: controller)],
+                ),
+                gap,
+                _columns(
                   left: [
-                    UserHomeAppointmentsSection(controller: controller),
+                    UserHomeTasksSectionWidget(controller: controller),
                     gap,
-                    UserHomeGoalsSection(controller: controller),
+                    const UserHomeGoalsProgressSection(),
                   ],
                   right: [
-                    if (controller.hasWeeklyProgress) ...[
+                    if (controller.hasWeeklyProgress)
                       UserHomeWeeklyProgressWidget(controller: controller),
-                      gap,
-                    ],
-                    const UserHomeGoalsProgressSection(),
                   ],
                 ),
                 if (controller.banners.isNotEmpty) ...[
@@ -131,16 +134,10 @@ class _WideHomeContent extends StatelessWidget {
                     bannersPerView: 2,
                   ),
                 ],
-                gap,
-                _columns(
-                  left: [UserHomeTasksSectionWidget(controller: controller)],
-                  right: [
-                    if (controller.professionals.isNotEmpty)
-                      UserHomeProfessionalCarouselWidget(
-                        controller: controller,
-                      ),
-                  ],
-                ),
+                if (controller.professionals.isNotEmpty) ...[
+                  gap,
+                  UserHomeProfessionalCarouselWidget(controller: controller),
+                ],
               ],
             ),
           ),
@@ -153,9 +150,9 @@ class _WideHomeContent extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(flex: 14, child: Column(children: left)),
+        Expanded(child: Column(children: left)),
         const SizedBox(width: 24),
-        Expanded(flex: 10, child: Column(children: right)),
+        Expanded(child: Column(children: right)),
       ],
     );
   }
