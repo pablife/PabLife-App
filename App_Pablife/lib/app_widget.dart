@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 
 import '../shared/themes/app_colors.dart';
+import '../shared/utils/wide_layout.dart';
 import 'app_controller.dart';
 import 'app_routes.dart';
 import 'infra/repositories/appointment_repository.dart';
@@ -28,10 +29,12 @@ class AppWidget extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       builder: (context, child) {
-        return SafeArea(
-          bottom: true,
-          top: false,
-          child: child ?? const SizedBox.shrink(),
+        return WideScale(
+          child: SafeArea(
+            bottom: true,
+            top: false,
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
       theme: ThemeData(

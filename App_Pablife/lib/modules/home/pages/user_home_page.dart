@@ -92,7 +92,8 @@ class UserHomePage extends StatelessWidget {
   }
 }
 
-/// Tela inicial em telas largas: as mesmas seções, em duas colunas.
+/// Tela inicial em telas largas: as mesmas seções, em duas colunas, com os
+/// banners lado a lado na largura toda.
 class _WideHomeContent extends StatelessWidget {
   final UserHomeController controller;
   const _WideHomeContent({required this.controller});
@@ -107,48 +108,54 @@ class _WideHomeContent extends StatelessWidget {
         Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1100),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
               children: [
-                Expanded(
-                  flex: 14,
-                  child: Column(
-                    children: [
-                      UserHomeAppointmentsSection(controller: controller),
+                _columns(
+                  left: [
+                    UserHomeAppointmentsSection(controller: controller),
+                    gap,
+                    UserHomeGoalsSection(controller: controller),
+                  ],
+                  right: [
+                    if (controller.hasWeeklyProgress) ...[
+                      UserHomeWeeklyProgressWidget(controller: controller),
                       gap,
-                      UserHomeGoalsSection(controller: controller),
-                      if (controller.banners.isNotEmpty) ...[
-                        gap,
-                        BannerCarouselWidget(banners: controller.banners),
-                      ],
-                      gap,
-                      UserHomeTasksSectionWidget(controller: controller),
                     ],
-                  ),
+                    const UserHomeGoalsProgressSection(),
+                  ],
                 ),
-                const SizedBox(width: 24),
-                Expanded(
-                  flex: 10,
-                  child: Column(
-                    children: [
-                      if (controller.hasWeeklyProgress) ...[
-                        UserHomeWeeklyProgressWidget(controller: controller),
-                        gap,
-                      ],
-                      if (controller.professionals.isNotEmpty) ...[
-                        UserHomeProfessionalCarouselWidget(
-                          controller: controller,
-                        ),
-                        gap,
-                      ],
-                      const UserHomeGoalsProgressSection(),
-                    ],
+                if (controller.banners.isNotEmpty) ...[
+                  gap,
+                  BannerCarouselWidget(
+                    banners: controller.banners,
+                    bannersPerView: 2,
                   ),
+                ],
+                gap,
+                _columns(
+                  left: [UserHomeTasksSectionWidget(controller: controller)],
+                  right: [
+                    if (controller.professionals.isNotEmpty)
+                      UserHomeProfessionalCarouselWidget(
+                        controller: controller,
+                      ),
+                  ],
                 ),
               ],
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _columns({required List<Widget> left, required List<Widget> right}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(flex: 14, child: Column(children: left)),
+        const SizedBox(width: 24),
+        Expanded(flex: 10, child: Column(children: right)),
       ],
     );
   }

@@ -36,3 +36,44 @@ class WideCenter extends StatelessWidget {
     );
   }
 }
+
+/// Em telas largas mais baixas (notebook), desenha o app um pouco menor
+/// para as telas caberem sem cortar, como num zoom de navegador.
+class WideScale extends StatelessWidget {
+  final Widget child;
+
+  /// Altura (em pixels lógicos) que as telas precisam para caber bem.
+  static const _comfortableHeight = 900.0;
+  static const _minScale = 0.75;
+
+  const WideScale({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final size = media.size;
+    if (size.width < wideLayoutBreakpoint) return child;
+
+    final scale = (size.height / _comfortableHeight).clamp(_minScale, 1.0);
+    if (scale == 1.0) return child;
+
+    final scaledSize = size / scale;
+    return ClipRect(
+      child: Transform.scale(
+        scale: scale,
+        alignment: Alignment.topLeft,
+        child: OverflowBox(
+          alignment: Alignment.topLeft,
+          minWidth: scaledSize.width,
+          maxWidth: scaledSize.width,
+          minHeight: scaledSize.height,
+          maxHeight: scaledSize.height,
+          child: MediaQuery(
+            data: media.copyWith(size: scaledSize),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
