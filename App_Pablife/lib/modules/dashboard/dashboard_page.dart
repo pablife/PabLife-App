@@ -42,7 +42,13 @@ class DashboardPage extends StatelessWidget {
                   controller: controller,
                   isProfessional: isProfessional,
                 ),
-                Expanded(child: pages[controller.currentIndex]),
+                Expanded(
+                  // O Dashboard do usuário já tem layout próprio em colunas;
+                  // as outras abas ficam numa coluna centralizada.
+                  child: controller.currentIndex == 0 && !isProfessional
+                      ? pages[0]
+                      : WideCenter(child: pages[controller.currentIndex]),
+                ),
               ],
             ),
           );
