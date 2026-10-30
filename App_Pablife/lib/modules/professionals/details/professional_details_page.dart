@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pablife/widgets/design_system/whatsapp_icon.dart';
 import 'package:pablife/widgets/design_system/app_image.dart';
 
 import '../../../shared/themes/app_colors.dart';
@@ -206,7 +206,10 @@ class ProfessionalDetailsPage extends StatelessWidget {
                         if (user.phone.isNotEmpty) ...[
                           const SizedBox(height: 12),
                           _buildContactItem(
-                            icon: FontAwesomeIcons.whatsapp,
+                            leading: const WhatsAppIcon(
+                              size: 20,
+                              color: Color(0xFF0C8DA1),
+                            ),
                             text: 'Conversar no WhatsApp',
                             onTap: controller.openWhatsApp,
                             isAction: true,
@@ -248,7 +251,8 @@ class ProfessionalDetailsPage extends StatelessWidget {
   }
 
   Widget _buildContactItem({
-    required IconData icon,
+    IconData? icon,
+    Widget? leading,
     required String text,
     VoidCallback? onTap,
     bool isAction = false,
@@ -266,11 +270,12 @@ class ProfessionalDetailsPage extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isAction ? const Color(0xFF0C8DA1) : Colors.grey[600],
-            ),
+            leading ??
+                Icon(
+                  icon,
+                  size: 20,
+                  color: isAction ? const Color(0xFF0C8DA1) : Colors.grey[600],
+                ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

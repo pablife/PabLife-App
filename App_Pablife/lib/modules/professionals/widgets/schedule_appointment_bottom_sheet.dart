@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pablife/widgets/design_system/whatsapp_icon.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -171,11 +171,7 @@ class _ScheduleAppointmentBottomSheetState
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
                             SizedBox(width: 10),
-                            FaIcon(
-                              FontAwesomeIcons.whatsapp,
-                              color: Colors.white,
-                              size: 32,
-                            ),
+                            WhatsAppIcon(size: 32),
                             SizedBox(width: 8),
                             TextDefault(
                               'Enviar Mensagem',

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pablife/widgets/design_system/whatsapp_icon.dart';
 
 import '../../../widgets/design_system/edge_button_rounded.dart';
 import '../../../widgets/design_system/expandable_action_fab.dart';
@@ -42,11 +42,7 @@ class AppointmentDetailsBottomBarWidget extends StatelessWidget {
                 textColor: Colors.white,
                 side: EdgeSide.right,
                 showText: !controller.isFabExpanded,
-                icon: const FaIcon(
-                  FontAwesomeIcons.whatsapp,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                icon: const WhatsAppIcon(size: 24),
                 iconSpacing: 12,
               ),
             ),

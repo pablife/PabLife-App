@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../controllers/dashboard_goals_controller.dart';
 import '../widgets/goal_progress_card.dart';
 
@@ -77,7 +76,7 @@ class DashboardHomePage extends StatelessWidget {
         child: Column(
           children: [
             Icon(
-              LucideIcons.target,
+              Icons.track_changes,
               size: 64,
               color: Colors.grey[400],
             ),

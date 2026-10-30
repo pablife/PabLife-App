@@ -26,7 +26,6 @@ dependencies:
   carousel_slider: ^5.1.1
   flutter_slidable: ^3.1.0
   material_symbols_icons: ^4.2874.0
-  font_awesome_flutter: ^10.7.0
   onesignal_flutter: ^5.3.4
   firebase_core: ^4.2.1
   flutter_launcher_icons: ^0.14.4
@@ -36,7 +35,6 @@ dependencies:
   youtube_explode_dart: ^3.0.5
   youtube_player_flutter: ^9.1.3
   cached_network_image: ^3.4.1
-  lucide_icons_flutter: ^3.1.7
   update_available: ^3.2.0+1
   uuid: ^4.5.2
   http: ^1.6.0
@@ -62,54 +60,10 @@ flutter:
     - assets/pages/waiting_approval/
     - assets/pages/premium/
     - assets/icons/
+  # Na web o Flutter baixa todas as fontes declaradas antes da primeira tela,
+  # então aqui ficam só as usadas (Elms Sans e Instrument Sans Condensed/
+  # SemiCondensed não aparecem no app; itálico só no peso regular).
   fonts:
-    - family: ElmsSans
-      fonts:
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-Thin.ttf
-          weight: 100
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-ThinItalic.ttf
-          weight: 100
-          style: italic
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-ExtraLight.ttf
-          weight: 200
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-ExtraLightItalic.ttf
-          weight: 200
-          style: italic
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-Light.ttf
-          weight: 300
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-LightItalic.ttf
-          weight: 300
-          style: italic
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-Italic.ttf
-          weight: 400
-          style: italic
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-MediumItalic.ttf
-          weight: 500
-          style: italic
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-SemiBoldItalic.ttf
-          weight: 600
-          style: italic
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-BoldItalic.ttf
-          weight: 700
-          style: italic
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-ExtraBold.ttf
-          weight: 800
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-ExtraBoldItalic.ttf
-          weight: 800
-          style: italic
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-Black.ttf
-          weight: 900
-        - asset: assets/fonts/Elms_Sans/static/ElmsSans-BlackItalic.ttf
-          weight: 900
-          style: italic
     - family: InstrumentSans
       fonts:
         - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-Regular.ttf
@@ -119,60 +73,7 @@ flutter:
           style: italic
         - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-MediumItalic.ttf
-          weight: 500
-          style: italic
         - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-SemiBoldItalic.ttf
-          weight: 600
-          style: italic
         - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-BoldItalic.ttf
-          weight: 700
-          style: italic
-    - family: InstrumentSansCondensed
-      fonts:
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_Condensed-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_Condensed-Italic.ttf
-          weight: 400
-          style: italic
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_Condensed-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_Condensed-MediumItalic.ttf
-          weight: 500
-          style: italic
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_Condensed-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_Condensed-SemiBoldItalic.ttf
-          weight: 600
-          style: italic
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_Condensed-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_Condensed-BoldItalic.ttf
-          weight: 700
-          style: italic
-    - family: InstrumentSansSemiCondensed
-      fonts:
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_SemiCondensed-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_SemiCondensed-Italic.ttf
-          weight: 400
-          style: italic
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_SemiCondensed-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_SemiCondensed-MediumItalic.ttf
-          weight: 500
-          style: italic
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_SemiCondensed-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_SemiCondensed-SemiBoldItalic.ttf
-          weight: 600
-          style: italic
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_SemiCondensed-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans_SemiCondensed-BoldItalic.ttf
-          weight: 700
-          style: italic

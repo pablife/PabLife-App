@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pablife/modules/dashboard/dashboard_controller.dart';
 import '../controllers/user_home_controller.dart';
 import 'user_home_task_button_widget.dart';
@@ -21,7 +20,7 @@ class UserHomeTasksSectionWidget extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SectionEmptyState(
-          icon: LucideIcons.clipboardCheck,
+          icon: Icons.assignment_turned_in_outlined,
           title: 'Nenhuma tarefa para hoje',
           description: 'Crie uma tarefa e ela será mostrada aqui.',
           buttonLabel: 'Criar tarefa',
