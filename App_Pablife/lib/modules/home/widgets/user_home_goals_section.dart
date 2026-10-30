@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../controllers/user_home_controller.dart';
 import 'user_home_goal_card_widget.dart';
 import 'section_empty_state_widget.dart';
@@ -20,7 +19,7 @@ class UserHomeGoalsSection extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SectionEmptyState(
-          icon: LucideIcons.target,
+          icon: Icons.track_changes,
           title: 'Nenhuma meta criada',
           description:
               'Crie metas para acompanhar seu progresso e alcançar seus objetivos.',
