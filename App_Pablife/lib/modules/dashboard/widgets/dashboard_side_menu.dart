@@ -25,7 +25,7 @@ class DashboardSideMenu extends StatelessWidget {
         icon: RegularRounded.BRIEFCASE,
         label: isProfessional ? 'Pacientes' : 'Profissionais',
       ),
-      (index: 0, icon: RegularRounded.HOME, label: 'Início'),
+      (index: 0, icon: RegularRounded.HOME, label: 'Dashboard'),
       (index: 1, icon: RegularRounded.CALENDAR, label: 'Agenda'),
       (index: 2, icon: RegularRounded.BOOK_ALT, label: 'Mentorias'),
       (index: 4, icon: RegularRounded.USER, label: 'Perfil'),

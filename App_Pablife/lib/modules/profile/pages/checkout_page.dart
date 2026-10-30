@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/themes/app_colors.dart';
+import '../../../shared/utils/app_snackbar.dart';
 import '../../../widgets/design_system/app_bar_default.dart';
 import '../../../widgets/design_system/app_text_form_field.dart';
 import '../../../widgets/design_system/edge_button_rounded.dart';
@@ -199,6 +200,10 @@ class CheckoutPage extends StatelessWidget {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 16),
+
+                          // Cupom de desconto
+                          const _CouponField(),
                           const SizedBox(height: 16),
 
                           // Resumo do Pagamento
@@ -471,6 +476,110 @@ class CheckoutPage extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF0C8DA1),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Campo de cupom. Por enquanto só visual: o desconto (primeiro mês grátis)
+// ainda precisa ser validado e aplicado pela função mercadopago-subscription.
+class _CouponField extends StatefulWidget {
+  const _CouponField();
+
+  @override
+  State<_CouponField> createState() => _CouponFieldState();
+}
+
+class _CouponFieldState extends State<_CouponField> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _apply() {
+    if (_controller.text.trim().isEmpty) {
+      AppSnackbar.to.show('Digite o código do cupom');
+      return;
+    }
+    AppSnackbar.to.show('Cupons ainda não estão disponíveis');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Cupom de desconto',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF00343C),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  textCapitalization: TextCapitalization.characters,
+                  style: const TextStyle(color: Color(0xFF00343C)),
+                  decoration: InputDecoration(
+                    hintText: 'Digite seu cupom',
+                    hintStyle: TextStyle(color: Colors.grey[500]),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFFD0D7F5)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFFD0D7F5)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFF0C8DA1)),
+                    ),
+                  ),
+                  onSubmitted: (_) => _apply(),
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilledButton(
+                onPressed: _apply,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF0C8DA1),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Aplicar',
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
             ],
