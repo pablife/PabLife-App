@@ -1,0 +1,6 @@
+# Publicação da versão web do App na Netlify.
+# A cada push no main a Netlify roda o script e publica App_Pablife/build/web.
+[build]
+  base = "App_Pablife"
+  command = "bash scripts/netlify_build.sh"
+  publish = "build/web"
