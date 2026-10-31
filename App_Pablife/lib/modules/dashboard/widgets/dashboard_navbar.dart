@@ -19,7 +19,14 @@ class DashboardNavbar extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        // Mesma ordem do menu lateral do computador: Profissionais,
+        // Dashboard, Agenda, Mentorias e Perfil.
         children: [
+          DashboardNavbarItem(
+            icon: RegularRounded.BRIEFCASE,
+            isSelected: controller.currentIndex == 3,
+            onTap: () => controller.changeTab(3),
+          ),
           DashboardNavbarItem(
             icon: RegularRounded.HOME,
             isSelected: controller.currentIndex == 0,
@@ -34,11 +41,6 @@ class DashboardNavbar extends StatelessWidget {
             icon: RegularRounded.BOOK_ALT,
             isSelected: controller.currentIndex == 2,
             onTap: () => controller.changeTab(2),
-          ),
-          DashboardNavbarItem(
-            icon: RegularRounded.BRIEFCASE,
-            isSelected: controller.currentIndex == 3,
-            onTap: () => controller.changeTab(3),
           ),
           DashboardNavbarItem(
             icon: RegularRounded.USER,
