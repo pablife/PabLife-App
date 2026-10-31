@@ -30,12 +30,10 @@ class AppWidget extends StatelessWidget {
       ],
       builder: (context, child) {
         return WideScale(
-          child: WebBadgeSpace(
-            child: SafeArea(
-              bottom: true,
-              top: false,
-              child: child ?? const SizedBox.shrink(),
-            ),
+          child: SafeArea(
+            bottom: true,
+            top: false,
+            child: child ?? const SizedBox.shrink(),
           ),
         );
       },
