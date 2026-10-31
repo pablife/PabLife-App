@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:painel_pablife/modules/dashboard/dashboard_page.dart';
+import 'package:painel_pablife/modules/coupons/panel_home.dart';
 import '../../../infra/services/auth_service.dart';
 import '../../../shared/mixins/loader_manager.dart';
 import '../../../shared/utils/app_snackbar.dart';
@@ -73,8 +73,9 @@ class LoginController extends GetxController with LoaderManagerMixin {
           Get.log('Usuário é null!');
         }
 
-        // Verificar se é admin
-        if (user == null || !AuthService.instance.isAdmin) {
+        // Admin (ou titular no painel de cupons)
+        final home = user == null ? null : panelHomeRoute();
+        if (home == null) {
           await AuthService.instance.signOut();
           AppSnackbar.to.error(
             'Acesso negado. Apenas administradores podem acessar o painel.',
@@ -82,7 +83,7 @@ class LoginController extends GetxController with LoaderManagerMixin {
           return;
         }
 
-        Get.offAllNamed(DashboardPage.route);
+        Get.offAllNamed(home);
       } else {
         AppSnackbar.to.error('E-mail ou senha incorretos');
       }
