@@ -19,21 +19,27 @@ class CouponOwnerFormDialog extends StatelessWidget {
     final emailCtrl = TextEditingController(text: editing?.email ?? '');
     final phoneCtrl = TextEditingController(text: editing?.phone ?? '');
     final notesCtrl = TextEditingController(text: editing?.notes ?? '');
-    final commissionCtrl = TextEditingController(
-      text: (editing?.commissionPerConversion ?? 0) == 0
+    final percent = editing?.commissionPercent ?? 0;
+    final percentCtrl = TextEditingController(
+      text: percent == 0
           ? ''
-          : editing!.commissionPerConversion
-                .toStringAsFixed(2)
-                .replaceAll('.', ','),
+          : (percent == percent.roundToDouble()
+                ? percent.toStringAsFixed(0)
+                : percent.toStringAsFixed(2).replaceAll('.', ',')),
+    );
+    final monthsCtrl = TextEditingController(
+      text: '${editing?.commissionMonths ?? 3}',
     );
     final accessCtrl = TextEditingController(text: editing?.accessEmail ?? '');
     String kind = editing?.kind ?? 'influencer';
     bool isActive = editing?.isActive ?? true;
 
-    double? parseMoney(String text) {
-      final clean = text.trim().replaceAll('R\$', '').replaceAll(' ', '');
+    double? parsePercent(String text) {
+      final clean = text.trim().replaceAll('%', '').replaceAll(' ', '');
       if (clean.isEmpty) return 0;
-      return double.tryParse(clean.replaceAll('.', '').replaceAll(',', '.'));
+      final value = double.tryParse(clean.replaceAll(',', '.'));
+      if (value == null || value < 0 || value > 100) return null;
+      return value;
     }
 
     return AlertDialog(
@@ -103,15 +109,47 @@ class CouponOwnerFormDialog extends StatelessWidget {
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 12),
-                    AppTextFormField(
-                      controller: commissionCtrl,
-                      title: 'Comissão por assinante (R\$)',
-                      hintText: 'Ex.: 20,00 (vazio = sem comissão)',
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (v) =>
-                          parseMoney(v ?? '') == null ? 'Valor inválido' : null,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: AppTextFormField(
+                            controller: percentCtrl,
+                            title: 'Comissão (%)',
+                            hintText: 'Ex.: 5 (vazio = sem comissão)',
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            validator: (v) => parsePercent(v ?? '') == null
+                                ? 'De 0 a 100'
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppTextFormField(
+                            controller: monthsCtrl,
+                            title: 'Por quantas mensalidades',
+                            hintText: 'Ex.: 3',
+                            keyboardType: TextInputType.number,
+                            validator: (v) {
+                              final months = int.tryParse((v ?? '').trim());
+                              return months == null || months < 1 || months > 36
+                                  ? 'De 1 a 36'
+                                  : null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const TextDefault(
+                      text:
+                          'A comissão é o percentual sobre as primeiras '
+                          'mensalidades pagas por cada pessoa que usou o cupom. '
+                          'Depois disso, aquela pessoa não gera mais comissão.',
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
                     ),
                     const SizedBox(height: 12),
                     AppTextFormField(
@@ -175,7 +213,8 @@ class CouponOwnerFormDialog extends StatelessWidget {
                 email: emailCtrl.text,
                 phone: phoneCtrl.text,
                 notes: notesCtrl.text,
-                commissionPerConversion: parseMoney(commissionCtrl.text) ?? 0,
+                commissionPercent: parsePercent(percentCtrl.text) ?? 0,
+                commissionMonths: int.parse(monthsCtrl.text.trim()),
                 accessUserId: editing?.accessUserId,
                 accessEmail: editing?.accessEmail,
                 isActive: isActive,

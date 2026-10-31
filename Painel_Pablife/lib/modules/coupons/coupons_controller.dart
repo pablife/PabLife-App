@@ -73,8 +73,10 @@ class CouponsController extends GetxController {
   CouponResults resultsOfOwner(String ownerId) =>
       CouponResults.of(usersOfOwner(ownerId));
 
-  double commissionOf(CouponOwnerModel owner) =>
-      resultsOfOwner(owner.id).conversions * owner.commissionPerConversion;
+  /// Percentual do titular sobre as primeiras mensalidades de cada usuário.
+  double commissionOf(CouponOwnerModel owner) => usersOfOwner(
+    owner.id,
+  ).fold(0, (sum, u) => sum + u.commissionFor(owner.commissionPercent));
 
   double get totalCommission =>
       owners.fold(0, (sum, o) => sum + commissionOf(o));

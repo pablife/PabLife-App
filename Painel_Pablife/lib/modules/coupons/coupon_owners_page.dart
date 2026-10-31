@@ -123,6 +123,12 @@ class _OwnerRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     TextDefault(
+                      text: 'Comissão: ${owner.commissionLabel}',
+                      fontSize: 12,
+                      color: AppColors.warning,
+                    ),
+                    const SizedBox(height: 4),
+                    TextDefault(
                       text: coupons.isEmpty
                           ? 'Sem cupons ainda'
                           : 'Cupons: $coupons',

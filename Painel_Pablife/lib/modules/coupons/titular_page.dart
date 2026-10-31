@@ -19,12 +19,14 @@ class TitularController extends GetxController {
 
   bool loading = false;
   String ownerName = '';
-  double commissionPerConversion = 0;
+  double commissionPercent = 0;
+  int commissionMonths = 3;
   List<CouponModel> coupons = [];
   List<CouponUserMetric> users = [];
 
   CouponResults get results => CouponResults.of(users);
-  double get commission => results.conversions * commissionPerConversion;
+  double get commission =>
+      users.fold(0, (sum, u) => sum + u.commissionFor(commissionPercent));
 
   @override
   void onInit() {
@@ -37,8 +39,9 @@ class TitularController extends GetxController {
     update();
     final owner = await _repository.getMyOwner();
     ownerName = owner.data?['name'] as String? ?? '';
-    commissionPerConversion =
-        (owner.data?['commission_per_conversion'] as num?)?.toDouble() ?? 0;
+    commissionPercent =
+        (owner.data?['commission_percent'] as num?)?.toDouble() ?? 0;
+    commissionMonths = (owner.data?['commission_months'] as num?)?.toInt() ?? 3;
     coupons = (await _repository.getMyCoupons()).data ?? [];
     users = (await _repository.getMyUsers()).data ?? [];
     loading = false;
@@ -105,13 +108,15 @@ class TitularPage extends StatelessWidget {
                     hint: percent(r.conversionRate),
                     color: AppColors.success,
                   ),
-                  if (controller.commissionPerConversion > 0)
+                  if (controller.commissionPercent > 0)
                     CouponKpiCard(
                       icon: Icons.payments_outlined,
                       label: 'Sua comissão',
                       value: money(controller.commission),
-                      hint:
-                          '${money(controller.commissionPerConversion)} por assinante',
+                      hint: commissionLabelOf(
+                        controller.commissionPercent,
+                        controller.commissionMonths,
+                      ),
                       color: AppColors.warning,
                     ),
                 ],
@@ -145,6 +150,7 @@ class TitularPage extends StatelessWidget {
                 rows: controller.users,
                 showContact: false,
                 showOwner: false,
+                commissionPercent: controller.commissionPercent,
                 emptyText: 'Ninguém usou seus cupons ainda.',
               ),
             ],
