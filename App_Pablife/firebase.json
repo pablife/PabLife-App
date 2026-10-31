@@ -1,1 +1,34 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"pablife-prod","appId":"1:1008018645010:android:8cf8e1aad05d1337cbb8cb","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"pablife-prod","configurations":{"android":"1:1008018645010:android:8cf8e1aad05d1337cbb8cb","ios":"1:1008018645010:ios:d336ecb73f8b0b34cbb8cb"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "pablife-prod",
+          "appId": "1:1008018645010:android:8cf8e1aad05d1337cbb8cb",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "pablife-prod",
+          "configurations": {
+            "android": "1:1008018645010:android:8cf8e1aad05d1337cbb8cb",
+            "ios": "1:1008018645010:ios:d336ecb73f8b0b34cbb8cb"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "target": "app",
+    "public": "build/web",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }],
+    "headers": [
+      {
+        "source": "**/*.@(js|json|html)",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      }
+    ]
+  }
+}

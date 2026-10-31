@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "pablife-prod"
+  },
+  "targets": {
+    "pablife-prod": {
+      "hosting": {
+        "app": ["pablife-app"]
+      }
+    }
+  }
+}
