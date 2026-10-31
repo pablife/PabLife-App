@@ -30,7 +30,6 @@ export const InputSchema = z
           .max(4, "card.securityCode: O código de segurança é requerido"),
       })
       .required(),
-    coupon_code: z.string().trim().min(1).max(40).optional(),
   })
   .strict();
 

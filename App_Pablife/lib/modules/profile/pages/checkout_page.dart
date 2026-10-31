@@ -49,169 +49,172 @@ class CheckoutPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Preview do Cartão
-                          _buildCardPreview(controller),
-                          const SizedBox(height: 30),
-
-                          // Número do Cartão
-                          _buildTextField(
-                            controller: controller.cardNumberController,
-                            label: 'Número do Cartão',
-                            hint: '0000 0000 0000 0000',
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(16),
-                              _CardNumberInputFormatter(),
-                            ],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Número do cartão é obrigatório';
-                              }
-                              if (value.replaceAll(' ', '').length < 13) {
-                                return 'Número do cartão inválido';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Nome do Titular
-                          _buildTextField(
-                            controller: controller.cardHolderNameController,
-                            label: 'Nome do Titular',
-                            hint: 'Nome como está no cartão',
-                            textCapitalization: TextCapitalization.characters,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Nome do titular é obrigatório';
-                              }
-                              if (value.length < 3) {
-                                return 'Nome muito curto';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // CPF/CNPJ do Titular
-                          _buildTextField(
-                            controller: controller.cardHolderCpfController,
-                            label: 'CPF/CNPJ do Titular',
-                            hint: '000.000.000-00 / 00.000.000/0000-00',
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(14),
-                              CpfOuCnpjFormatter(),
-                            ],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'CPF/CNPJ do titular é obrigatório';
-                              }
-                              final digits = value.replaceAll(
-                                RegExp(r'\D'),
-                                '',
-                              );
-                              if (digits.length == 11) {
-                                if (!UtilBrasilFields.isCPFValido(digits)) {
-                                  return 'CPF/CNPJ inválido';
-                                }
-                                return null;
-                              }
-                              if (digits.length == 14) {
-                                if (!UtilBrasilFields.isCNPJValido(digits)) {
-                                  return 'CPF/CNPJ inválido';
-                                }
-                                return null;
-                              }
-                              return 'CPF/CNPJ inválido';
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Data de Validade
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildTextField(
-                                  controller:
-                                      controller.expirationMonthController,
-                                  label: 'Mês',
-                                  hint: 'MM',
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                    LengthLimitingTextInputFormatter(2),
-                                  ],
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Obrigatório';
-                                    }
-                                    final month = int.tryParse(value);
-                                    if (month == null ||
-                                        month < 1 ||
-                                        month > 12) {
-                                      return 'Inválido';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildTextField(
-                                  controller:
-                                      controller.expirationYearController,
-                                  label: 'Ano',
-                                  hint: 'AAAA',
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                    LengthLimitingTextInputFormatter(4),
-                                  ],
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Obrigatório';
-                                    }
-                                    final year = int.tryParse(value);
-                                    if (year == null ||
-                                        year < DateTime.now().year) {
-                                      return 'Inválido';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // CVV
-                          _buildTextField(
-                            controller: controller.securityCodeController,
-                            label: 'Código de Segurança (CVV)',
-                            hint: '123',
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(4),
-                            ],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'CVV é obrigatório';
-                              }
-                              if (value.length < 3) {
-                                return 'CVV inválido';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Cupom de desconto
+                          // Cupom: libera o plano por N dias sem cartão, então
+                          // fica no topo e esconde o formulário do cartão.
                           _CouponField(controller: controller),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
+
+                          if (!controller.hasCoupon) ...[
+                            // Preview do Cartão
+                            _buildCardPreview(controller),
+                            const SizedBox(height: 30),
+
+                            // Número do Cartão
+                            _buildTextField(
+                              controller: controller.cardNumberController,
+                              label: 'Número do Cartão',
+                              hint: '0000 0000 0000 0000',
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(16),
+                                _CardNumberInputFormatter(),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Número do cartão é obrigatório';
+                                }
+                                if (value.replaceAll(' ', '').length < 13) {
+                                  return 'Número do cartão inválido';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Nome do Titular
+                            _buildTextField(
+                              controller: controller.cardHolderNameController,
+                              label: 'Nome do Titular',
+                              hint: 'Nome como está no cartão',
+                              textCapitalization: TextCapitalization.characters,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Nome do titular é obrigatório';
+                                }
+                                if (value.length < 3) {
+                                  return 'Nome muito curto';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+
+                            // CPF/CNPJ do Titular
+                            _buildTextField(
+                              controller: controller.cardHolderCpfController,
+                              label: 'CPF/CNPJ do Titular',
+                              hint: '000.000.000-00 / 00.000.000/0000-00',
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(14),
+                                CpfOuCnpjFormatter(),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'CPF/CNPJ do titular é obrigatório';
+                                }
+                                final digits = value.replaceAll(
+                                  RegExp(r'\D'),
+                                  '',
+                                );
+                                if (digits.length == 11) {
+                                  if (!UtilBrasilFields.isCPFValido(digits)) {
+                                    return 'CPF/CNPJ inválido';
+                                  }
+                                  return null;
+                                }
+                                if (digits.length == 14) {
+                                  if (!UtilBrasilFields.isCNPJValido(digits)) {
+                                    return 'CPF/CNPJ inválido';
+                                  }
+                                  return null;
+                                }
+                                return 'CPF/CNPJ inválido';
+                              },
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Data de Validade
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildTextField(
+                                    controller:
+                                        controller.expirationMonthController,
+                                    label: 'Mês',
+                                    hint: 'MM',
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(2),
+                                    ],
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Obrigatório';
+                                      }
+                                      final month = int.tryParse(value);
+                                      if (month == null ||
+                                          month < 1 ||
+                                          month > 12) {
+                                        return 'Inválido';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildTextField(
+                                    controller:
+                                        controller.expirationYearController,
+                                    label: 'Ano',
+                                    hint: 'AAAA',
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(4),
+                                    ],
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Obrigatório';
+                                      }
+                                      final year = int.tryParse(value);
+                                      if (year == null ||
+                                          year < DateTime.now().year) {
+                                        return 'Inválido';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+
+                            // CVV
+                            _buildTextField(
+                              controller: controller.securityCodeController,
+                              label: 'Código de Segurança (CVV)',
+                              hint: '123',
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(4),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'CVV é obrigatório';
+                                }
+                                if (value.length < 3) {
+                                  return 'CVV inválido';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                          ],
 
                           // Resumo do Pagamento
                           _buildPaymentSummary(controller),
@@ -244,12 +247,18 @@ class CheckoutPage extends StatelessWidget {
                         child: EdgeButtonRounded(
                           text: controller.isLoading
                               ? 'Processando...'
+                              : controller.hasCoupon
+                              ? 'Ativar grátis'
                               : 'Pagar',
                           onTap: controller.isLoading
                               ? () {}
                               : () {
                                   FocusScope.of(context).unfocus();
-                                  controller.processPayment();
+                                  if (controller.hasCoupon) {
+                                    controller.redeemCoupon();
+                                  } else {
+                                    controller.processPayment();
+                                  }
                                 },
                           backgroundColor: const Color(0xFF0C8DA1),
                           side: EdgeSide.left,
@@ -268,16 +277,18 @@ class CheckoutPage extends StatelessWidget {
                       child: Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            CircularProgressIndicator(
+                          children: [
+                            const CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 Colors.white,
                               ),
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             Text(
-                              'Pagamento sendo processado...',
-                              style: TextStyle(
+                              controller.hasCoupon
+                                  ? 'Ativando seu plano...'
+                                  : 'Pagamento sendo processado...',
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -509,14 +520,22 @@ class CheckoutPage extends StatelessWidget {
               ),
             ],
           ),
+          if (controller.hasCoupon) ...[
+            const SizedBox(height: 8),
+            const Text(
+              'Sem cartão e sem cobrança automática. Ao fim do período, '
+              'é só assinar para continuar.',
+              style: TextStyle(fontSize: 13, color: Color(0xFF5F6B7A)),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-// Campo de cupom: confere o código (validate_coupon) e, se valer, a
-// assinatura começa com os dias grátis do cupom, sem cobrança agora.
+// Campo de cupom: confere o código (validate_coupon) e, se valer, o botão
+// passa a ativar o plano pelos dias do cupom (redeem_coupon), sem cartão.
 class _CouponField extends StatefulWidget {
   final CheckoutController controller;
 
@@ -655,7 +674,7 @@ class _CouponFieldState extends State<_CouponField> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${checkout.couponFreeDays} dias grátis antes da primeira cobrança',
+                  '${checkout.couponFreeDays} dias grátis, sem precisar de cartão',
                   style: const TextStyle(
                     fontSize: 14,
                     color: Color(0xFF0F6E56),

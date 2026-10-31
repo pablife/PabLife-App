@@ -21,24 +21,34 @@ class PaymentRepository extends StrautilsTryThis {
     }, action: 'conferir cupom');
   }
 
+  /// Usa o cupom: libera o plano pelos dias do cupom, sem cartão e sem
+  /// Mercado Pago. Devolve {valid, reason, free_days, ends_at}.
+  FStrautilsResponse<Map<String, dynamic>> redeemCoupon({
+    required String code,
+    required String planId,
+  }) {
+    return tryThis(() async {
+      final data = await Supabase.instance.client.rpc(
+        'redeem_coupon',
+        params: {'p_code': code, 'p_plan_id': planId},
+      );
+      return StrautilsResponse.success(Map<String, dynamic>.from(data as Map));
+    }, action: 'usar cupom');
+  }
+
   /// Criar assinatura recorrente com cartão de crédito
   /// Utiliza a API de assinaturas do Mercado Pago (/preapproval)
   FStrautilsResponse<Map<String, dynamic>> createSubscription({
     required String planId,
     required Map<String, dynamic> card,
     required String idempotencyKey,
-    String? couponCode,
   }) {
     return tryThis(() async {
       if (idempotencyKey.trim().isEmpty) {
         return StrautilsResponse.error('Idempotency key inválida');
       }
 
-      final body = {
-        'plan_id': planId,
-        'card': card,
-        if (couponCode != null) 'coupon_code': couponCode,
-      };
+      final body = {'plan_id': planId, 'card': card};
 
       // Nunca registrar os dados do cartão no console.
       debugPrint('Enviando requisição para criar assinatura (plano $planId)');

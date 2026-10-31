@@ -108,8 +108,13 @@ const getMercadoPagoConfig = (): MercadoPagoConfig | null => {
   return { accessToken, apiBase };
 };
 
-const isTempPreapprovalId = (value: string | null): boolean =>
-  typeof value === "string" && value.startsWith("TEMP-");
+// Ids que não existem no Mercado Pago: pendência (TEMP-), cortesia
+// (COURTESY-) e cupom (COUPON-).
+const LOCAL_PREAPPROVAL_PREFIXES = ["TEMP-", "COURTESY-", "COUPON-"];
+
+const isLocalPreapprovalId = (value: string | null): boolean =>
+  !value ||
+  LOCAL_PREAPPROVAL_PREFIXES.some((prefix) => value.startsWith(prefix));
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -213,7 +218,13 @@ Deno.serve(async (req) => {
     );
   }
 
-  if (activeSubscriptions.length > 1) {
+  // Cortesias e cupons (e pendências TEMP-) não existem no Mercado Pago: são
+  // só encerradas aqui. No máximo uma assinatura ativa é do Mercado Pago.
+  const mpSubscriptions = activeSubscriptions.filter(
+    (subscription) => !isLocalPreapprovalId(subscription.mp_preapproval_id),
+  );
+
+  if (mpSubscriptions.length > 1) {
     return errorResponse(
       409,
       "MULTIPLE_ACTIVE_SUBSCRIPTIONS",
@@ -221,58 +232,33 @@ Deno.serve(async (req) => {
     );
   }
 
-  const activeSubscription = activeSubscriptions[0];
-  const mpPreapprovalId = activeSubscription?.mp_preapproval_id ?? null;
+  const mpPreapprovalId = mpSubscriptions[0]?.mp_preapproval_id ?? null;
 
-  if (!mpPreapprovalId || isTempPreapprovalId(mpPreapprovalId)) {
-    const now = new Date().toISOString();
-    const { error: updateError } = await serviceClient
-      .from("tb_user_subscriptions")
-      .update({
-        status: "cancelled",
-        cancelled_at: now,
-        updated_at: now,
-      })
-      .eq("id", activeSubscription.id);
-
-    if (updateError) {
-      log("Failed to update cancelled subscription", { error: updateError });
+  if (mpPreapprovalId) {
+    const mercadopagoConfig = getMercadoPagoConfig();
+    if (!mercadopagoConfig) {
+      log("Mercado Pago config missing for cancellation", { userId });
       return errorResponse(
         500,
-        "SUBSCRIPTION_CANCEL_UPDATE_FAILED",
-        "Nao foi possivel atualizar o cancelamento da assinatura",
+        "MERCADOPAGO_CONFIG_MISSING",
+        "Nao foi possivel cancelar a assinatura no momento",
       );
     }
 
-    return successResponse(
-      "SUBSCRIPTION_CANCELLED",
-      "Assinatura cancelada com sucesso",
-    );
-  }
-
-  const mercadopagoConfig = getMercadoPagoConfig();
-  if (!mercadopagoConfig) {
-    log("Mercado Pago config missing for cancellation", { userId });
-    return errorResponse(
-      500,
-      "MERCADOPAGO_CONFIG_MISSING",
-      "Nao foi possivel cancelar a assinatura no momento",
-    );
-  }
-
-  try {
-    await cancelPreapproval({
-      config: mercadopagoConfig,
-      preapprovalId: mpPreapprovalId,
-      log,
-    });
-  } catch (error) {
-    log("Mercado Pago cancel failed", { error, mpPreapprovalId });
-    return errorResponse(
-      502,
-      "MERCADOPAGO_CANCEL_FAILED",
-      "Nao foi possivel cancelar a assinatura no momento",
-    );
+    try {
+      await cancelPreapproval({
+        config: mercadopagoConfig,
+        preapprovalId: mpPreapprovalId,
+        log,
+      });
+    } catch (error) {
+      log("Mercado Pago cancel failed", { error, mpPreapprovalId });
+      return errorResponse(
+        502,
+        "MERCADOPAGO_CANCEL_FAILED",
+        "Nao foi possivel cancelar a assinatura no momento",
+      );
+    }
   }
 
   const now = new Date().toISOString();
@@ -283,7 +269,10 @@ Deno.serve(async (req) => {
       cancelled_at: now,
       updated_at: now,
     })
-    .eq("id", activeSubscription.id);
+    .in(
+      "id",
+      activeSubscriptions.map((subscription) => subscription.id),
+    );
 
   if (updateError) {
     log("Failed to update cancelled subscription", { error: updateError });

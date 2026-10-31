@@ -18,11 +18,6 @@ import {
   getPlanPricingOrThrow,
 } from "./modules/db/plansRepo.ts";
 import {
-  activateSubscriptionWithCoupon,
-  recordCouponRedemption,
-  validateCouponOrThrow,
-} from "./modules/db/couponsRepo.ts";
-import {
   MP_ACCESS_TOKEN_ENV,
   MP_PUBLIC_KEY_ENV,
   TEST_MODE,
@@ -84,6 +79,30 @@ function buildExternalReference(params: {
 
 function isTempPreapprovalId(value: string): boolean {
   return value.startsWith("TEMP-");
+}
+
+// Cortesias e cupons ficam só no banco, sem assinatura no Mercado Pago.
+function isLocalOnlyPreapprovalId(value: string): boolean {
+  return value.startsWith("COURTESY-") || value.startsWith("COUPON-");
+}
+
+// Cancela a assinatura pendente quando o Mercado Pago recusou antes de
+// qualquer cobrança. Se já houve pagamento, não mexe.
+async function cancelPendingWithoutCharge(
+  adminClient: ReturnType<typeof createAdminClient>,
+  subscription: { id: string; status: string; has_first_payment: boolean },
+): Promise<void> {
+  if (subscription.status !== "pending" || subscription.has_first_payment) {
+    return;
+  }
+  try {
+    await cancelUserSubscription(adminClient, subscription.id);
+  } catch (error) {
+    safeLog("pending_subscription_cancel_failed", {
+      user_subscription_id: subscription.id,
+      error: safeError(error),
+    });
+  }
 }
 
 function getIpAddress(req: Request): string | null {
@@ -172,6 +191,12 @@ Deno.serve(async (req) => {
       authUserId,
     );
 
+    // No modo de teste o Mercado Pago só aceita assinaturas de um usuário de
+    // teste comprador: o e-mail dele vem de um secret.
+    const payerEmail = TEST_MODE
+      ? (Deno.env.get("MERCADOPAGO_TEST_PAYER_EMAIL") ?? email)
+      : email;
+
     const plan = await getPlanOrThrow(userClient, input.plan_id);
     if (!plan.preapproval_plan_id) {
       throw new AppError(
@@ -201,11 +226,6 @@ Deno.serve(async (req) => {
 
     const reason = mpPlan.reason ?? plan.reason;
 
-    // Cupom de dias grátis: conferido antes de qualquer cobrança.
-    const coupon = input.coupon_code
-      ? await validateCouponOrThrow(userClient, input.coupon_code)
-      : null;
-
     const paymentToken = await createCardToken({
       card: input.card,
       publicKey: mpPublicKey,
@@ -227,7 +247,12 @@ Deno.serve(async (req) => {
     let preapprovalSnapshot: MpPreapprovalResponse | null = null;
 
     if (currentSubscription) {
-      if (!isTempPreapprovalId(currentSubscription.mp_preapproval_id)) {
+      if (isLocalOnlyPreapprovalId(currentSubscription.mp_preapproval_id)) {
+        // Cortesia ou cupom do mesmo plano (não existe no Mercado Pago):
+        // encerra e segue com uma assinatura paga nova.
+        await cancelUserSubscription(adminClient, currentSubscription.id);
+        currentSubscription = null;
+      } else if (!isTempPreapprovalId(currentSubscription.mp_preapproval_id)) {
         preapprovalSnapshot = await getPreapprovalById(
           mpClient,
           currentSubscription.mp_preapproval_id,
@@ -348,20 +373,22 @@ Deno.serve(async (req) => {
       },
     };
 
-    // Com cupom não há cobrança agora: a primeira mensalidade fica para o fim
-    // do período grátis.
-    const freePeriodStart = new Date();
-    const freePeriodEnd = coupon
-      ? new Date(freePeriodStart.getTime() + coupon.free_days * 86_400_000)
-      : null;
+    if (!currentSubscription.has_first_payment) {
+      const paymentMethodId = paymentToken.payment_method_id;
+      if (!paymentMethodId) {
+        throw new AppError(
+          502,
+          "PAYMENT_METHOD_INVALID",
+          "Missing payment method id",
+        );
+      }
 
-    if (!coupon && !currentSubscription.has_first_payment) {
       try {
         safeLog("createImmediatePayment:", {
           client: mpClient,
-          payer_email: email,
+          payer_email: payerEmail,
           card_token_id: paymentToken.card_token_id,
-          payment_method_id: paymentToken.payment_method_id,
+          payment_method_id: paymentMethodId,
           amount: mpPlan.transaction_amount,
           external_reference_pay,
           idempotency_key: payKey,
@@ -369,9 +396,9 @@ Deno.serve(async (req) => {
         });
         payment = await createImmediatePayment({
           client: mpClient,
-          payer_email: email,
+          payer_email: payerEmail,
           card_token_id: paymentToken.card_token_id,
-          payment_method_id: paymentToken.payment_method_id,
+          payment_method_id: paymentMethodId,
           amount: mpPlan.transaction_amount,
           external_reference_pay,
           idempotency_key: payKey,
@@ -382,6 +409,10 @@ Deno.serve(async (req) => {
           user_subscription_id: currentSubscription.id,
           error: safeError(error),
         });
+
+        // Nada foi cobrado: encerra a pendência para a pessoa poder tentar de
+        // novo (senão o app fica em "pagamento em processamento").
+        await cancelPendingWithoutCharge(adminClient, currentSubscription);
 
         return jsonError(502, {
           error: {
@@ -443,7 +474,7 @@ Deno.serve(async (req) => {
         currency_id: rawPayment.currency_id ?? mpPlan.currency_id,
         installments: rawPayment.installments ?? 1,
         payment_method_id:
-          rawPayment.payment_method_id ?? paymentToken.payment_method_id,
+          rawPayment.payment_method_id ?? paymentMethodId,
         payment_type_id: rawPayment.payment_type_id ?? null,
         issuer_id: rawPayment.issuer_id ?? null,
         mp_payer_id: rawPayer?.id ?? null,
@@ -476,9 +507,10 @@ Deno.serve(async (req) => {
     } | null = null;
 
     if (!currentSubscription.has_preapproval) {
+      const pendingSubscription = currentSubscription;
       const created = await createSubscriptionNextCycle({
         client: mpClient,
-        payer_email: email,
+        payer_email: payerEmail,
         card_token_id: subscriptionToken.card_token_id,
         reason,
         plan: {
@@ -490,7 +522,10 @@ Deno.serve(async (req) => {
         },
         external_reference_sub,
         idempotency_key: subKey,
-        start_date: freePeriodEnd?.toISOString(),
+      }).catch(async (error) => {
+        // Recusada antes de qualquer cobrança: libera nova tentativa.
+        await cancelPendingWithoutCharge(adminClient, pendingSubscription);
+        throw error;
       });
 
       createdSubscription = {
@@ -506,28 +541,6 @@ Deno.serve(async (req) => {
           externalReference: external_reference_sub,
         },
       );
-    }
-
-    // Cupom: ativa já pelo período grátis e registra o uso.
-    if (coupon && freePeriodEnd) {
-      await activateSubscriptionWithCoupon(adminClient, {
-        subscriptionId: currentSubscription.id,
-        startDate: freePeriodStart,
-        endDate: freePeriodEnd,
-      });
-      await recordCouponRedemption(adminClient, {
-        couponId: coupon.coupon_id,
-        userId: user_id,
-        userSubscriptionId: currentSubscription.id,
-        planId: plan.id,
-        isTest: TEST_MODE,
-      });
-      currentSubscription = {
-        ...currentSubscription,
-        status: "active",
-        start_date: freePeriodStart.toISOString(),
-        end_date: freePeriodEnd.toISOString(),
-      };
     }
 
     const subscriptionStatus =
@@ -551,13 +564,16 @@ Deno.serve(async (req) => {
         status_detail: payment?.status_detail ?? null,
         external_reference: external_reference_pay,
       },
-      coupon: coupon && freePeriodEnd
-        ? { free_days: coupon.free_days, ends_at: freePeriodEnd.toISOString() }
-        : null,
       test_mode: TEST_MODE,
     });
   } catch (error) {
     if (isAppError(error)) {
+      // Só código e detalhes do Mercado Pago; nunca dados do cartão.
+      safeLog("mercadopago_subscription_app_error", {
+        status: error.status,
+        code: error.code,
+        details: error.details ?? null,
+      });
       return jsonError(error.status, { error: toErrorPayload(error) });
     }
 

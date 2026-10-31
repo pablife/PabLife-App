@@ -20,8 +20,6 @@ export type CreateSubscriptionParams = {
   plan: SubscriptionPlanPayload;
   external_reference_sub: string;
   idempotency_key?: string;
-  // Primeira cobrança só a partir desta data (cupom de dias grátis).
-  start_date?: string;
 };
 
 export async function createSubscriptionNextCycle(
@@ -32,9 +30,10 @@ export async function createSubscriptionNextCycle(
   raw: MpPreapprovalResponse;
 }> {
   const payload = {
+    // Sem plano, o Mercado Pago exige o endereço de retorno (o plano já o tem).
     ...(params.plan.preapproval_plan_id
       ? { preapproval_plan_id: params.plan.preapproval_plan_id }
-      : {}),
+      : { back_url: "https://app.pablife.com.br" }),
     payer_email: params.payer_email,
     reason: params.reason,
     external_reference: params.external_reference_sub,
@@ -45,7 +44,6 @@ export async function createSubscriptionNextCycle(
       frequency_type: params.plan.frequency_type,
       transaction_amount: params.plan.transaction_amount,
       currency_id: params.plan.currency_id,
-      ...(params.start_date ? { start_date: params.start_date } : {}),
     },
   };
 

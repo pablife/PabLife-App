@@ -39,7 +39,7 @@ class CheckoutController extends GetxController {
   static const Duration _pollInterval = Duration(seconds: 8);
   static const Duration _pollTimeout = Duration(minutes: 2);
 
-  // Cupom aplicado (dias grátis antes da primeira cobrança)
+  // Cupom aplicado: libera o plano por N dias, sem cartão e sem recorrência
   String? _couponCode;
   int? _couponFreeDays;
   bool _isCheckingCoupon = false;
@@ -51,6 +51,9 @@ class CheckoutController extends GetxController {
     'expired': 'Cupom expirado',
     'exhausted': 'Cupom esgotado',
     'already_used': 'Você já usou este cupom',
+    'has_subscription': 'Você já tem um plano ativo',
+    'plan_not_found': 'Plano indisponível',
+    'not_authenticated': 'Entre na sua conta para usar o cupom',
   };
 
   String? get couponCode => _couponCode;
@@ -97,6 +100,43 @@ class CheckoutController extends GetxController {
     _couponFreeDays = null;
     _resetIdempotencyKey();
     update();
+  }
+
+  /// Ativa o plano escolhido pelos dias do cupom (redeem_coupon), sem cartão.
+  Future<void> redeemCoupon() async {
+    final code = _couponCode;
+    final plan = _selectedPlan;
+    if (code == null || plan == null) return;
+
+    _isLoading = true;
+    _isProcessingPayment = true;
+    update();
+
+    try {
+      final response = await _paymentRepository.redeemCoupon(
+        code: code,
+        planId: plan.id,
+      );
+      final data = response.data;
+      if (!response.success || data == null) {
+        AppSnackbar.to.show('Não foi possível usar o cupom. Tente de novo.');
+        return;
+      }
+      if (data['valid'] != true) {
+        AppSnackbar.to.show(_couponReasons[data['reason']] ?? 'Cupom inválido');
+        return;
+      }
+
+      final days = (data['free_days'] as num?)?.toInt() ?? _couponFreeDays;
+      Get.find<SubscriptionController>().reload();
+      await AuthService.instance.reloadUserAccessInfo();
+      Get.back();
+      AppSnackbar.to.show('Plano liberado: $days dias grátis!');
+    } finally {
+      _isLoading = false;
+      _isProcessingPayment = false;
+      update();
+    }
   }
 
   // Getters
@@ -288,7 +328,6 @@ class CheckoutController extends GetxController {
           'expirationYear': int.parse(expirationYear),
           'securityCode': securityCode,
         },
-        couponCode: _couponCode,
       );
 
       if (response.success) {

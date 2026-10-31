@@ -46,12 +46,33 @@ async function fetchPaymentMethodId(params: {
   baseUrl: string;
   cardNumber: string;
   timeoutMs?: number;
-}): Promise<string> {
-  const bin = params.cardNumber.slice(0, 8);
-  if (bin.length !== 8) {
+}): Promise<string | null> {
+  if (params.cardNumber.length < 8) {
     throw new AppError(400, "INVALID_CARD_BIN", "Invalid card bin");
   }
 
+  // Alguns cartões (como os de teste do Mercado Pago) só são encontrados pelos
+  // 6 primeiros dígitos: tenta com 8 e, sem resultado, com 6.
+  const byEightDigits = await searchPaymentMethodByBin({
+    ...params,
+    bin: params.cardNumber.slice(0, 8),
+  });
+  if (byEightDigits) return byEightDigits;
+
+  const bySixDigits = await searchPaymentMethodByBin({
+    ...params,
+    bin: params.cardNumber.slice(0, 6),
+  });
+  return bySixDigits;
+}
+
+async function searchPaymentMethodByBin(params: {
+  publicKey: string;
+  baseUrl: string;
+  bin: string;
+  timeoutMs?: number;
+}): Promise<string | null> {
+  const bin = params.bin;
   const baseUrl = params.baseUrl.replace(/\/$/, "");
   const url = `${baseUrl}/v1/payment_methods/search?public_key=${encodeURIComponent(
     params.publicKey,
@@ -85,18 +106,7 @@ async function fetchPaymentMethodId(params: {
       );
     }
 
-    const paymentMethodId =
-      typeof body === "string" ? null : (body.results?.[0]?.id ?? null);
-
-    if (!paymentMethodId) {
-      throw new AppError(
-        502,
-        "PAYMENT_METHOD_INVALID",
-        "Missing payment method id",
-      );
-    }
-
-    return paymentMethodId;
+    return typeof body === "string" ? null : (body.results?.[0]?.id ?? null);
   } catch (error) {
     if (error instanceof AppError) {
       throw error;
@@ -125,7 +135,7 @@ export async function createCardToken(params: {
   publicKey: string;
   baseUrl: string;
   timeoutMs?: number;
-}): Promise<{ card_token_id: string; payment_method_id: string }> {
+}): Promise<{ card_token_id: string; payment_method_id: string | null }> {
   const sanitizedDocument = sanitizeDigits(params.card.cpfOrCnpj);
   const sanitizedCardNumber = sanitizeDigits(params.card.cardNumber);
 
@@ -192,12 +202,17 @@ export async function createCardToken(params: {
       throw new AppError(502, "CARD_TOKEN_INVALID", "Missing card token id");
     }
 
-    const paymentMethodId = await fetchPaymentMethodId({
-      publicKey: params.publicKey,
-      baseUrl,
-      cardNumber: sanitizedCardNumber,
-      timeoutMs: params.timeoutMs,
-    });
+    // A bandeira só é obrigatória para a cobrança imediata (o index.ts confere);
+    // a assinatura usa apenas o token.
+    const paymentMethodId = (typeof body === "string"
+      ? null
+      : body.payment_method_id) ??
+      await fetchPaymentMethodId({
+        publicKey: params.publicKey,
+        baseUrl,
+        cardNumber: sanitizedCardNumber,
+        timeoutMs: params.timeoutMs,
+      });
 
     return { card_token_id: tokenId, payment_method_id: paymentMethodId };
   } catch (error) {
@@ -213,7 +228,9 @@ export async function createCardToken(params: {
       );
     }
 
-    throw new AppError(502, "CARD_TOKEN_FAILED", "Failed to create card token");
+    throw new AppError(502, "CARD_TOKEN_FAILED", "Failed to create card token", {
+      error: error instanceof Error ? error.message : String(error),
+    });
   } finally {
     clearTimeout(timeout);
   }
