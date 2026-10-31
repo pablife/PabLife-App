@@ -3,6 +3,14 @@ import 'package:get/get.dart';
 
 import '../../modules/appointments/appointments_page.dart';
 import '../../modules/banners/banners_page.dart';
+import '../../infra/services/auth_service.dart';
+import '../../modules/auth/login/login_page.dart';
+import '../../modules/coupons/coupon_consultations_page.dart';
+import '../../modules/coupons/coupon_owners_page.dart';
+import '../../modules/coupons/coupons_overview_page.dart';
+import '../../modules/coupons/coupons_page.dart';
+import '../../modules/coupons/titular_page.dart';
+import '../../shared/utils/app_mode.dart';
 import '../../modules/dashboard/dashboard_controller.dart';
 import '../../modules/dashboard/dashboard_page.dart';
 import '../../modules/finance/finance_report_page.dart';
@@ -110,64 +118,73 @@ class SidebarContent extends StatelessWidget {
         Expanded(
           child: SingleChildScrollView(
             child: Column(
-              children: [
-                SidebarItem(
-                  icon: Icons.dashboard_outlined,
-                  label: 'Dashboard',
-                  route: DashboardPage.route,
-                  isCollapsed: isCollapsed,
-                  currentRoute: currentRoute,
-                ),
-                SidebarItem(
-                  icon: Icons.people_outline,
-                  label: 'Usuários',
-                  route: UsersPage.route,
-                  isCollapsed: isCollapsed,
-                  currentRoute: currentRoute,
-                ),
-                SidebarItem(
-                  icon: Icons.business_center_outlined,
-                  label: 'Profissionais',
-                  route: ProfessionalsPage.route,
-                  isCollapsed: isCollapsed,
-                  currentRoute: currentRoute,
-                ),
-                SidebarItem(
-                  icon: Icons.school_outlined,
-                  label: 'Mentorias',
-                  route: MentorshipPage.route,
-                  isCollapsed: isCollapsed,
-                  currentRoute: currentRoute,
-                ),
-                SidebarItem(
-                  icon: Icons.calendar_today_outlined,
-                  label: 'Agendamentos',
-                  route: AppointmentsPage.route,
-                  isCollapsed: isCollapsed,
-                  currentRoute: currentRoute,
-                ),
-                SidebarItem(
-                  icon: Icons.attach_money_outlined,
-                  label: 'Financeiro',
-                  route: FinanceReportPage.route,
-                  isCollapsed: isCollapsed,
-                  currentRoute: currentRoute,
-                ),
-                SidebarItem(
-                  icon: Icons.photo_library_outlined,
-                  label: 'Banners',
-                  route: BannersPage.route,
-                  isCollapsed: isCollapsed,
-                  currentRoute: currentRoute,
-                ),
-                SidebarItem(
-                  icon: Icons.notifications_outlined,
-                  label: 'Notificações',
-                  route: NotificationsPage.route,
-                  isCollapsed: isCollapsed,
-                  currentRoute: currentRoute,
-                ),
-              ],
+              children: kCouponsOnly
+                  ? _couponMenu()
+                  : [
+                      SidebarItem(
+                        icon: Icons.dashboard_outlined,
+                        label: 'Dashboard',
+                        route: DashboardPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
+                        icon: Icons.people_outline,
+                        label: 'Usuários',
+                        route: UsersPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
+                        icon: Icons.business_center_outlined,
+                        label: 'Profissionais',
+                        route: ProfessionalsPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
+                        icon: Icons.school_outlined,
+                        label: 'Mentorias',
+                        route: MentorshipPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
+                        icon: Icons.calendar_today_outlined,
+                        label: 'Agendamentos',
+                        route: AppointmentsPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
+                        icon: Icons.attach_money_outlined,
+                        label: 'Financeiro',
+                        route: FinanceReportPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
+                        icon: Icons.photo_library_outlined,
+                        label: 'Banners',
+                        route: BannersPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
+                        icon: Icons.local_offer_outlined,
+                        label: 'Cupons',
+                        route: CouponsPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
+                        icon: Icons.notifications_outlined,
+                        label: 'Notificações',
+                        route: NotificationsPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                    ],
             ),
           ),
         ),
@@ -250,6 +267,31 @@ class SidebarContent extends StatelessWidget {
     );
   }
 
+  /// Menu do painel de cupons: abas do admin ou só o painel do titular.
+  List<Widget> _couponMenu() {
+    SidebarItem item(IconData icon, String label, String route) => SidebarItem(
+      icon: icon,
+      label: label,
+      route: route,
+      isCollapsed: isCollapsed,
+      currentRoute: currentRoute,
+    );
+
+    if (!AuthService.instance.isAdmin) {
+      return [item(Icons.insights_outlined, 'Meu painel', TitularPage.route)];
+    }
+    return [
+      item(Icons.dashboard_outlined, 'Visão geral', CouponsOverviewPage.route),
+      item(Icons.local_offer_outlined, 'Cupons', CouponsPage.route),
+      item(Icons.campaign_outlined, 'Titulares', CouponOwnersPage.route),
+      item(
+        Icons.medical_services_outlined,
+        'Consultas',
+        CouponConsultationsPage.route,
+      ),
+    ];
+  }
+
   void _showLogoutDialog() {
     Get.dialog(
       AlertDialog(
@@ -263,6 +305,12 @@ class SidebarContent extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Get.back();
+              if (kCouponsOnly) {
+                // O painel de cupons não carrega o Dashboard.
+                await AuthService.instance.signOut();
+                Get.offAllNamed(LoginPage.route);
+                return;
+              }
               await Get.find<DashboardController>().signOut();
             },
             child: const Text('Sair', style: TextStyle(color: Colors.red)),

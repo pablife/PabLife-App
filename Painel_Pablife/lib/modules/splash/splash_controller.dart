@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import '../../infra/services/auth_service.dart';
-import '../dashboard/dashboard_page.dart';
+import '../coupons/panel_home.dart';
 import '../auth/login/login_page.dart';
 
 class SplashController extends GetxController {
@@ -27,11 +27,11 @@ class SplashController extends GetxController {
       );
       Get.log('SplashPage: isAdmin = ${AuthService.instance.isAdmin}');
 
-      if (AuthService.instance.isAuthenticated &&
-          AuthService.instance.isAdmin) {
-        // Usuário autenticado e é admin, ir para dashboard
-        Get.log('SplashPage: Redirecionando para dashboard');
-        Get.offAllNamed(DashboardPage.route);
+      final home = panelHomeRoute();
+      if (AuthService.instance.isAuthenticated && home != null) {
+        // Admin (ou titular no painel de cupons): vai para a tela inicial
+        Get.log('SplashPage: Redirecionando para $home');
+        Get.offAllNamed(home);
       } else {
         // Não autenticado ou não é admin, ir para login
         Get.log('SplashPage: Redirecionando para login');

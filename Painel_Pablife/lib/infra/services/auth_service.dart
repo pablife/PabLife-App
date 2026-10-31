@@ -14,6 +14,10 @@ class AuthService {
   UserModel? _currentUser;
   UserModel? get currentUser => _currentUser;
 
+  /// Titular de cupom ligado à conta logada (painel de cupons).
+  bool _isCouponOwner = false;
+  bool get isCouponOwner => _isCouponOwner;
+
   Future<void> initialize() async {
     await _loadCurrentUser();
   }
@@ -40,6 +44,9 @@ class AuthService {
         } else {
           Get.log('AuthService: response é null');
         }
+
+        final owner = await _client.rpc('my_coupon_owner');
+        _isCouponOwner = owner is List && owner.isNotEmpty;
       } catch (e) {
         Get.log('AuthService: Erro ao carregar usuário: $e');
       }
@@ -70,6 +77,7 @@ class AuthService {
     try {
       await _client.auth.signOut();
       _currentUser = null;
+      _isCouponOwner = false;
     } catch (e) {
       // TODO: Implementar logging adequado
     }
