@@ -90,7 +90,7 @@ class CouponOwnerDetailPage extends StatelessWidget {
                   icon: Icons.payments_outlined,
                   label: 'Comissão',
                   value: money(controller.commissionOf(owner)),
-                  hint: '${money(owner.commissionPerConversion)} por assinante',
+                  hint: owner.commissionLabel,
                   color: AppColors.warning,
                 ),
               ],
@@ -112,6 +112,7 @@ class CouponOwnerDetailPage extends StatelessWidget {
             CouponUsersTable(
               rows: rows,
               showOwner: false,
+              commissionPercent: owner.commissionPercent,
               emptyText: 'Ninguém entrou pelos cupons deste titular ainda.',
             ),
           ],

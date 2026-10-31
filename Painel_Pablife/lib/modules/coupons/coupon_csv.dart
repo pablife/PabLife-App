@@ -30,6 +30,7 @@ Future<void> exportCouponUsersCsv(
     'Primeira consulta',
     'Última consulta',
     'Virou assinante em',
+    'Mensalidades pagas',
   ];
 
   final lines = <String>[header.map(cell).join(';')];
@@ -49,6 +50,7 @@ Future<void> exportCouponUsersCsv(
         d(r.firstConsultationAt),
         d(r.lastConsultationAt),
         d(r.convertedAt),
+        r.paidPayments,
       ].map(cell).join(';'),
     );
   }

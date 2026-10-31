@@ -4,6 +4,8 @@ import 'package:painel_pablife/infra/models/coupon_model.dart';
 import 'package:painel_pablife/shared/themes/app_colors.dart';
 import 'package:painel_pablife/widgets/design_system/text_default.dart';
 
+import 'coupon_kpi_card.dart';
+
 /// Tabela de quem entrou por cupom: situação, consultas e conversão.
 class CouponUsersTable extends StatelessWidget {
   final List<CouponUserMetric> rows;
@@ -11,11 +13,15 @@ class CouponUsersTable extends StatelessWidget {
   final bool showOwner;
   final String emptyText;
 
+  /// Percentual do titular: quando informado, mostra a comissão de cada um.
+  final double? commissionPercent;
+
   const CouponUsersTable({
     super.key,
     required this.rows,
     this.showContact = true,
     this.showOwner = true,
+    this.commissionPercent,
     this.emptyText = 'Ninguém entrou por cupom ainda.',
   });
 
@@ -30,6 +36,7 @@ class CouponUsersTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showCommission = (commissionPercent ?? 0) > 0;
     if (rows.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 32),
@@ -62,6 +69,9 @@ class CouponUsersTable extends StatelessWidget {
             const DataColumn(label: Text('1ª consulta')),
             const DataColumn(label: Text('Última')),
             const DataColumn(label: Text('Assinou em')),
+            const DataColumn(label: Text('Mensalidades'), numeric: true),
+            if (showCommission)
+              const DataColumn(label: Text('Comissão'), numeric: true),
           ],
           rows: rows.map((r) {
             return DataRow(
@@ -89,6 +99,16 @@ class CouponUsersTable extends StatelessWidget {
                 DataCell(Text(_date(r.firstConsultationAt))),
                 DataCell(Text(_date(r.lastConsultationAt))),
                 DataCell(Text(_date(r.convertedAt))),
+                DataCell(Text('${r.paidPayments}')),
+                if (showCommission)
+                  DataCell(
+                    Text(
+                      r.commissionPayments == 0
+                          ? '-'
+                          : '${money(r.commissionFor(commissionPercent!))} '
+                                '(${r.commissionPayments} mens.)',
+                    ),
+                  ),
               ],
             );
           }).toList(),

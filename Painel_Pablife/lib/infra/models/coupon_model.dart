@@ -1,6 +1,18 @@
 DateTime? _date(dynamic value) =>
     value == null ? null : DateTime.tryParse(value.toString())?.toLocal();
 
+/// Ex.: "5% das 3 primeiras mensalidades" (ou "Sem comissão").
+String commissionLabelOf(double percent, int months) {
+  if (percent <= 0) return 'Sem comissão';
+  final pct = percent == percent.roundToDouble()
+      ? percent.toStringAsFixed(0)
+      : percent.toStringAsFixed(2).replaceAll('.', ',');
+  final payments = months == 1
+      ? 'da 1ª mensalidade'
+      : 'das $months primeiras mensalidades';
+  return '$pct% $payments';
+}
+
 /// Cupom de dias grátis: libera um plano por [freeDays] dias, sem cartão.
 class CouponModel {
   final String id;
@@ -110,7 +122,11 @@ class CouponOwnerModel {
   final String? email;
   final String? phone;
   final String? notes;
-  final double commissionPerConversion;
+
+  /// Percentual sobre as primeiras [commissionMonths] mensalidades pagas
+  /// por cada usuário que veio pelo cupom (ex.: 5% das 3 primeiras).
+  final double commissionPercent;
+  final int commissionMonths;
   final String? accessUserId;
 
   /// E-mail da conta de acesso ao painel (preenchido no painel).
@@ -126,7 +142,8 @@ class CouponOwnerModel {
     this.email,
     this.phone,
     this.notes,
-    this.commissionPerConversion = 0,
+    this.commissionPercent = 0,
+    this.commissionMonths = 3,
     this.accessUserId,
     this.accessEmail,
     this.isActive = true,
@@ -143,6 +160,10 @@ class CouponOwnerModel {
 
   String get kindLabel => kinds[kind] ?? 'Outro';
 
+  /// Ex.: "5% das 3 primeiras mensalidades".
+  String get commissionLabel =>
+      commissionLabelOf(commissionPercent, commissionMonths);
+
   factory CouponOwnerModel.fromMap(Map<String, dynamic> map) {
     return CouponOwnerModel(
       id: map['id'] as String,
@@ -152,8 +173,8 @@ class CouponOwnerModel {
       email: map['email'] as String?,
       phone: map['phone'] as String?,
       notes: map['notes'] as String?,
-      commissionPerConversion:
-          (map['commission_per_conversion'] as num?)?.toDouble() ?? 0,
+      commissionPercent: (map['commission_percent'] as num?)?.toDouble() ?? 0,
+      commissionMonths: (map['commission_months'] as num?)?.toInt() ?? 3,
       accessUserId: map['access_user_id'] as String?,
       isActive: map['is_active'] as bool? ?? true,
       createdAt: _date(map['created_at']),
@@ -169,7 +190,8 @@ class CouponOwnerModel {
       'email': clean(email),
       'phone': clean(phone),
       'notes': clean(notes),
-      'commission_per_conversion': commissionPerConversion,
+      'commission_percent': commissionPercent,
+      'commission_months': commissionMonths,
       'access_user_id': accessUserId,
       'is_active': isActive,
     };
@@ -189,7 +211,8 @@ class CouponOwnerModel {
       email: email,
       phone: phone,
       notes: notes,
-      commissionPerConversion: commissionPerConversion,
+      commissionPercent: commissionPercent,
+      commissionMonths: commissionMonths,
       accessUserId: clearAccess ? null : (accessUserId ?? this.accessUserId),
       accessEmail: clearAccess ? null : (accessEmail ?? this.accessEmail),
       isActive: isActive ?? this.isActive,
@@ -218,6 +241,12 @@ class CouponUserMetric {
   final DateTime? lastConsultationAt;
   final DateTime? convertedAt;
 
+  /// Mensalidades pagas depois do cupom; quantas entram na comissão e a
+  /// soma delas (base sobre a qual incide o percentual do titular).
+  final int paidPayments;
+  final int commissionPayments;
+  final double commissionBase;
+
   const CouponUserMetric({
     this.userId,
     this.fullName,
@@ -235,7 +264,12 @@ class CouponUserMetric {
     this.firstConsultationAt,
     this.lastConsultationAt,
     this.convertedAt,
+    this.paidPayments = 0,
+    this.commissionPayments = 0,
+    this.commissionBase = 0,
   });
+
+  double commissionFor(double percent) => commissionBase * percent / 100;
 
   bool get hasFirstConsultation => consultations > 0;
   bool get isConverted => convertedAt != null;
@@ -270,6 +304,9 @@ class CouponUserMetric {
       firstConsultationAt: _date(map['first_consultation_at']),
       lastConsultationAt: _date(map['last_consultation_at']),
       convertedAt: _date(map['converted_at']),
+      paidPayments: (map['paid_payments'] as num?)?.toInt() ?? 0,
+      commissionPayments: (map['commission_payments'] as num?)?.toInt() ?? 0,
+      commissionBase: (map['commission_base'] as num?)?.toDouble() ?? 0,
     );
   }
 }
