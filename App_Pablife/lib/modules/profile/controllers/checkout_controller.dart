@@ -39,6 +39,106 @@ class CheckoutController extends GetxController {
   static const Duration _pollInterval = Duration(seconds: 8);
   static const Duration _pollTimeout = Duration(minutes: 2);
 
+  // Cupom aplicado: libera o plano por N dias, sem cartão e sem recorrência
+  String? _couponCode;
+  int? _couponFreeDays;
+  bool _isCheckingCoupon = false;
+
+  static const _couponReasons = {
+    'not_found': 'Cupom não encontrado',
+    'inactive': 'Cupom inativo',
+    'not_started': 'Este cupom ainda não está valendo',
+    'expired': 'Cupom expirado',
+    'exhausted': 'Cupom esgotado',
+    'already_used': 'Você já usou este cupom',
+    'has_subscription': 'Você já tem um plano ativo',
+    'plan_not_found': 'Plano indisponível',
+    'not_authenticated': 'Entre na sua conta para usar o cupom',
+  };
+
+  String? get couponCode => _couponCode;
+  int? get couponFreeDays => _couponFreeDays;
+  bool get isCheckingCoupon => _isCheckingCoupon;
+  bool get hasCoupon => _couponCode != null;
+
+  Future<void> applyCoupon(String rawCode) async {
+    final code = rawCode.trim().toUpperCase();
+    if (code.isEmpty) {
+      AppSnackbar.to.show('Digite o código do cupom');
+      return;
+    }
+
+    _isCheckingCoupon = true;
+    update();
+
+    final response = await _paymentRepository.validateCoupon(code);
+    _isCheckingCoupon = false;
+
+    final data = response.data;
+    if (!response.success || data == null) {
+      update();
+      AppSnackbar.to.show('Não foi possível conferir o cupom. Tente de novo.');
+      return;
+    }
+
+    if (data['valid'] != true) {
+      update();
+      AppSnackbar.to.show(_couponReasons[data['reason']] ?? 'Cupom inválido');
+      return;
+    }
+
+    _couponCode = code;
+    _couponFreeDays = (data['free_days'] as num?)?.toInt() ?? 30;
+    // Um pedido novo, para não reaproveitar uma tentativa sem cupom.
+    _resetIdempotencyKey();
+    update();
+    AppSnackbar.to.show('Cupom aplicado: $_couponFreeDays dias grátis');
+  }
+
+  void removeCoupon() {
+    _couponCode = null;
+    _couponFreeDays = null;
+    _resetIdempotencyKey();
+    update();
+  }
+
+  /// Ativa o plano escolhido pelos dias do cupom (redeem_coupon), sem cartão.
+  Future<void> redeemCoupon() async {
+    final code = _couponCode;
+    final plan = _selectedPlan;
+    if (code == null || plan == null) return;
+
+    _isLoading = true;
+    _isProcessingPayment = true;
+    update();
+
+    try {
+      final response = await _paymentRepository.redeemCoupon(
+        code: code,
+        planId: plan.id,
+      );
+      final data = response.data;
+      if (!response.success || data == null) {
+        AppSnackbar.to.show('Não foi possível usar o cupom. Tente de novo.');
+        return;
+      }
+      if (data['valid'] != true) {
+        AppSnackbar.to.show(_couponReasons[data['reason']] ?? 'Cupom inválido');
+        return;
+      }
+
+      final days = (data['free_days'] as num?)?.toInt() ?? _couponFreeDays;
+      Get.find<SubscriptionController>().reload();
+      await AuthService.instance.reloadUserAccessInfo();
+      Get.back();
+      AppSnackbar.to.show('Plano liberado: $days dias grátis!');
+    } finally {
+      _isLoading = false;
+      _isProcessingPayment = false;
+      update();
+    }
+  }
+
   // Getters
   SubscriptionPlanModel? get selectedPlan => _selectedPlan;
   UserModel? get currentUser => _currentUser;
@@ -232,15 +332,17 @@ class CheckoutController extends GetxController {
 
       if (response.success) {
         final data = response.data ?? <String, dynamic>{};
-        final subscriptionData =
-            data['subscription'] as Map<String, dynamic>?;
+        final subscriptionData = data['subscription'] as Map<String, dynamic>?;
         final paymentData = data['payment'] as Map<String, dynamic>?;
 
         final preapprovalId = subscriptionData?['preapproval_id'] as String?;
         final subscriptionId =
-            _extractSubscriptionId(paymentData?['external_reference'] as String?) ??
-                _extractSubscriptionId(
-                    subscriptionData?['external_reference'] as String?);
+            _extractSubscriptionId(
+              paymentData?['external_reference'] as String?,
+            ) ??
+            _extractSubscriptionId(
+              subscriptionData?['external_reference'] as String?,
+            );
 
         final result = await _pollSubscriptionUntilDone(
           subscriptionId: subscriptionId,
@@ -255,9 +357,7 @@ class CheckoutController extends GetxController {
           Get.back();
           AppSnackbar.to.show('Assinatura criada com sucesso!');
         } else if (result == _SubscriptionPollingResult.cancelled) {
-          AppSnackbar.to.show(
-            'Pagamento não aprovado. Tente novamente.',
-          );
+          AppSnackbar.to.show('Pagamento não aprovado. Tente novamente.');
           _resetIdempotencyKey();
         } else {
           final subscription = subscriptionId != null
@@ -280,7 +380,10 @@ class CheckoutController extends GetxController {
             : <String, dynamic>{};
         final errorCode = errorPayload['code'] as String?;
         final subscriptionId = errorPayload['user_subscription_id'] as String?;
-        final userMessage = _buildUserErrorMessage(errorPayload, response.message);
+        final userMessage = _buildUserErrorMessage(
+          errorPayload,
+          response.message,
+        );
         final errorStatus = (errorPayload['status'] as String?)?.toLowerCase();
         final errorStatusDetail = errorPayload['status_detail'] as String?;
 
@@ -317,9 +420,7 @@ class CheckoutController extends GetxController {
               AppSnackbar.to.show('Assinatura criada com sucesso!');
             } else if (subscriptionResult ==
                 _SubscriptionPollingResult.cancelled) {
-              AppSnackbar.to.show(
-                'Pagamento não aprovado. Tente novamente.',
-              );
+              AppSnackbar.to.show('Pagamento não aprovado. Tente novamente.');
               _resetIdempotencyKey();
             } else {
               AppSnackbar.to.show(
@@ -402,10 +503,7 @@ class CheckoutController extends GetxController {
     }
   }
 
-  String _buildProcessingMessage({
-    String? status,
-    String? statusDetail,
-  }) {
+  String _buildProcessingMessage({String? status, String? statusDetail}) {
     final normalizedStatus = (status ?? '').toLowerCase();
     if (normalizedStatus.isEmpty) {
       return 'Pagamento em processamento. Aguarde a confirmação.';
@@ -490,10 +588,7 @@ class CheckoutController extends GetxController {
 
     final status = (response['status'] as String?)?.toLowerCase() ?? 'pending';
     final statusDetail = response['status_detail'] as String?;
-    return mapPaymentStatusMessage(
-      status: status,
-      statusDetail: statusDetail,
-    );
+    return mapPaymentStatusMessage(status: status, statusDetail: statusDetail);
   }
 
   Future<_SubscriptionPollingResult> _pollSubscriptionUntilDone({

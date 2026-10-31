@@ -143,9 +143,9 @@ class ProfessionalDetailsController extends GetxController
         PremiumLockDialog(
           message: isInTrial
               ? 'O contato com profissionais não está disponível durante o período de trial. '
-                  'Assine um plano para entrar em contato!'
+                    'Assine um plano para entrar em contato!'
               : 'Você precisa de uma assinatura ativa para entrar em contato com os profissionais. '
-                  'Assine um plano para ter acesso!',
+                    'Assine um plano para ter acesso!',
           contentType: 'Contato',
           contentTitle: professional.user.fullName,
         ),

@@ -32,39 +32,52 @@ class ProfessionalDetailsPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.aquaText, width: 3),
-                      ),
-                      child: ClipOval(
-                        child: user.imageUrl != null
-                            ? AppImage(
-                                imageUrl: user.imageUrl!,
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                                errorWidget: Container(
-                                  width: 120,
-                                  height: 120,
-                                  color: const Color(0xFF89BEC6),
-                                  child: const Icon(
-                                    Icons.person,
-                                    size: 60,
-                                    color: Colors.white,
+                    GestureDetector(
+                      onTap: user.imageUrl != null
+                          ? () => _showPhoto(context, user.imageUrl!)
+                          : null,
+                      child: MouseRegion(
+                        cursor: user.imageUrl != null
+                            ? SystemMouseCursors.zoomIn
+                            : MouseCursor.defer,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.aquaText,
+                              width: 3,
+                            ),
+                          ),
+                          child: ClipOval(
+                            child: user.imageUrl != null
+                                ? AppImage(
+                                    imageUrl: user.imageUrl!,
+                                    width: 120,
+                                    height: 120,
+                                    fit: BoxFit.cover,
+                                    errorWidget: Container(
+                                      width: 120,
+                                      height: 120,
+                                      color: const Color(0xFF89BEC6),
+                                      child: const Icon(
+                                        Icons.person,
+                                        size: 60,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    width: 120,
+                                    height: 120,
+                                    color: const Color(0xFF89BEC6),
+                                    child: const Icon(
+                                      Icons.person,
+                                      size: 60,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                              )
-                            : Container(
-                                width: 120,
-                                height: 120,
-                                color: const Color(0xFF89BEC6),
-                                child: const Icon(
-                                  Icons.person,
-                                  size: 60,
-                                  color: Colors.white,
-                                ),
-                              ),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -239,6 +252,42 @@ class ProfessionalDetailsPage extends StatelessWidget {
     );
   }
 
+  /// Mostra a foto do profissional ampliada; dá para dar zoom e arrastar.
+  void _showPhoto(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black87,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(24),
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              maxScale: 4,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: AppImage(imageUrl: imageUrl, fit: BoxFit.contain),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton.filled(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
+                tooltip: 'Fechar',
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black54,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
@@ -259,41 +308,46 @@ class ProfessionalDetailsPage extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: isAction
-              ? Border.all(color: const Color(0xFF0C8DA1), width: 1)
-              : null,
-        ),
-        child: Row(
-          children: [
-            leading ??
-                Icon(
-                  icon,
-                  size: 20,
-                  color: isAction ? const Color(0xFF0C8DA1) : Colors.grey[600],
-                ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: isAction ? const Color(0xFF0C8DA1) : Colors.black87,
-                  fontWeight: isAction ? FontWeight.w600 : FontWeight.normal,
+      child: MouseRegion(
+        cursor: isAction ? SystemMouseCursors.click : MouseCursor.defer,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: isAction
+                ? Border.all(color: const Color(0xFF0C8DA1), width: 1)
+                : null,
+          ),
+          child: Row(
+            children: [
+              leading ??
+                  Icon(
+                    icon,
+                    size: 20,
+                    color: isAction
+                        ? const Color(0xFF0C8DA1)
+                        : Colors.grey[600],
+                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isAction ? const Color(0xFF0C8DA1) : Colors.black87,
+                    fontWeight: isAction ? FontWeight.w600 : FontWeight.normal,
+                  ),
                 ),
               ),
-            ),
-            if (isAction)
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 14,
-                color: Color(0xFF0C8DA1),
-              ),
-          ],
+              if (isAction)
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: Color(0xFF0C8DA1),
+                ),
+            ],
+          ),
         ),
       ),
     );

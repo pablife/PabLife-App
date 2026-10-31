@@ -3,7 +3,9 @@ import { MpClient } from "./mpClient.ts";
 import type { MpPreapprovalResponse } from "./types.ts";
 
 export type SubscriptionPlanPayload = {
-  preapproval_plan_id: string;
+  // Sem plano no Mercado Pago (modo de teste), a assinatura usa só os valores
+  // de auto_recurring abaixo.
+  preapproval_plan_id: string | null;
   frequency: number;
   frequency_type: "months" | "days";
   transaction_amount: number;
@@ -28,7 +30,10 @@ export async function createSubscriptionNextCycle(
   raw: MpPreapprovalResponse;
 }> {
   const payload = {
-    preapproval_plan_id: params.plan.preapproval_plan_id,
+    // Sem plano, o Mercado Pago exige o endereço de retorno (o plano já o tem).
+    ...(params.plan.preapproval_plan_id
+      ? { preapproval_plan_id: params.plan.preapproval_plan_id }
+      : { back_url: "https://app.pablife.com.br" }),
     payer_email: params.payer_email,
     reason: params.reason,
     external_reference: params.external_reference_sub,

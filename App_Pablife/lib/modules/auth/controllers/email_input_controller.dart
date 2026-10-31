@@ -56,6 +56,7 @@ class EmailInputController extends GetxController with LoaderManagerMixin {
   }
 
   bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+    // Aceita "+" e outros caracteres válidos (ex.: nome+teste@gmail.com).
+    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email);
   }
 }

@@ -246,7 +246,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
     }
   }
 
-Future<void> _deleteAccount() async {
+  Future<void> _deleteAccount() async {
     if (currentUser?.id == null) {
       AppSnackbar.to.show('Erro: ID do usuário não encontrado');
       return;

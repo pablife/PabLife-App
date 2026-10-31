@@ -36,99 +36,102 @@ class ProfessionalTile extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        height: 110,
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        padding: const EdgeInsets.all(15),
-        child: Row(
-          children: [
-            AppImage(
-              imageUrl: professional.user.imageUrl,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-              borderRadius: BorderRadius.circular(40),
-              errorWidget: Container(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          height: 110,
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(25),
+          ),
+          padding: const EdgeInsets.all(15),
+          child: Row(
+            children: [
+              AppImage(
+                imageUrl: professional.user.imageUrl,
                 width: 80,
                 height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF00343C).withAlpha(51),
-                ),
-                child: Icon(
-                  Icons.person,
-                  size: 40,
-                  color: const Color(0xFF00343C).withAlpha(128),
+                fit: BoxFit.cover,
+                borderRadius: BorderRadius.circular(40),
+                errorWidget: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF00343C).withAlpha(51),
+                  ),
+                  child: Icon(
+                    Icons.person,
+                    size: 40,
+                    color: const Color(0xFF00343C).withAlpha(128),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 17),
+              const SizedBox(width: 17),
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextDefault(
-                    professional.typeFormatted,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF00343C),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextDefault(
+                      professional.typeFormatted,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF00343C),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
 
-                  TextDefault(
-                    professional.user.fullName,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF00343C),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
+                    TextDefault(
+                      professional.user.fullName,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF00343C),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
 
-                  TextDefault(
-                    hasAppointment
-                        ? professional.appointmentFormatted!
-                        : professional.user.email,
-                    fontSize: hasAppointment ? 10 : 14,
-                    fontWeight: hasAppointment
-                        ? FontWeight.w700
-                        : FontWeight.w400,
-                    color: subtitleColor,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 10),
-
-            GestureDetector(
-              onTap: onCalendarTap,
-              child: Container(
-                width: 49.24,
-                height: 48.5,
-                decoration: BoxDecoration(
-                  color: calendarBgColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  calendarIcon,
-                  color: hasAppointment
-                      ? Colors.white
-                      : const Color(0xFF00343C),
-                  size: 24,
+                    TextDefault(
+                      hasAppointment
+                          ? professional.appointmentFormatted!
+                          : professional.user.email,
+                      fontSize: hasAppointment ? 10 : 14,
+                      fontWeight: hasAppointment
+                          ? FontWeight.w700
+                          : FontWeight.w400,
+                      color: subtitleColor,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(width: 10),
+
+              GestureDetector(
+                onTap: onCalendarTap,
+                child: Container(
+                  width: 49.24,
+                  height: 48.5,
+                  decoration: BoxDecoration(
+                    color: calendarBgColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    calendarIcon,
+                    color: hasAppointment
+                        ? Colors.white
+                        : const Color(0xFF00343C),
+                    size: 24,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

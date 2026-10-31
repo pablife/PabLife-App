@@ -1,14 +1,19 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../infra/models/banner_model.dart';
 import '../design_system/app_image.dart';
 
-class BannerCarouselWidget extends StatelessWidget {
+class BannerCarouselWidget extends StatefulWidget {
   final List<BannerModel> banners;
   final double? height;
   final EdgeInsets padding;
   final double aspectRatio;
+
+  /// Quantos banners cabem inteiros lado a lado (usado na web, com barra de
+  /// rolagem para os demais). Sem valor, cada banner ocupa 85% da largura.
+  final int? bannersPerView;
 
   const BannerCarouselWidget({
     super.key,
@@ -16,38 +21,86 @@ class BannerCarouselWidget extends StatelessWidget {
     this.height,
     this.padding = const EdgeInsets.symmetric(horizontal: 16),
     this.aspectRatio = 16 / 9,
+    this.bannersPerView,
   });
 
   @override
+  State<BannerCarouselWidget> createState() => _BannerCarouselWidgetState();
+}
+
+class _BannerCarouselWidgetState extends State<BannerCarouselWidget> {
+  static const _gap = 12.0;
+
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (banners.isEmpty) {
+    if (widget.banners.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    // Calcula a largura do banner (85% da tela)
-    final bannerWidth = MediaQuery.of(context).size.width * 0.85;
-    // Calcula a altura baseada na proporção ou usa a altura fixa se fornecida
-    final bannerHeight = height ?? (bannerWidth / aspectRatio);
+    return LayoutBuilder(builder: _buildCarousel);
+  }
 
+  Widget _buildCarousel(BuildContext context, BoxConstraints constraints) {
+    final banners = widget.banners;
+    final perView = widget.bannersPerView;
+    final padding = widget.padding;
+
+    // Calcula a largura do banner: 85% do espaço disponível (na web em
+    // colunas, isso é a coluna e não a tela inteira), ou a fração que faz
+    // caber [bannersPerView] banners inteiros
+    final bannerWidth = perView == null
+        ? constraints.maxWidth * 0.85
+        : (constraints.maxWidth - padding.horizontal - _gap * (perView - 1)) /
+              perView;
+    // Calcula a altura baseada na proporção ou usa a altura fixa se fornecida
+    final bannerHeight = widget.height ?? (bannerWidth / widget.aspectRatio);
+
+    final list = ListView.builder(
+      controller: _scrollController,
+      scrollDirection: Axis.horizontal,
+      padding: perView == null
+          ? padding
+          : padding.copyWith(bottom: padding.bottom + 14),
+      itemCount: banners.length,
+      itemBuilder: (context, index) {
+        final banner = banners[index];
+        return Padding(
+          padding: EdgeInsets.only(
+            right: index < banners.length - 1 ? _gap : 0,
+          ),
+          child: _BannerItem(
+            banner: banner,
+            height: bannerHeight,
+            width: bannerWidth,
+          ),
+        );
+      },
+    );
+
+    if (perView == null) {
+      return SizedBox(height: bannerHeight, child: list);
+    }
+
+    // Na web: barra de rolagem visível e arrastar com o mouse também rola
     return SizedBox(
-      height: bannerHeight,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: padding,
-        itemCount: banners.length,
-        itemBuilder: (context, index) {
-          final banner = banners[index];
-          return Padding(
-            padding: EdgeInsets.only(
-              right: index < banners.length - 1 ? 12 : 0,
-            ),
-            child: _BannerItem(
-              banner: banner,
-              height: bannerHeight,
-              width: bannerWidth,
-            ),
-          );
-        },
+      height: bannerHeight + 14,
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(
+          context,
+        ).copyWith(dragDevices: PointerDeviceKind.values.toSet()),
+        child: Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: banners.length > perView,
+          child: list,
+        ),
       ),
     );
   }

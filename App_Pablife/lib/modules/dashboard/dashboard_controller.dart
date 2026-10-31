@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../infra/models/user_role.dart';
@@ -11,6 +12,16 @@ class DashboardController extends GetxController with LoaderManagerMixin {
   static DashboardController get to => Get.find();
 
   int currentIndex = 0;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Na web, quem não é profissional já entra vendo os profissionais.
+    final role = AuthService.instance.currentUser?.role;
+    if (kIsWeb && role != UserRole.professional) {
+      currentIndex = 3;
+    }
+  }
 
   void changeTab(int index) {
     currentIndex = index;

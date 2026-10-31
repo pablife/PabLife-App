@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../shared/utils/wide_layout.dart';
 import '../app_text_vector.dart';
 import 'outlined_icon_button.dart';
 import 'text_default.dart';
@@ -34,6 +35,9 @@ class AppBarDefault extends StatelessWidget implements PreferredSizeWidget {
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   )
+                // Nas abas do computador o logo já está no menu lateral.
+                : isWideLayout(context) && !canPop
+                ? const SizedBox.shrink()
                 : const AppTextVector(width: 148, height: 45),
             trailing ?? const SizedBox(width: 66),
           ],

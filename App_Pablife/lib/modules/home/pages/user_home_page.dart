@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/themes/app_colors.dart';
+import '../../../shared/utils/wide_layout.dart';
 import '../../../widgets/banners/banner_carousel_widget.dart';
 import '../controllers/user_home_controller.dart';
 import '../widgets/home_user_header.dart';
@@ -43,6 +44,8 @@ class UserHomePage extends StatelessWidget {
                         ? const Center(child: CircularProgressIndicator())
                         : controller.isEmpty
                         ? const UserHomeEmptyStateWidget()
+                        : isWideLayout(context)
+                        ? _WideHomeContent(controller: controller)
                         : ListView(
                             children: [
                               const SizedBox(height: 24),
@@ -85,6 +88,72 @@ class UserHomePage extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// Tela inicial em telas largas, em blocos: consulta e meta em andamento lado
+/// a lado (mesmo tamanho), tarefas e metas juntas ao lado do progresso
+/// semanal, e os banners e profissionais na largura toda.
+class _WideHomeContent extends StatelessWidget {
+  final UserHomeController controller;
+  const _WideHomeContent({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    const gap = SizedBox(height: 24);
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      children: [
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1100),
+            child: Column(
+              children: [
+                _columns(
+                  left: [UserHomeAppointmentsSection(controller: controller)],
+                  right: [UserHomeGoalsSection(controller: controller)],
+                ),
+                gap,
+                _columns(
+                  left: [
+                    UserHomeTasksSectionWidget(controller: controller),
+                    gap,
+                    const UserHomeGoalsProgressSection(),
+                  ],
+                  right: [
+                    if (controller.hasWeeklyProgress)
+                      UserHomeWeeklyProgressWidget(controller: controller),
+                  ],
+                ),
+                if (controller.banners.isNotEmpty) ...[
+                  gap,
+                  BannerCarouselWidget(
+                    banners: controller.banners,
+                    bannersPerView: 2,
+                  ),
+                ],
+                if (controller.professionals.isNotEmpty) ...[
+                  gap,
+                  UserHomeProfessionalCarouselWidget(controller: controller),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _columns({required List<Widget> left, required List<Widget> right}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: Column(children: left)),
+        const SizedBox(width: 24),
+        Expanded(child: Column(children: right)),
+      ],
     );
   }
 }

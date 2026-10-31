@@ -33,6 +33,9 @@ class AppImage extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
+      // Fotos grandes reduzidas para miniatura ficam serrilhadas/embaçadas com
+      // o filtro padrão (low); medium usa mipmaps e deixa a miniatura nítida.
+      filterQuality: FilterQuality.medium,
       placeholder: (context, url) =>
           placeholder ??
           Center(
