@@ -9,6 +9,7 @@ class ProfessionalsListWidget extends StatelessWidget {
   final bool showOnlyScheduled;
   final void Function(ProfessionalWithUserModel) onProfessionalTap;
   final void Function(ProfessionalWithUserModel) onCalendarTap;
+  final ProfessionalWithUserModel? selected;
 
   const ProfessionalsListWidget({
     super.key,
@@ -17,6 +18,7 @@ class ProfessionalsListWidget extends StatelessWidget {
     required this.showOnlyScheduled,
     required this.onProfessionalTap,
     required this.onCalendarTap,
+    this.selected,
   });
 
   @override
@@ -55,6 +57,8 @@ class ProfessionalsListWidget extends StatelessWidget {
             professional: professional,
             onTap: () => onProfessionalTap(professional),
             onCalendarTap: () => onCalendarTap(professional),
+            isSelected:
+                selected?.professional.id == professional.professional.id,
           ),
         );
       },

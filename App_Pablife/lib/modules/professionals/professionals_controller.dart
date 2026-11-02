@@ -6,6 +6,7 @@ import '../../shared/utils/app_snackbar.dart';
 import '../../infra/repositories/professional_repository.dart';
 import '../../infra/models/professional_with_user_model.dart';
 import '../../infra/services/auth_service.dart';
+import '../../infra/services/subscription_service.dart';
 import '../../widgets/dialogs/premium_lock_dialog.dart';
 import '../calendar/widgets/interactive_calendar_base.dart';
 import 'widgets/cancel_appointment_dialog.dart';
@@ -33,6 +34,13 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
   final List<String> professionalTypes = ['Psicólogos', 'Nutricionistas'];
   String selectedType = 'Psicólogos';
   bool showOnlyScheduled = false;
+
+  /// No computador o perfil abre ao lado da lista; este é o profissional
+  /// mostrado no painel.
+  ProfessionalWithUserModel? selected;
+
+  bool get hasActivePlan =>
+      _authService.accessStatus == SubscriptionAccessStatus.active;
 
   @override
   void onInit() {
@@ -121,6 +129,23 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
     }
 
     filteredProfessionals = tempProfessionals;
+    _syncSelected();
+  }
+
+  /// Mantém o painel com a versão atual do profissional selecionado (por
+  /// exemplo, depois de agendar) ou mostra o primeiro da lista filtrada.
+  void _syncSelected() {
+    final id = selected?.professional.id;
+    selected =
+        filteredProfessionals.firstWhereOrNull(
+          (p) => p.professional.id == id,
+        ) ??
+        filteredProfessionals.firstOrNull;
+  }
+
+  void selectProfessional(ProfessionalWithUserModel professional) {
+    selected = professional;
+    update();
   }
 
   String _getTypeKey(String typeFormatted) {
@@ -244,6 +269,29 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
         Get.offAllNamed('/appointment-success');
       }
     }
+  }
+
+  /// WhatsApp a partir do painel do perfil: como na página de detalhes, só
+  /// para quem tem plano ativo.
+  Future<void> openWhatsAppIfAllowed(
+    ProfessionalWithUserModel professional,
+  ) async {
+    await _authService.reloadUserAccessInfo();
+    if (!hasActivePlan) {
+      Get.dialog(
+        PremiumLockDialog(
+          message: isInTrial
+              ? 'O contato com profissionais não está disponível durante o período de trial. '
+                    'Assine um plano para entrar em contato!'
+              : 'Você precisa de uma assinatura ativa para entrar em contato com os profissionais. '
+                    'Assine um plano para ter acesso!',
+          contentType: 'Contato',
+          contentTitle: professional.user.fullName,
+        ),
+      );
+      return;
+    }
+    await _openWhatsApp(professional);
   }
 
   Future<void> _openWhatsApp(ProfessionalWithUserModel professional) async {

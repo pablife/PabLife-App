@@ -8,11 +8,15 @@ class ProfessionalTile extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onCalendarTap;
 
+  /// Destaca o card do profissional aberto no painel ao lado (computador).
+  final bool isSelected;
+
   const ProfessionalTile({
     super.key,
     required this.professional,
     required this.onTap,
     required this.onCalendarTap,
+    this.isSelected = false,
   });
 
   @override
@@ -44,6 +48,13 @@ class ProfessionalTile extends StatelessWidget {
             color: bgColor,
             borderRadius: BorderRadius.circular(25),
           ),
+          // Borda por cima (não ocupa espaço): o card tem altura fixa.
+          foregroundDecoration: isSelected
+              ? BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: const Color(0xFF00343C), width: 3),
+                )
+              : null,
           padding: const EdgeInsets.all(15),
           child: Row(
             children: [

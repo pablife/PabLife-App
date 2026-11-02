@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:pablife/modules/waiting_approval/pages/waiting_approval_page.dart';
 import '../../../shared/mixins/loader_manager.dart';
 import '../../../shared/utils/app_snackbar.dart';
+import '../../../shared/utils/photo_resize.dart';
 import '../../../infra/models/professional_type.dart';
 import '../../../infra/models/user_model.dart';
 import '../../../infra/models/user_role.dart';
@@ -127,10 +128,9 @@ class ProfessionalProfileController extends GetxController
         return;
       }
 
-      final base64String = base64Encode(file.bytes!);
-      final extension = file.extension ?? 'jpg';
+      final base64String = base64Encode(shrinkProfilePhoto(file.bytes!));
       final fileName =
-          'profile-image-${DateTime.now().millisecondsSinceEpoch}.$extension';
+          'profile-image-${DateTime.now().millisecondsSinceEpoch}.jpg';
 
       updateProfileImageBase64(base64String, fileName);
     } catch (e) {

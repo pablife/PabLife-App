@@ -43,11 +43,17 @@ class DashboardPage extends StatelessWidget {
                   isProfessional: isProfessional,
                 ),
                 Expanded(
-                  // O Dashboard do usuário já tem layout próprio em colunas;
-                  // as outras abas ficam numa coluna centralizada.
-                  child: controller.currentIndex == 0 && !isProfessional
-                      ? pages[0]
-                      : WideCenter(child: pages[controller.currentIndex]),
+                  // O Dashboard e os Profissionais do usuário têm layout
+                  // próprio em colunas; as outras abas ficam numa coluna
+                  // centralizada.
+                  child: switch (controller.currentIndex) {
+                    0 when !isProfessional => pages[0],
+                    3 when !isProfessional => WideCenter(
+                      maxWidth: 1400,
+                      child: pages[3],
+                    ),
+                    final index => WideCenter(child: pages[index]),
+                  },
                 ),
               ],
             ),

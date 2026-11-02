@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:strawti_utils/strawti_utils.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../shared/utils/photo_resize.dart';
 
 import '../models/user_model.dart';
 import '../models/user_role.dart';
@@ -246,20 +247,11 @@ class UserRepository extends StrautilsTryThis {
     required String fileName,
   }) {
     return tryThis(() async {
-      final bytes = base64Decode(imageBase64);
-
-      final extension = fileName.split('.').last.toLowerCase();
-      String contentType = 'image/jpeg';
-      if (extension == 'png') {
-        contentType = 'image/png';
-      } else if (extension == 'webp') {
-        contentType = 'image/webp';
-      } else if (extension == 'gif') {
-        contentType = 'image/gif';
-      }
+      final bytes = shrinkProfilePhoto(base64Decode(imageBase64));
+      const contentType = 'image/jpeg';
 
       final storagePath =
-          '$userId/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+          '$userId/${DateTime.now().millisecondsSinceEpoch}_${jpgFileName(fileName)}';
 
       await _client.storage
           .from('profile-photos')
