@@ -33,6 +33,10 @@ class AppImage extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
+      // Guarda na memória só o tamanho que a tela usa, e não a foto original
+      // (que pode ter milhares de pixels). O dobro dá folga para fotos não
+      // quadradas recortadas com BoxFit.cover.
+      memCacheWidth: _memCacheWidth(context),
       // Fotos grandes reduzidas para miniatura ficam serrilhadas/embaçadas com
       // o filtro padrão (low); medium usa mipmaps e deixa a miniatura nítida.
       filterQuality: FilterQuality.medium,
@@ -56,6 +60,13 @@ class AppImage extends StatelessWidget {
     }
 
     return imageWidget;
+  }
+
+  int? _memCacheWidth(BuildContext context) {
+    final w = width, h = height;
+    if (w == null || h == null || !w.isFinite || !h.isFinite) return null;
+    final side = w > h ? w : h;
+    return (side * MediaQuery.devicePixelRatioOf(context) * 2).round();
   }
 
   Widget _buildErrorWidget() {
