@@ -54,6 +54,9 @@ class ProfessionalAppointmentModel {
   final DateTime? startedAt;
   final DateTime? finishedAt;
   final AppointmentStatus status;
+
+  /// Justificativa de "Cancelada/remarcada" (preenchida pelo profissional).
+  final String? cancellationReason;
   final String timezone;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -77,6 +80,7 @@ class ProfessionalAppointmentModel {
     this.startedAt,
     this.finishedAt,
     required this.status,
+    this.cancellationReason,
     required this.timezone,
     required this.createdAt,
     required this.updatedAt,
@@ -171,15 +175,16 @@ class ProfessionalAppointmentModel {
     final finishedAtStr = map['finished_at']?.toString();
     final statusStr = map['status']?.toString() ?? 'scheduled';
 
-    final startOfScheduledWindow =
-        map['start_of_scheduled_window'] != null
-            ? DateTime.parse(map['start_of_scheduled_window']).toLocal()
-            : _combineDateAndTime(dueAt, startTime);
+    final startOfScheduledWindow = map['start_of_scheduled_window'] != null
+        ? DateTime.parse(map['start_of_scheduled_window']).toLocal()
+        : _combineDateAndTime(dueAt, startTime);
     final endOfScheduledWindow = map['end_of_scheduled_window'] != null
         ? DateTime.parse(map['end_of_scheduled_window']).toLocal()
         : _combineNullableDateAndTime(dueAt, finishTime) ??
-              _combineDateAndTime(dueAt, startTime)
-                  .add(const Duration(hours: 1));
+              _combineDateAndTime(
+                dueAt,
+                startTime,
+              ).add(const Duration(hours: 1));
     final finishAt =
         _combineNullableDateAndTime(dueAt, finishTime) ?? endOfScheduledWindow;
 
@@ -205,6 +210,7 @@ class ProfessionalAppointmentModel {
           ? DateTime.parse(finishedAtStr).toLocal()
           : null,
       status: AppointmentStatus.fromString(statusStr),
+      cancellationReason: map['cancellation_reason']?.toString(),
       timezone: timezone,
       createdAt: map['created_at'] != null
           ? DateTime.parse(map['created_at']).toLocal()
@@ -266,6 +272,7 @@ class ProfessionalAppointmentModel {
     DateTime? startedAt,
     DateTime? finishedAt,
     AppointmentStatus? status,
+    String? cancellationReason,
     String? timezone,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -288,6 +295,7 @@ class ProfessionalAppointmentModel {
       startedAt: startedAt ?? this.startedAt,
       finishedAt: finishedAt ?? this.finishedAt,
       status: status ?? this.status,
+      cancellationReason: cancellationReason ?? this.cancellationReason,
       timezone: timezone ?? this.timezone,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

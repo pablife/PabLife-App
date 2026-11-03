@@ -212,6 +212,16 @@ class AppointmentDetailsPage extends StatelessWidget {
                                           ),
                                       ],
                                     ),
+                                  if (controller
+                                      .canShowCancelledRescheduledButton) ...[
+                                    const SizedBox(height: 8),
+                                    AppButtonDefault(
+                                      text: 'Cancelada/remarcada',
+                                      onTap:
+                                          controller.markCancelledRescheduled,
+                                      backgroundColor: const Color(0xFFDA879A),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -301,6 +311,10 @@ class AppointmentDetailsPage extends StatelessWidget {
     final controller = Get.find<AppointmentDetailsController>();
     switch (status) {
       case AppointmentStatus.cancelled:
+        final reason = controller.appointment?.cancellationReason?.trim();
+        if (reason != null && reason.isNotEmpty) {
+          return 'Cancelada/remarcada.\nJustificativa: $reason';
+        }
         return 'Esta consulta foi cancelada e não possui registros.';
       case AppointmentStatus.completed:
         return 'Esta consulta foi concluída.';

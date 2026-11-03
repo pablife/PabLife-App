@@ -33,6 +33,7 @@ class AppointmentRepository extends StrautilsTryThis {
             started_at,
             finished_at,
             status,
+            cancellation_reason,
             created_at,
             updated_at,
             appointment_time:tb_appointment_times!inner(
@@ -468,6 +469,7 @@ class AppointmentRepository extends StrautilsTryThis {
             started_at,
             finished_at,
             status,
+            cancellation_reason,
             created_at,
             updated_at,
             appointment_time:tb_appointment_times!inner(
@@ -575,6 +577,18 @@ class AppointmentRepository extends StrautilsTryThis {
     await _client
         .from('tb_appointments')
         .update({'status': 'cancelled'})
+        .eq('id', appointmentId);
+  }
+
+  /// Profissional marca a consulta como "Cancelada/remarcada" com a
+  /// justificativa (o horário volta a ficar livre).
+  Future<void> markCancelledWithReason(
+    String appointmentId,
+    String reason,
+  ) async {
+    await _client
+        .from('tb_appointments')
+        .update({'status': 'cancelled', 'cancellation_reason': reason})
         .eq('id', appointmentId);
   }
 

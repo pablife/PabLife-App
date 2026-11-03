@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../infra/models/activity_model.dart';
+import '../../../shared/utils/wide_layout.dart';
 import '../controllers/professional_wide_calendar_controller.dart';
 import '../controllers/user_wide_calendar_controller.dart';
 import '../widgets/wide_agenda_views.dart';
@@ -24,6 +25,9 @@ class UserWideCalendarPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<UserWideCalendarController>(
       builder: (controller) {
+        if (!isWideLayout(context)) {
+          return _PhoneCalendar(controller: controller);
+        }
         return Scaffold(
           backgroundColor: WideAgendaColors.background,
           body: Padding(
@@ -75,6 +79,270 @@ class UserWideCalendarPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// ------------------------------------------------------------------ celular
+
+/// A mesma agenda no celular: cabeçalho em duas linhas, filtros numa janela
+/// de baixo e botão "+" para criar. Abre no dia de hoje (visão Dia).
+class _PhoneCalendar extends StatelessWidget {
+  final UserWideCalendarController controller;
+
+  const _PhoneCalendar({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => controller.applyPhoneDefaultView(),
+    );
+
+    return Scaffold(
+      backgroundColor: WideAgendaColors.background,
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Criar',
+        backgroundColor: WideAgendaColors.appointment,
+        foregroundColor: Colors.white,
+        onPressed: () => _showCreateSheet(context),
+        child: const Icon(Icons.add),
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          decoration: const BoxDecoration(
+            color: WideAgendaColors.panel,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  OutlinedButton(
+                    onPressed: controller.goToday,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: WideAgendaColors.text,
+                      side: const BorderSide(color: WideAgendaColors.text),
+                      shape: const StadiumBorder(),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    child: const Text('Hoje'),
+                  ),
+                  IconButton(
+                    tooltip: 'Anterior',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => controller.move(-1),
+                    icon: const Icon(
+                      Icons.chevron_left,
+                      color: WideAgendaColors.text,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Próximo',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => controller.move(1),
+                    icon: const Icon(
+                      Icons.chevron_right,
+                      color: WideAgendaColors.text,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      controller.title,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: WideAgendaColors.text,
+                      ),
+                    ),
+                  ),
+                  if (controller.isLoading)
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: WideAgendaColors.text,
+                      ),
+                    ),
+                  IconButton(
+                    tooltip: 'Mostrar',
+                    onPressed: () => _showFilterSheet(context),
+                    icon: const Icon(
+                      Icons.filter_list,
+                      color: WideAgendaColors.text,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<WideAgendaView>(
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(
+                      value: WideAgendaView.day,
+                      label: Text('Dia'),
+                    ),
+                    ButtonSegment(
+                      value: WideAgendaView.week,
+                      label: Text('Semana'),
+                    ),
+                    ButtonSegment(
+                      value: WideAgendaView.month,
+                      label: Text('Mês'),
+                    ),
+                    ButtonSegment(
+                      value: WideAgendaView.year,
+                      label: Text('Ano'),
+                    ),
+                  ],
+                  selected: {controller.view},
+                  onSelectionChanged: (s) => controller.setView(s.first),
+                  style: ButtonStyle(
+                    visualDensity: VisualDensity.compact,
+                    foregroundColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? WideAgendaColors.panel
+                          : WideAgendaColors.text,
+                    ),
+                    backgroundColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? WideAgendaColors.text
+                          : Colors.transparent,
+                    ),
+                    side: const WidgetStatePropertyAll(
+                      BorderSide(color: WideAgendaColors.text),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: switch (controller.view) {
+                  WideAgendaView.day || WideAgendaView.week => _UserWeekView(
+                    controller: controller,
+                    compact: true,
+                  ),
+                  WideAgendaView.month => _UserMonthView(
+                    controller: controller,
+                    compact: true,
+                  ),
+                  WideAgendaView.year => _UserYearView(controller: controller),
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCreateSheet(BuildContext context) {
+    Widget option(String label, Color color, VoidCallback onTap) => ListTile(
+      leading: CircleAvatar(radius: 8, backgroundColor: color),
+      title: Text(label, style: const TextStyle(color: WideAgendaColors.text)),
+      onTap: () {
+        Navigator.of(context).pop();
+        onTap();
+      },
+    );
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: WideAgendaColors.panel,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Text(
+                'Criar',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: WideAgendaColors.text,
+                ),
+              ),
+            ),
+            option('Tarefa', _PlannerColors.task, controller.createTask),
+            option('Meta', _PlannerColors.goal, controller.createGoal),
+            option('Anotação', _PlannerColors.note, controller.createNote),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFilterSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: WideAgendaColors.panel,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => SafeArea(
+        child: GetBuilder<UserWideCalendarController>(
+          builder: (c) {
+            final totals = c.totals;
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Mostrar',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: WideAgendaColors.text,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  WideFilterRow(
+                    label: 'Tarefas',
+                    color: _PlannerColors.task,
+                    value: c.showTasks,
+                    count: totals.tasks,
+                    onChanged: (v) => c.setFilter(tasks: v),
+                  ),
+                  WideFilterRow(
+                    label: 'Metas',
+                    color: _PlannerColors.goal,
+                    value: c.showGoals,
+                    count: totals.goals,
+                    onChanged: (v) => c.setFilter(goals: v),
+                  ),
+                  WideFilterRow(
+                    label: 'Anotações',
+                    color: _PlannerColors.note,
+                    value: c.showNotes,
+                    count: totals.notes,
+                    onChanged: (v) => c.setFilter(notes: v),
+                  ),
+                  WideFilterRow(
+                    label: 'Consultas',
+                    color: _PlannerColors.appointment,
+                    value: c.showAppointments,
+                    count: totals.appointments,
+                    onChanged: (v) => c.setFilter(appointments: v),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -241,7 +509,10 @@ class _SideColumn extends StatelessWidget {
 class _UserWeekView extends StatefulWidget {
   final UserWideCalendarController controller;
 
-  const _UserWeekView({required this.controller});
+  /// Celular: coluna das horas mais estreita.
+  final bool compact;
+
+  const _UserWeekView({required this.controller, this.compact = false});
 
   @override
   State<_UserWeekView> createState() => _UserWeekViewState();
@@ -249,7 +520,8 @@ class _UserWeekView extends StatefulWidget {
 
 class _UserWeekViewState extends State<_UserWeekView> {
   static const _hourHeight = 60.0;
-  static const _gutter = 56.0;
+
+  double get _gutter => widget.compact ? 40 : 56;
 
   final _scroll = ScrollController(initialScrollOffset: 7 * _hourHeight);
 
@@ -273,7 +545,7 @@ class _UserWeekViewState extends State<_UserWeekView> {
       children: [
         Row(
           children: [
-            const SizedBox(width: _gutter),
+            SizedBox(width: _gutter),
             for (final day in days)
               Expanded(
                 child: Column(
@@ -299,12 +571,12 @@ class _UserWeekViewState extends State<_UserWeekView> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(
+              SizedBox(
                 width: _gutter,
-                child: Padding(
+                child: const Padding(
                   padding: EdgeInsets.only(right: 8, top: 4),
                   child: Text(
-                    'dia todo',
+                    'dia\ntodo',
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       fontSize: 10,
@@ -367,7 +639,9 @@ class _UserWeekViewState extends State<_UserWeekView> {
                             child: Padding(
                               padding: const EdgeInsets.only(right: 8, top: 2),
                               child: Text(
-                                '${wideTwo(hour)}:00',
+                                widget.compact
+                                    ? wideTwo(hour)
+                                    : '${wideTwo(hour)}:00',
                                 style: const TextStyle(
                                   fontSize: 11,
                                   color: WideAgendaColors.text,
@@ -558,7 +832,10 @@ class _PlannerChip extends StatelessWidget {
 class _UserMonthView extends StatelessWidget {
   final UserWideCalendarController controller;
 
-  const _UserMonthView({required this.controller});
+  /// Celular: bolinhas coloridas no lugar das etiquetas "2 tarefas".
+  final bool compact;
+
+  const _UserMonthView({required this.controller, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -624,6 +901,7 @@ class _UserMonthView extends StatelessWidget {
 
   Widget _dayCell(DateTime day, int month) {
     final c = controller.countsOn(day);
+    if (compact) return _compactDayCell(day, month, c);
     final pills = [
       if (c.appointments > 0)
         _pill(
@@ -680,6 +958,50 @@ class _UserMonthView extends StatelessWidget {
     );
   }
 
+  Widget _compactDayCell(DateTime day, int month, UserDayCounts c) {
+    final dots = [
+      if (c.appointments > 0) _PlannerColors.appointment,
+      if (c.tasks > 0) _PlannerColors.task,
+      if (c.notes > 0) _PlannerColors.note,
+      if (c.goals > 0) _PlannerColors.goal,
+    ];
+
+    return InkWell(
+      onTap: () => controller.openDay(day),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        decoration: const BoxDecoration(
+          border: Border(
+            right: BorderSide(color: WideAgendaColors.grid),
+            bottom: BorderSide(color: WideAgendaColors.grid),
+          ),
+        ),
+        child: Column(
+          children: [
+            WideDayNumber(day: day, faded: day.month != month),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 3,
+              runSpacing: 3,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final color in dots)
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _pill(String text, Color fill, Color textColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -717,7 +1039,11 @@ class _UserYearView extends StatelessWidget {
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final columns = constraints.maxWidth > 900 ? 4 : 3;
+              final columns = constraints.maxWidth > 900
+                  ? 4
+                  : constraints.maxWidth > 560
+                  ? 3
+                  : 2;
               return GridView.builder(
                 itemCount: 12,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

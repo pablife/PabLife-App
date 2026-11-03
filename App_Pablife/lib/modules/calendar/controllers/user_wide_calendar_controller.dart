@@ -245,6 +245,16 @@ class UserWideCalendarController extends GetxController
 
   // ---------------------------------------------------------------- navegação
 
+  bool _phoneDefaultApplied = false;
+
+  /// No celular a agenda abre no dia de hoje (visão Dia). Só vale na
+  /// primeira vez; depois fica a visão que a pessoa escolher.
+  void applyPhoneDefaultView() {
+    if (_phoneDefaultApplied) return;
+    _phoneDefaultApplied = true;
+    if (view == WideAgendaView.week) setView(WideAgendaView.day);
+  }
+
   void setView(WideAgendaView newView) {
     if (view == newView) return;
     view = newView;
