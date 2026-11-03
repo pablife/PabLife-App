@@ -737,7 +737,13 @@ class ProfessionalRepository extends StrautilsTryThis {
         return StrautilsResponse.error('Agendamento não encontrado.');
       }
 
-      await _client.from('tb_appointments').delete().eq('id', appointmentId);
+      // O banco não deixa o paciente apagar a consulta (só admin), então o
+      // delete era ignorado em silêncio. Cancelar é mudar o status, como no
+      // lado do profissional; a consulta cancelada libera o horário.
+      await _client
+          .from('tb_appointments')
+          .update({'status': 'cancelled'})
+          .eq('id', appointmentId);
 
       return StrautilsResponse.success(true);
     }, action: 'cancelar horário.');

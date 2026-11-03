@@ -11,6 +11,7 @@ import '../../infra/services/auth_service.dart';
 import '../../shared/mixins/loader_manager.dart';
 import '../../shared/utils/app_snackbar.dart';
 import '../../widgets/dialogs/premium_lock_dialog.dart';
+import '../appointment_details/widgets/patient_appointment_options_sheet.dart';
 import 'pages/activity_details_page.dart';
 import 'pages/interactive_calendar_page.dart';
 
@@ -104,7 +105,6 @@ class CalendarController extends GetxController with LoaderManagerMixin {
     super.onClose();
   }
 
-
   void _flushPendingToggles() {
     if (_pendingToggles.isEmpty) return;
 
@@ -112,7 +112,8 @@ class CalendarController extends GetxController with LoaderManagerMixin {
     for (final id in pendingIds) {
       final isCompleted = _pendingToggles[id]!;
       final activity = _activities.firstWhereOrNull((a) => a.id == id);
-      final activityDate = activity?.activityDate ??
+      final activityDate =
+          activity?.activityDate ??
           DateTime(
             selectedDateTime.year,
             selectedDateTime.month,
@@ -257,7 +258,8 @@ class CalendarController extends GetxController with LoaderManagerMixin {
       if (activity.type == 'goal') {
         activityDate = activity.activityDate;
       } else {
-        activityDate ??= activity.activityDate ??
+        activityDate ??=
+            activity.activityDate ??
             DateTime(
               selectedDateTime.year,
               selectedDateTime.month,
@@ -437,6 +439,17 @@ class CalendarController extends GetxController with LoaderManagerMixin {
 
   Future<void> openActivityDetails(CalendarItem item) async {
     final activity = _activities.firstWhereOrNull((a) => a.id == item.id);
+    if (activity?.type == 'appointment') {
+      // "Consulta agendada": abre as opções (detalhes, remarcar, cancelar).
+      final changed = await PatientAppointmentOptionsSheet.showById(
+        activity!.id,
+      );
+      if (changed) {
+        await loadActivities();
+        UserHomeController.to.refreshData();
+      }
+      return;
+    }
     if (activity != null) {
       final result = await Get.toNamed(
         ActivityDetailsPage.route,

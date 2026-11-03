@@ -1,8 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../controllers/user_home_controller.dart';
-import '../../appointment_details/appointment_details_routes.dart';
+import '../../appointment_details/widgets/patient_appointment_options_sheet.dart';
 import '../../patients/widgets/patient_tile.dart';
 
 class UserHomeAppointmentCarouselWidget extends StatefulWidget {
@@ -55,11 +54,12 @@ class _UserHomeAppointmentCarouselWidgetState
             totalPages: appointments.length,
             filledHour: true,
             showStatusIndicator: true,
-            onTap: () {
-              Get.toNamed(
-                AppointmentDetailsRoutes.appointmentDetails,
-                arguments: appointment.id,
+            // Abre as opções: ver detalhes, remarcar, WhatsApp e cancelar.
+            onTap: () async {
+              final changed = await PatientAppointmentOptionsSheet.show(
+                appointment,
               );
+              if (changed) widget.controller.refreshData();
             },
           ),
         );

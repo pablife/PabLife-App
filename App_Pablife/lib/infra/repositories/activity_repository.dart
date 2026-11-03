@@ -224,6 +224,34 @@ class ActivityRepository extends StrautilsTryThis {
     }, action: 'buscar tarefas concluídas.');
   }
 
+  /// Quantos dias diferentes cada atividade foi marcada como feita (meta
+  /// diária: cada check vale para o seu dia).
+  FStrautilsResponse<Map<String, int>> getCheckedDaysCount(
+    List<String> activityIds,
+  ) {
+    return tryThis(() async {
+      if (activityIds.isEmpty) {
+        return StrautilsResponse.success(<String, int>{});
+      }
+      final rows = await _client
+          .from('tb_activity_registers')
+          .select('activity_id, activity_date')
+          .inFilter('activity_id', activityIds)
+          .isFilter('deleted_at', null);
+
+      final days = <String, Set<String>>{};
+      for (final row in rows as List) {
+        final id = row['activity_id']?.toString();
+        final date = row['activity_date']?.toString();
+        if (id == null || date == null) continue;
+        days.putIfAbsent(id, () => <String>{}).add(date);
+      }
+      return StrautilsResponse.success({
+        for (final entry in days.entries) entry.key: entry.value.length,
+      });
+    }, action: 'contar dias marcados.');
+  }
+
   FStrautilsResponse<List<ActivityModel>> getAllGoals({
     required String userId,
   }) {
