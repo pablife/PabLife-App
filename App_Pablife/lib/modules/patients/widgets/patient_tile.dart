@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../../infra/models/professional_appointment_model.dart';
 import '../../../widgets/design_system/app_image.dart';
 import '../../../widgets/design_system/text_default.dart';
+import '../../../widgets/design_system/whatsapp_icon.dart';
 
 class PatientTile extends StatelessWidget {
   final ProfessionalAppointmentModel patient;
@@ -26,6 +27,10 @@ class PatientTile extends StatelessWidget {
   final bool forceShowTrailing;
   final bool isProfessional;
 
+  /// Botão do WhatsApp ao lado do nome (aba Pacientes do profissional).
+  /// Só aparece se o paciente tiver telefone.
+  final VoidCallback? onWhatsAppTap;
+
   const PatientTile({
     super.key,
     required this.patient,
@@ -46,6 +51,7 @@ class PatientTile extends StatelessWidget {
     this.showStatusIndicator = false,
     this.forceShowTrailing = false,
     this.isProfessional = false,
+    this.onWhatsAppTap,
   });
 
   @override
@@ -255,6 +261,31 @@ class PatientTile extends StatelessWidget {
               ),
 
               const SizedBox(width: 10),
+
+              if (onWhatsAppTap != null &&
+                  (patient.patientPhone ?? '').trim().isNotEmpty) ...[
+                Tooltip(
+                  message: 'Conversar no WhatsApp',
+                  child: GestureDetector(
+                    onTap: onWhatsAppTap,
+                    behavior: HitTestBehavior.opaque,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: Container(
+                        width: 48.5,
+                        height: 48.5,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF25D366),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const WhatsAppIcon(size: 26),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+              ],
 
               if (showTrailingButton)
                 GestureDetector(

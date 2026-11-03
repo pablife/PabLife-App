@@ -5,6 +5,7 @@ import 'package:pablife/modules/profile/profile_controller.dart';
 import '../calendar/calendar_controller.dart';
 import '../calendar/controllers/calendar_switcher_controller.dart';
 import '../calendar/controllers/professional_calendar_controller.dart';
+import '../calendar/controllers/professional_wide_calendar_controller.dart';
 import '../home/controllers/professional_home_controller.dart';
 import '../home/controllers/user_home_controller.dart';
 import '../mentorias/mentorias_controller.dart';
@@ -25,6 +26,7 @@ final dashboardRoutes = [
         Get.put(UserHomeController());
         Get.lazyPut(() => CalendarController(), fenix: true);
         Get.lazyPut(() => ProfessionalCalendarController(), fenix: true);
+        Get.lazyPut(() => ProfessionalWideCalendarController(), fenix: true);
         Get.put(CalendarSwitcherController());
         Get.put(MentoriasController());
         Get.put(PatientsController());
