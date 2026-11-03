@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../widgets/design_system/app_image.dart';
+
 class RescheduleBottomSheetAvatarWidget extends StatelessWidget {
   final String? patientImageUrl;
 
@@ -7,31 +9,23 @@ class RescheduleBottomSheetAvatarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (patientImageUrl != null && patientImageUrl!.isNotEmpty) {
-      return Container(
+    // AppImage guarda a foto em cache e reduz para o tamanho mostrado.
+    return ClipOval(
+      child: AppImage(
+        imageUrl: patientImageUrl,
         width: 80,
         height: 80,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          image: DecorationImage(
-            image: NetworkImage(patientImageUrl!),
-            fit: BoxFit.cover,
+        fit: BoxFit.cover,
+        errorWidget: Container(
+          width: 80,
+          height: 80,
+          color: const Color(0xFF00343C).withAlpha(51),
+          child: Icon(
+            Icons.person,
+            size: 40,
+            color: const Color(0xFF00343C).withAlpha(128),
           ),
         ),
-      );
-    }
-
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: const Color(0xFF00343C).withAlpha(51),
-      ),
-      child: Icon(
-        Icons.person,
-        size: 40,
-        color: const Color(0xFF00343C).withAlpha(128),
       ),
     );
   }
