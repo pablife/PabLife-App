@@ -20,6 +20,7 @@ import '../home/controllers/user_home_controller.dart';
 import '../patients/patients_controller.dart';
 import 'record_editor/record_editor_arguments.dart';
 import 'record_editor/record_editor_page.dart';
+import 'widgets/cancelled_rescheduled_reason_dialog.dart';
 
 class AppointmentDetailsController extends GetxController
     with LoaderManagerMixin {
@@ -350,6 +351,47 @@ class AppointmentDetailsController extends GetxController
   bool get canShowNoShowButton {
     if (isPatient) return false;
     return appointment!.canMarkNoShow;
+  }
+
+  /// "Cancelada/remarcada": profissional, consulta agendada e não começada.
+  bool get canShowCancelledRescheduledButton {
+    if (isPatient) return false;
+    return appointment!.status == AppointmentStatus.scheduled &&
+        appointment!.startedAt == null;
+  }
+
+  Future<void> markCancelledRescheduled() async {
+    final reason = await CancelledRescheduledReasonDialog.show(
+      patientName: appointment!.patientName,
+    );
+    if (reason == null) return;
+
+    changeLoading(true);
+    try {
+      await appointmentRepository.markCancelledWithReason(
+        appointment!.id,
+        reason,
+      );
+
+      appointment = appointment!.copyWith(
+        status: AppointmentStatus.cancelled,
+        cancellationReason: reason,
+      );
+
+      AppSnackbar.to.show('Consulta marcada como cancelada/remarcada');
+
+      final patientsController = Get.isRegistered<PatientsController>()
+          ? Get.find<PatientsController>()
+          : null;
+      await patientsController?.loadAppointments();
+
+      _refreshHomeControllers();
+    } catch (e) {
+      AppSnackbar.to.show('Erro ao salvar. Tente novamente.');
+    } finally {
+      changeLoading(false);
+      update();
+    }
   }
 
   bool get canShowCompleteButton {

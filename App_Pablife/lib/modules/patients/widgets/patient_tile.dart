@@ -65,6 +65,7 @@ class PatientTile extends StatelessWidget {
         appointmentDateTime.difference(now).inHours >= 24;
 
     final isCancelled = patient.status == AppointmentStatus.cancelled;
+    final cancellationReason = patient.cancellationReason?.trim();
     final isNoShow = patient.status == AppointmentStatus.noShow;
     final isLateStatus = patient.isLate;
     final isInProgress =
@@ -125,7 +126,9 @@ class PatientTile extends StatelessWidget {
         statusLabel = 'Concluída';
         statusIcon = Icons.check_circle_outline;
       } else if (isCancelled) {
-        statusLabel = 'Cancelada';
+        statusLabel = (cancellationReason ?? '').isNotEmpty
+            ? 'Cancelada/remarcada'
+            : 'Cancelada';
         statusIcon = Icons.cancel_outlined;
       } else if (isNoShow) {
         statusLabel = 'Não compareceu';
@@ -161,6 +164,17 @@ class PatientTile extends StatelessWidget {
                 ),
               ],
             ),
+            if (isCancelled && (cancellationReason ?? '').isNotEmpty) ...[
+              const SizedBox(height: 4),
+              TextDefault(
+                'Justificativa: $cancellationReason',
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF00343C),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
             const SizedBox(height: 8),
           ],
           Row(

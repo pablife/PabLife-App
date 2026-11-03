@@ -15,14 +15,12 @@ class CalendarPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // No computador, profissional e usuário têm a agenda de semana/mês/ano.
+    // Usuário: a agenda nova (dia/semana/mês/ano) no computador e no celular.
+    // Profissional: a agenda nova só no computador.
     final isProfessional =
         AuthService.instance.currentUser?.role == UserRole.professional;
-    if (isWideLayout(context)) {
-      return isProfessional
-          ? const ProfessionalWideCalendarPage()
-          : const UserWideCalendarPage();
-    }
+    if (!isProfessional) return const UserWideCalendarPage();
+    if (isWideLayout(context)) return const ProfessionalWideCalendarPage();
 
     return GetBuilder<CalendarSwitcherController>(
       builder: (controller) {
