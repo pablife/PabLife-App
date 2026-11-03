@@ -61,6 +61,7 @@ class _ProfessionalHomeAppointmentCarouselWidgetState
             totalPages: appointments.length,
             filledHour: true,
             showStatusIndicator: true,
+            onWhatsAppTap: () => _openWhatsApp(appointment),
             onTrailingTap: (!appointment.isOngoing && !appointment.isCompleted)
                 ? () => _onRescheduleTapped(context, appointment)
                 : null,
