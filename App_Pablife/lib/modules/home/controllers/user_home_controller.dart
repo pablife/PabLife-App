@@ -270,14 +270,35 @@ class UserHomeController extends GetxController with LoaderManagerMixin {
         duration = 'Sem prazo';
       }
 
+      // Meta diária: o banco manda a % de dias cumpridos; aqui vira
+      // "X de Y dias", usando a data de criação da meta.
+      int? doneDays;
+      int? totalDays;
+      final activity = _allActivities.firstWhereOrNull(
+        (a) => a.id == goal.goalId,
+      );
+      if (activity != null) {
+        final created = activity.createdAt.toLocal();
+        final start = DateTime(created.year, created.month, created.day);
+        final due = goal.dueAt?.toLocal();
+        final end = due == null
+            ? start
+            : DateTime(due.year, due.month, due.day);
+        totalDays = end.difference(start).inDays + 1;
+        if (totalDays < 1) totalDays = 1;
+        doneDays = (percentage * totalDays / 100).round();
+      }
+
       return GoalViewModel(
         title: goal.name,
         description:
             goal.description ??
-            '${percentage.toStringAsFixed(1)}% do prazo decorrido',
+            '${percentage.toStringAsFixed(0)}% dos dias cumpridos',
         duration: duration,
         tag: 'Meta em andamento:',
         percentage: percentage,
+        doneDays: doneDays,
+        totalDays: totalDays,
       );
     }).toList();
   }

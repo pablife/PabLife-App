@@ -34,13 +34,19 @@ class ProfessionalWideCalendarPage extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        _Header(controller: controller),
+                        WideAgendaHeader(
+                          title: controller.title,
+                          isLoading: controller.isLoading,
+                          view: controller.view,
+                          onToday: controller.goToday,
+                          onMove: controller.move,
+                          onViewChanged: controller.setView,
+                        ),
                         const SizedBox(height: 12),
                         Expanded(
                           child: switch (controller.view) {
-                            WideAgendaView.week => WideWeekView(
-                              controller: controller,
-                            ),
+                            WideAgendaView.day || WideAgendaView.week =>
+                              WideWeekView(controller: controller),
                             WideAgendaView.month => WideMonthView(
                               controller: controller,
                             ),
@@ -58,89 +64,6 @@ class ProfessionalWideCalendarPage extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final ProfessionalWideCalendarController controller;
-
-  const _Header({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        OutlinedButton(
-          onPressed: controller.goToday,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: WideAgendaColors.text,
-            side: const BorderSide(color: WideAgendaColors.text),
-            shape: const StadiumBorder(),
-          ),
-          child: const Text('Hoje'),
-        ),
-        const SizedBox(width: 8),
-        IconButton(
-          tooltip: 'Anterior',
-          onPressed: () => controller.move(-1),
-          icon: const Icon(Icons.chevron_left, color: WideAgendaColors.text),
-        ),
-        IconButton(
-          tooltip: 'Próximo',
-          onPressed: () => controller.move(1),
-          icon: const Icon(Icons.chevron_right, color: WideAgendaColors.text),
-        ),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(
-            controller.title,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w500,
-              color: WideAgendaColors.text,
-            ),
-          ),
-        ),
-        if (controller.isLoading) ...[
-          const SizedBox(width: 12),
-          const SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: WideAgendaColors.text,
-            ),
-          ),
-        ],
-        const Spacer(),
-        SegmentedButton<WideAgendaView>(
-          showSelectedIcon: false,
-          segments: const [
-            ButtonSegment(value: WideAgendaView.week, label: Text('Semana')),
-            ButtonSegment(value: WideAgendaView.month, label: Text('Mês')),
-            ButtonSegment(value: WideAgendaView.year, label: Text('Ano')),
-          ],
-          selected: {controller.view},
-          onSelectionChanged: (s) => controller.setView(s.first),
-          style: ButtonStyle(
-            foregroundColor: WidgetStateProperty.resolveWith(
-              (states) => states.contains(WidgetState.selected)
-                  ? WideAgendaColors.panel
-                  : WideAgendaColors.text,
-            ),
-            backgroundColor: WidgetStateProperty.resolveWith(
-              (states) => states.contains(WidgetState.selected)
-                  ? WideAgendaColors.text
-                  : Colors.transparent,
-            ),
-            side: const WidgetStatePropertyAll(
-              BorderSide(color: WideAgendaColors.text),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -195,14 +118,14 @@ class _SideColumn extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                _FilterRow(
+                WideFilterRow(
                   label: 'Consultas',
                   color: WideAgendaColors.appointment,
                   value: controller.showAppointments,
                   count: controller.appointmentCount,
                   onChanged: controller.toggleAppointments,
                 ),
-                _FilterRow(
+                WideFilterRow(
                   label: 'Horários livres',
                   color: WideAgendaColors.free,
                   value: controller.showFree,
@@ -238,58 +161,6 @@ class _SideColumn extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: child,
-    );
-  }
-}
-
-class _FilterRow extends StatelessWidget {
-  final String label;
-  final Color color;
-  final bool value;
-  final int count;
-  final ValueChanged<bool> onChanged;
-
-  const _FilterRow({
-    required this.label,
-    required this.color,
-    required this.value,
-    required this.count,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => onChanged(!value),
-      borderRadius: BorderRadius.circular(8),
-      child: Row(
-        children: [
-          Checkbox(
-            value: value,
-            onChanged: (v) => onChanged(v ?? false),
-            activeColor: color,
-            side: BorderSide(color: color, width: 2),
-          ),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                color: WideAgendaColors.text,
-              ),
-            ),
-          ),
-          Text(
-            '$count',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: WideAgendaColors.text,
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
     );
   }
 }

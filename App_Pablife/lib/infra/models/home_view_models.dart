@@ -7,12 +7,19 @@ class GoalViewModel {
   final String tag;
   final double? percentage;
 
+  /// Meta diária: dias marcados e total de dias da meta (da criação ao
+  /// prazo). Nulos quando não dá para calcular.
+  final int? doneDays;
+  final int? totalDays;
+
   GoalViewModel({
     required this.title,
     required this.description,
     required this.duration,
     required this.tag,
     this.percentage,
+    this.doneDays,
+    this.totalDays,
   });
 }
 

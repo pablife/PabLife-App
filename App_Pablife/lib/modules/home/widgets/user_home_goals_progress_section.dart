@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -5,6 +7,7 @@ import '../../../infra/models/activity_model.dart';
 import '../../../infra/repositories/activity_repository.dart';
 import '../../../infra/services/auth_service.dart';
 import '../../dashboard/widgets/goal_progress_card.dart';
+import '../controllers/user_home_controller.dart';
 
 class UserHomeGoalsProgressSection extends StatefulWidget {
   const UserHomeGoalsProgressSection({super.key});
@@ -20,8 +23,16 @@ class _UserHomeGoalsProgressSectionState
   final AuthService _authService = AuthService.instance;
 
   List<ActivityModel> _allGoals = [];
+
+  /// Dias marcados de cada meta (meta diária).
+  Map<String, int> _checkedDays = {};
   bool _isLoading = true;
   bool _isExpanded = false;
+
+  /// Recarrega junto com o Dashboard (por exemplo, depois de marcar a meta
+  /// na agenda). O atraso junta várias atualizações seguidas numa só busca.
+  UserHomeController? _home;
+  Timer? _reloadDebounce;
 
   final List<Color> _goalColors = [
     const Color(0xFFA8D5A3),
@@ -36,30 +47,54 @@ class _UserHomeGoalsProgressSectionState
   void initState() {
     super.initState();
     _loadGoals();
+    if (Get.isRegistered<UserHomeController>()) {
+      _home = Get.find<UserHomeController>()..addListener(_onHomeUpdated);
+    }
   }
 
-  Future<void> _loadGoals() async {
-    setState(() => _isLoading = true);
+  @override
+  void dispose() {
+    _home?.removeListener(_onHomeUpdated);
+    _reloadDebounce?.cancel();
+    super.dispose();
+  }
+
+  void _onHomeUpdated() {
+    _reloadDebounce?.cancel();
+    _reloadDebounce = Timer(const Duration(milliseconds: 600), () {
+      if (mounted) _loadGoals(silent: true);
+    });
+  }
+
+  Future<void> _loadGoals({bool silent = false}) async {
+    if (!silent) setState(() => _isLoading = true);
     try {
       final userId = _authService.currentUser?.id;
       if (userId == null) return;
 
       final response = await _repository.getAllGoals(userId: userId);
       if (response.success && response.data != null) {
+        final goals = response.data!;
+        final checked = await _repository.getCheckedDaysCount(
+          goals.map((g) => g.id).toList(),
+        );
+        if (!mounted) return;
         setState(() {
-          _allGoals = response.data!;
+          _checkedDays = checked.success ? checked.data ?? {} : {};
+          _allGoals = goals;
 
+          // Metas com todos os dias cumpridos vão para o fim.
           _allGoals.sort((a, b) {
-            if (a.isCompleted != b.isCompleted) {
-              return a.isCompleted ? 1 : -1;
-            }
+            final aDone = _calculateProgress(a)['isComplete'] as bool;
+            final bDone = _calculateProgress(b)['isComplete'] as bool;
+            if (aDone != bDone) return aDone ? 1 : -1;
 
             return b.createdAt.compareTo(a.createdAt);
           });
         });
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -67,47 +102,28 @@ class _UserHomeGoalsProgressSectionState
     return _goalColors[index % _goalColors.length];
   }
 
+  /// Meta diária: progresso = dias marcados ÷ dias da meta (da criação ao
+  /// prazo, contando os dois; sem prazo, só o dia da criação), como no
+  /// planner e no card de metas do Dashboard.
   Map<String, dynamic> _calculateProgress(ActivityModel goal) {
-    if (goal.dueAt == null) {
-      return {
-        'daysCompleted': 0,
-        'totalDays': 0,
-        'percentage': 0,
-        'isExpired': false,
-      };
+    DateTime dateOnly(DateTime d) {
+      final local = d.toLocal();
+      return DateTime(local.year, local.month, local.day);
     }
 
-    final now = DateTime.now();
-    final startDate = goal.createdAt;
-    final endDate = goal.dueAt!;
-
-    final isExpired = !goal.isCompleted && now.isAfter(endDate);
-
-    final totalDays = endDate.difference(startDate).inDays;
-
-    final daysPassed = now.difference(startDate).inDays;
-
-    int daysCompleted;
-    if (goal.isCompleted && goal.completedAt != null) {
-      daysCompleted = goal.completedAt!.difference(startDate).inDays;
-    } else {
-      daysCompleted = daysPassed.clamp(0, totalDays);
-    }
-
-    int percentage;
-    if (goal.isCompleted) {
-      percentage = 100;
-    } else {
-      percentage = totalDays > 0
-          ? ((daysCompleted / totalDays) * 100).round()
-          : 0;
-    }
+    final start = dateOnly(goal.createdAt);
+    final end = goal.dueAt == null ? start : dateOnly(goal.dueAt!);
+    final totalDays = (end.difference(start).inDays + 1).clamp(1, 100000);
+    final daysCompleted = (_checkedDays[goal.id] ?? 0).clamp(0, totalDays);
+    final isComplete = daysCompleted >= totalDays;
+    final isExpired = !isComplete && dateOnly(DateTime.now()).isAfter(end);
 
     return {
       'daysCompleted': daysCompleted,
       'totalDays': totalDays,
-      'percentage': percentage.clamp(0, 100),
+      'percentage': ((daysCompleted / totalDays) * 100).round().clamp(0, 100),
       'isExpired': isExpired,
+      'isComplete': isComplete,
     };
   }
 
@@ -151,7 +167,8 @@ class _UserHomeGoalsProgressSectionState
                     totalDays: progressData['totalDays'],
                     percentage: progressData['percentage'],
                     color: color,
-                    isCompleted: goal.isCompleted,
+                    isCompleted: progressData['isComplete'],
+                    progressLabel: 'Dias cumpridos',
                     isExpired: progressData['isExpired'],
                     onTap: () async {
                       final result = await Get.toNamed(

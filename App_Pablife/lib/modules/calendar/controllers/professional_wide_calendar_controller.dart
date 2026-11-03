@@ -10,7 +10,7 @@ import '../../appointment_details/appointment_details_routes.dart';
 import '../repositories/calendar_repository.dart';
 import 'professional_calendar_controller.dart';
 
-enum WideAgendaView { week, month, year }
+enum WideAgendaView { day, week, month, year }
 
 /// Agenda do profissional no computador (semana, mês e ano, no estilo do
 /// Google Agenda). Criar e remover horários reaproveita o
@@ -69,6 +69,8 @@ class ProfessionalWideCalendarController extends GetxController
   /// Primeiro dia mostrado (inclusive).
   DateTime get rangeStart {
     switch (view) {
+      case WideAgendaView.day:
+        return focusDate;
       case WideAgendaView.week:
         return weekStart(focusDate);
       case WideAgendaView.month:
@@ -81,6 +83,8 @@ class ProfessionalWideCalendarController extends GetxController
   /// Dia seguinte ao último mostrado (exclusive).
   DateTime get rangeEnd {
     switch (view) {
+      case WideAgendaView.day:
+        return rangeStart.add(const Duration(days: 1));
       case WideAgendaView.week:
         return rangeStart.add(const Duration(days: 7));
       case WideAgendaView.month:
@@ -90,17 +94,35 @@ class ProfessionalWideCalendarController extends GetxController
     }
   }
 
+  static const _weekdayNames = [
+    'Domingo',
+    'Segunda-feira',
+    'Terça-feira',
+    'Quarta-feira',
+    'Quinta-feira',
+    'Sexta-feira',
+    'Sábado',
+  ];
+
+  /// Título da visão Dia, ex.: "Terça-feira, 3 de Novembro de 2026".
+  static String dayTitle(DateTime day) =>
+      '${_weekdayNames[day.weekday % 7]}, ${day.day} de '
+      '${monthNames[day.month - 1]} de ${day.year}';
+
   /// A semana começa no domingo, como no Google Agenda.
   static DateTime weekStart(DateTime day) =>
       _dateOnly(day).subtract(Duration(days: day.weekday % 7));
 
+  /// Dias mostrados na grade de horas: só o dia (visão Dia) ou a semana.
   List<DateTime> get weekDays => List.generate(
-    7,
+    view == WideAgendaView.day ? 1 : 7,
     (i) => DateTime(rangeStart.year, rangeStart.month, rangeStart.day + i),
   );
 
   String get title {
     switch (view) {
+      case WideAgendaView.day:
+        return ProfessionalWideCalendarController.dayTitle(focusDate);
       case WideAgendaView.week:
         final start = rangeStart;
         final end = start.add(const Duration(days: 6));
@@ -231,14 +253,18 @@ class ProfessionalWideCalendarController extends GetxController
     load();
   }
 
+  /// "Hoje" abre só o dia de hoje (visão Dia), como no Google Agenda.
   void goToday() {
     focusDate = _dateOnly(DateTime.now());
+    view = WideAgendaView.day;
     update();
     load();
   }
 
   void move(int direction) {
     switch (view) {
+      case WideAgendaView.day:
+        focusDate = focusDate.add(Duration(days: direction));
       case WideAgendaView.week:
         focusDate = focusDate.add(Duration(days: 7 * direction));
       case WideAgendaView.month:
@@ -253,7 +279,7 @@ class ProfessionalWideCalendarController extends GetxController
   /// Clique num dia (minicalendário, mês ou ano): abre a semana desse dia.
   void openDay(DateTime day) {
     focusDate = _dateOnly(day);
-    view = WideAgendaView.week;
+    view = WideAgendaView.day;
     update();
     load();
   }

@@ -12,6 +12,10 @@ class GoalProgressCard extends StatelessWidget {
   final bool isExpired;
   final VoidCallback? onTap;
 
+  /// Texto antes de "(feitos/total)". O Dashboard do usuário usa
+  /// "Dias cumpridos" (meta diária).
+  final String progressLabel;
+
   const GoalProgressCard({
     super.key,
     required this.goalName,
@@ -22,6 +26,7 @@ class GoalProgressCard extends StatelessWidget {
     this.isCompleted = false,
     this.isExpired = false,
     this.onTap,
+    this.progressLabel = 'Dias decorridos',
   });
 
   @override
@@ -84,8 +89,8 @@ class GoalProgressCard extends StatelessWidget {
                               isCompleted
                                   ? 'Concluído em ($daysCompleted) dias'
                                   : isExpired
-                                  ? 'Dias decorridos ($daysCompleted/$totalDays) (Prazo expirado)'
-                                  : 'Dias decorridos ($daysCompleted/$totalDays)',
+                                  ? '$progressLabel ($daysCompleted/$totalDays) (Prazo expirado)'
+                                  : '$progressLabel ($daysCompleted/$totalDays)',
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: Colors.white.withValues(alpha: 0.9),

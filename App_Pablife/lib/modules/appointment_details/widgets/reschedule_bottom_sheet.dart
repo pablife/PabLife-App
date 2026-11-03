@@ -7,6 +7,9 @@ import '../../../infra/models/professional_appointment_model.dart';
 import '../../../widgets/design_system/text_default.dart';
 import 'reschedule_bottom_sheet_avatar_widget.dart';
 import 'reschedule_time_picker_page.dart';
+import '../../../infra/repositories/appointment_repository.dart';
+import '../../../shared/utils/app_snackbar.dart';
+import '../../calendar/widgets/interactive_calendar_base.dart';
 
 class RescheduleBottomSheet extends StatefulWidget {
   final ProfessionalAppointmentModel appointment;
@@ -30,26 +33,33 @@ class RescheduleBottomSheet extends StatefulWidget {
 }
 
 class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
-  String? newAppointmentTimeId;
+  bool _saving = false;
 
+  /// Escolhe o novo horário e grava a troca (antes só fechava a janela com
+  /// "reagendada", sem salvar nada).
   Future<void> _onReschedulePressed() async {
-    final result = await Get.to<String>(
+    if (_saving) return;
+    final slot = await Get.to<CalendarSlotData>(
       () => RescheduleTimePickerPage(
         professionalId: widget.appointment.professionalId,
       ),
     );
+    if (slot == null || !mounted) return;
 
-    if (result != null) {
-      setState(() {
-        newAppointmentTimeId = result;
-      });
-    }
-  }
+    setState(() => _saving = true);
+    final response = await AppointmentRepository().rescheduleAppointment(
+      appointmentId: widget.appointment.id,
+      newAppointmentTimeId: slot.id,
+      newSlotStartAt: slot.startAt,
+    );
+    if (!mounted) return;
+    setState(() => _saving = false);
 
-  void _onConfirmPressed() {
-    if (newAppointmentTimeId != null) {
-      Navigator.of(context).pop('confirmed');
+    if (!response.success) {
+      AppSnackbar.to.show(response.message);
+      return;
     }
+    Navigator.of(context).pop('confirmed');
   }
 
   @override
@@ -62,12 +72,6 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
     );
     final timeLabel = DateFormat('HH:mm').format(startAt);
     final dateLabel = DateFormat('dd/MM/yyyy').format(startAt);
-
-    if (newAppointmentTimeId != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _onConfirmPressed();
-      });
-    }
 
     return Container(
       decoration: const BoxDecoration(

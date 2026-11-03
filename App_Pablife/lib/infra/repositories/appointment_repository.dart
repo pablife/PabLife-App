@@ -545,6 +545,32 @@ class AppointmentRepository extends StrautilsTryThis {
         .eq('id', appointmentId);
   }
 
+  /// Troca o horário da consulta (função reschedule_appointment do banco).
+  /// É a mesma consulta, então não gasta outra consulta do plano.
+  FStrautilsResponse<bool> rescheduleAppointment({
+    required String appointmentId,
+    required String newAppointmentTimeId,
+    required DateTime newSlotStartAt,
+  }) {
+    return tryThis(() async {
+      try {
+        await _client.rpc(
+          'reschedule_appointment',
+          params: {
+            'p_appointment_id': appointmentId,
+            'p_new_appointment_time_id': newAppointmentTimeId,
+            'p_new_slot_date': DateFormat(
+              'yyyy-MM-dd',
+            ).format(newSlotStartAt.toLocal()),
+          },
+        );
+      } on PostgrestException catch (e) {
+        return StrautilsResponse.error(e.message);
+      }
+      return StrautilsResponse.success(true);
+    }, action: 'remarcar consulta.');
+  }
+
   Future<void> cancelAppointment(String appointmentId) async {
     await _client
         .from('tb_appointments')
