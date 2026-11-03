@@ -62,16 +62,19 @@ class AppointmentRepository extends StrautilsTryThis {
           .eq('professional_id', professionalId)
           .isFilter('deleted_at', null);
 
+      // Filtra pelo início da consulta, que sempre existe. O due_at do
+      // horário fica vazio nos horários que se repetem toda semana, e
+      // filtrar por ele escondia essas consultas.
       if (startAt != null) {
         query = query.gte(
-          'appointment_time.due_at',
+          'start_of_scheduled_window',
           startAt.toUtc().toIso8601String(),
         );
       }
 
       if (endAt != null) {
         query = query.lt(
-          'appointment_time.due_at',
+          'start_of_scheduled_window',
           endAt.toUtc().toIso8601String(),
         );
       }
@@ -383,16 +386,19 @@ class AppointmentRepository extends StrautilsTryThis {
           .eq('scheduled_by', patientId)
           .isFilter('deleted_at', null);
 
+      // Filtra pelo início da consulta, que sempre existe. O due_at do
+      // horário fica vazio nos horários que se repetem toda semana, e
+      // filtrar por ele escondia essas consultas.
       if (startAt != null) {
         query = query.gte(
-          'appointment_time.due_at',
+          'start_of_scheduled_window',
           startAt.toUtc().toIso8601String(),
         );
       }
 
       if (endAt != null) {
         query = query.lt(
-          'appointment_time.due_at',
+          'start_of_scheduled_window',
           endAt.toUtc().toIso8601String(),
         );
       }
