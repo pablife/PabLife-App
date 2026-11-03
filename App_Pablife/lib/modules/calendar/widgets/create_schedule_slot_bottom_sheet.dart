@@ -8,18 +8,29 @@ import '../../../widgets/design_system/text_default.dart';
 class CreateScheduleSlotBottomSheet extends StatefulWidget {
   final String professionalId;
 
+  /// Dia e hora já escolhidos ao abrir (por exemplo, ao clicar num espaço
+  /// vazio da agenda do computador).
+  final DateTime? initialDateTime;
+
   const CreateScheduleSlotBottomSheet({
     super.key,
     required this.professionalId,
+    this.initialDateTime,
   });
 
-  static Future<T?> show<T>(BuildContext context, String professionalId) {
+  static Future<T?> show<T>(
+    BuildContext context,
+    String professionalId, {
+    DateTime? initialDateTime,
+  }) {
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) =>
-          CreateScheduleSlotBottomSheet(professionalId: professionalId),
+      builder: (_) => CreateScheduleSlotBottomSheet(
+        professionalId: professionalId,
+        initialDateTime: initialDateTime,
+      ),
     );
   }
 
@@ -41,6 +52,11 @@ class _CreateScheduleSlotBottomSheetState
   @override
   void initState() {
     super.initState();
+    final initial = widget.initialDateTime;
+    if (initial != null) {
+      selectedDate = DateTime(initial.year, initial.month, initial.day);
+      selectedTime = TimeOfDay(hour: initial.hour, minute: initial.minute);
+    }
     _loadAvailableSlots();
   }
 

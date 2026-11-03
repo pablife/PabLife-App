@@ -4,6 +4,7 @@ import 'calendar_page.dart';
 import 'calendar_controller.dart';
 import 'controllers/calendar_switcher_controller.dart';
 import 'controllers/professional_calendar_controller.dart';
+import 'controllers/professional_wide_calendar_controller.dart';
 import 'controllers/interactive_calendar_controller.dart';
 import 'controllers/selected_day_controller.dart';
 import 'controllers/professional_selected_day_controller.dart';
@@ -33,6 +34,9 @@ final calendarRoutes = [
         }
         if (!Get.isRegistered<ProfessionalCalendarController>()) {
           Get.lazyPut(() => ProfessionalCalendarController(), fenix: true);
+        }
+        if (!Get.isRegistered<ProfessionalWideCalendarController>()) {
+          Get.lazyPut(() => ProfessionalWideCalendarController(), fenix: true);
         }
         if (!Get.isRegistered<InteractiveCalendarController>()) {
           Get.lazyPut(() => InteractiveCalendarController(), fenix: true);

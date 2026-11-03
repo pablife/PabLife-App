@@ -213,7 +213,7 @@ class PatientsController extends GetxController with LoaderManagerMixin {
 
     switch (result) {
       case 'message':
-        await _openWhatsApp(appointment);
+        await openWhatsApp(appointment);
         break;
       case 'confirmed':
         AppSnackbar.to.show('Consulta reagendada com sucesso!');
@@ -226,7 +226,9 @@ class PatientsController extends GetxController with LoaderManagerMixin {
     }
   }
 
-  Future<void> _openWhatsApp(ProfessionalAppointmentModel appointment) async {
+  /// Abre a conversa com o paciente no WhatsApp (ícone no card e opção
+  /// "mensagem" da remarcação).
+  Future<void> openWhatsApp(ProfessionalAppointmentModel appointment) async {
     final rawPhone = appointment.patientPhone;
     if (rawPhone == null || rawPhone.trim().isEmpty) {
       AppSnackbar.to.show('Paciente não possui telefone cadastrado.');

@@ -11,6 +11,7 @@ class PatientsListWidget extends StatelessWidget {
   final void Function(String) onCancelAppointment;
   final void Function(ProfessionalAppointmentModel)? onPatientTap;
   final void Function(ProfessionalAppointmentModel)? onReschedule;
+  final void Function(ProfessionalAppointmentModel)? onWhatsApp;
 
   const PatientsListWidget({
     super.key,
@@ -20,6 +21,7 @@ class PatientsListWidget extends StatelessWidget {
     required this.onCancelAppointment,
     this.onPatientTap,
     this.onReschedule,
+    this.onWhatsApp,
   });
 
   @override
@@ -60,6 +62,9 @@ class PatientsListWidget extends StatelessWidget {
                 ? (onReschedule != null ? () => onReschedule!(patient) : null)
                 : null,
             showStatusIndicator: true,
+            onWhatsAppTap: onWhatsApp != null
+                ? () => onWhatsApp!(patient)
+                : null,
           ),
         );
       },

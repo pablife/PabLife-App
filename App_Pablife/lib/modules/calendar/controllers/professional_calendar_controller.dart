@@ -272,20 +272,25 @@ class ProfessionalCalendarController extends GetxController
     return hour;
   }
 
-  Future<void> openCreateScheduleSlotBottomSheet() async {
+  /// Abre a janela de novo horário. Devolve true se um horário foi criado
+  /// (a agenda do computador usa isso para recarregar a semana/mês).
+  Future<bool> openCreateScheduleSlotBottomSheet({
+    DateTime? initialDateTime,
+  }) async {
     final professionalId = _professionalId;
     if (professionalId == null) {
       AppSnackbar.to.show('Profissional não encontrado');
-      return;
+      return false;
     }
 
     final result = await CreateScheduleSlotBottomSheet.show<dynamic>(
       Get.context!,
       professionalId,
+      initialDateTime: initialDateTime,
     );
 
     if (result == null || result == 'cancelled') {
-      return;
+      return false;
     }
 
     if (result is Map<String, dynamic>) {
@@ -293,16 +298,17 @@ class ProfessionalCalendarController extends GetxController
       final isRecurring = result['isRecurring'] as bool? ?? false;
 
       if (dateTime != null) {
-        await _createScheduleSlot(dateTime, isRecurring);
+        return _createScheduleSlot(dateTime, isRecurring);
       }
     }
+    return false;
   }
 
-  Future<void> _createScheduleSlot(DateTime startAt, bool isRecurring) async {
+  Future<bool> _createScheduleSlot(DateTime startAt, bool isRecurring) async {
     final professionalId = _professionalId;
     if (professionalId == null) {
       AppSnackbar.to.show('Profissional não encontrado');
-      return;
+      return false;
     }
 
     debugPrint('📅 [ProfessionalCalendar] Criando horário: $startAt');
@@ -319,16 +325,16 @@ class ProfessionalCalendarController extends GetxController
       if (isRecurring) {
         final response = await _professionalRepository
             .createRecurringScheduleSlot(
-          professionalId: professionalId,
-          startAt: startAt,
-          duration: const Duration(hours: 1),
-        );
+              professionalId: professionalId,
+              startAt: startAt,
+              duration: const Duration(hours: 1),
+            );
 
         if (response.success) {
           AppSnackbar.to.show('Horário recorrente criado com sucesso!');
         } else {
           AppSnackbar.to.show(response.message);
-          return;
+          return false;
         }
       } else {
         final response = await _professionalRepository.createScheduleSlot(
@@ -342,7 +348,7 @@ class ProfessionalCalendarController extends GetxController
           AppSnackbar.to.show('Horário criado com sucesso!');
         } else {
           AppSnackbar.to.show(response.message);
-          return;
+          return false;
         }
       }
 
@@ -376,14 +382,16 @@ class ProfessionalCalendarController extends GetxController
         _setScrollToHour(startAt.toLocal().hour);
       }
       await _refreshInteractiveCalendarIfSameMonth(createdDateLocal);
+      return true;
     } finally {
       changeLoading(false);
     }
   }
 
-  Future<void> promptRemoveSlot(ProfessionalScheduleSlot slot) async {
+  /// Pergunta e remove um horário livre. Devolve true se removeu.
+  Future<bool> promptRemoveSlot(ProfessionalScheduleSlot slot) async {
     if (slot.hasAppointment) {
-      return;
+      return false;
     }
 
     final isRecurring = slot.isRecurring;
@@ -454,7 +462,7 @@ class ProfessionalCalendarController extends GetxController
     );
 
     if (result == null) {
-      return;
+      return false;
     }
 
     changeLoading(true);
@@ -474,9 +482,11 @@ class ProfessionalCalendarController extends GetxController
         AppSnackbar.to.show('Horário removido com sucesso!');
         await loadDailySchedule();
         await _refreshInteractiveCalendarIfSameMonth(slot.startAt.toLocal());
+        return true;
       } else {
         AppSnackbar.to.show(response.message);
       }
+      return false;
     } finally {
       changeLoading(false);
     }

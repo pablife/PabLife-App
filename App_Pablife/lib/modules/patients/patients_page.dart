@@ -53,6 +53,7 @@ class PatientsPage extends StatelessWidget {
                           onCancelAppointment: controller.cancelAppointment,
                           onPatientTap: controller.navigateToAppointmentDetails,
                           onReschedule: controller.onReschedule,
+                          onWhatsApp: controller.openWhatsApp,
                         ),
                       ),
                     ],
