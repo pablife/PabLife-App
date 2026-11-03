@@ -100,12 +100,16 @@ class _PhoneCalendar extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: WideAgendaColors.background,
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Criar',
-        backgroundColor: WideAgendaColors.appointment,
-        foregroundColor: Colors.white,
-        onPressed: () => _showCreateSheet(context),
-        child: const Icon(Icons.add),
+      // Mais alto que o normal para não ficar em cima da barra de baixo.
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 90),
+        child: FloatingActionButton(
+          tooltip: 'Criar',
+          backgroundColor: WideAgendaColors.appointment,
+          foregroundColor: Colors.white,
+          onPressed: () => _showCreateSheet(context),
+          child: const Icon(Icons.add),
+        ),
       ),
       body: SafeArea(
         bottom: false,
