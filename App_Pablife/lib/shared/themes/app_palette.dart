@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,8 +27,28 @@ abstract final class AppPalette {
     );
     Get.changeTheme(appTheme(rose ? _roseSeed : _normalSeed));
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      resetCachedDecorations();
       WidgetsBinding.instance.reassembleApplication();
     });
+  }
+
+  /// O Flutter guarda a tinta do fundo de cada caixa. Como as cores são
+  /// constantes, a caixa não percebe a troca de paleta e seguiria com a cor
+  /// antiga: trocar a decoração descarta essa tinta guardada.
+  @visibleForTesting
+  static void resetCachedDecorations() {
+    void visit(Element element) {
+      final renderObject = element.renderObject;
+      if (element is RenderObjectElement &&
+          renderObject is RenderDecoratedBox) {
+        final decoration = renderObject.decoration;
+        renderObject.decoration = const BoxDecoration();
+        renderObject.decoration = decoration;
+      }
+      element.visitChildren(visit);
+    }
+
+    WidgetsBinding.instance.rootElement?.visitChildren(visit);
   }
 
   static const _normalSeed = Color(0xFF00343D);
