@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
+import 'modules/auth/pages/choose_profile_page.dart';
+import 'modules/auth/pages/email_input_page.dart';
 import 'modules/dashboard/dashboard_page.dart';
+import 'modules/onboarding/onboarding_page.dart';
 import 'shared/utils/wide_layout.dart';
 import 'modules/splash/splash_routes.dart';
 import 'modules/auth/auth_routes.dart';
@@ -17,11 +20,20 @@ import 'modules/appointment_details/appointment_details_routes.dart';
 class AppRoutes {
   AppRoutes._();
 
+  /// Telas que ocupam a largura toda no computador: o Dashboard (menu lateral)
+  /// e as telas de entrada, com fundo de ponta a ponta.
+  static const _fullWidthRoutes = {
+    DashboardPage.route,
+    OnboardingPage.route,
+    ChooseProfilePage.route,
+    EmailInputPage.route,
+  };
+
   /// No computador, as telas desenhadas para celular abrem numa coluna
-  /// centralizada; só o Dashboard ocupa a largura toda (menu lateral).
+  /// centralizada.
   static List<GetPage> pages = _allPages
       .map(
-        (page) => page.name == DashboardPage.route
+        (page) => _fullWidthRoutes.contains(page.name)
             ? page
             : page.copy(
                 page: () => WideCenter(maxWidth: 760, child: page.page()),

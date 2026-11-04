@@ -1,3 +1,4 @@
+import 'package:pablife/modules/onboarding/onboarding_page.dart';
 import 'package:pablife/modules/auth/pages/choose_profile_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -77,10 +78,10 @@ class SplashController extends GetxController with LoaderManagerMixin {
 
         Get.offAllNamed(DashboardPage.route);
       } else {
-        Get.offAllNamed(ChooseProfilePage.route);
+        Get.offAllNamed(OnboardingPage.route);
       }
     } else {
-      Get.offAllNamed(ChooseProfilePage.route);
+      Get.offAllNamed(OnboardingPage.route);
     }
 
     changeLoading(false);
