@@ -1,6 +1,5 @@
 import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
-import 'package:fui_kit/fui_kit.dart';
 import 'package:get/get.dart';
 
 import '../../infra/services/notification_service.dart';
@@ -25,9 +24,9 @@ class NotificationButtonWidget extends StatelessWidget {
           children: [
             AppOutlinedButton(
               onPressed: () => Get.toNamed(NotificationsPage.route),
-              child: FUI(
-                RegularRounded.BELL,
-                width: 21,
+              child: const Icon(
+                Icons.notifications_none,
+                size: 21,
                 color: AppColors.white,
               ),
             ),

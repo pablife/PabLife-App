@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -224,89 +222,86 @@ class _ChooseProfilePageState extends State<ChooseProfilePage> {
   Widget _card(String label) {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 560),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-          child: Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .55),
-              border: Border.all(color: Colors.white.withValues(alpha: .85)),
-              borderRadius: BorderRadius.circular(32),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AuthEntrance(
-                  delay: 180,
-                  child: Text(
-                    _beforeLogin ? 'Você é?' : 'Como você quer entrar?',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 38,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -.9,
-                      color: OnboardingColors.text,
-                    ),
+      child: RepaintBoundary(
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            // Sem desfoque: recalculá-lo a cada quadro deixa a tela lenta.
+            color: Colors.white.withValues(alpha: .78),
+            border: Border.all(color: Colors.white.withValues(alpha: .85)),
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AuthEntrance(
+                delay: 180,
+                child: Text(
+                  _beforeLogin ? 'Você é?' : 'Como você quer entrar?',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 38,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -.9,
+                    color: OnboardingColors.text,
                   ),
                 ),
-                const SizedBox(height: 14),
-                AuthEntrance(
-                  delay: 180,
-                  child: Text(
-                    _beforeLogin
-                        ? 'Escolha para ir direto à sua área.'
-                        : 'Você pode trocar depois, no seu Perfil.',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      color: OnboardingColors.body,
-                    ),
+              ),
+              const SizedBox(height: 14),
+              AuthEntrance(
+                delay: 180,
+                child: Text(
+                  _beforeLogin
+                      ? 'Escolha para ir direto à sua área.'
+                      : 'Você pode trocar depois, no seu Perfil.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    color: OnboardingColors.body,
                   ),
                 ),
-                const SizedBox(height: 24),
-                AuthEntrance(
-                  delay: 300,
-                  child: _Option(
-                    icon: Icons.medical_services_outlined,
-                    iconColor: const AppColor.pair(0xFF0E7F7B, 0xFF7A5FB8),
-                    iconBackground: const AppColor.pair(0xFFDDF5F3, 0xFFF1E7EE),
-                    title: 'Profissional',
-                    subtitle: 'Sua agenda, pacientes e atendimentos',
-                    selected: _choice == 'professional',
-                    onTap: () => setState(() => _choice = 'professional'),
-                  ),
+              ),
+              const SizedBox(height: 24),
+              AuthEntrance(
+                delay: 300,
+                child: _Option(
+                  icon: Icons.medical_services_outlined,
+                  iconColor: const AppColor.pair(0xFF0E7F7B, 0xFF7A5FB8),
+                  iconBackground: const AppColor.pair(0xFFDDF5F3, 0xFFF1E7EE),
+                  title: 'Profissional',
+                  subtitle: 'Sua agenda, pacientes e atendimentos',
+                  selected: _choice == 'professional',
+                  onTap: () => setState(() => _choice = 'professional'),
                 ),
-                const SizedBox(height: 14),
-                AuthEntrance(
-                  delay: 420,
-                  child: _Option(
-                    icon: Icons.person_outline,
-                    iconColor: const AppColor.pair(0xFF5B45D6, 0xFF8F72E0),
-                    iconBackground: const AppColor.pair(0xFFECE8FF, 0xFFE3D8F8),
-                    title: 'Usuário',
-                    subtitle: 'Planos e consultas',
-                    selected: _choice == 'user',
-                    onTap: () => setState(() => _choice = 'user'),
-                  ),
+              ),
+              const SizedBox(height: 14),
+              AuthEntrance(
+                delay: 420,
+                child: _Option(
+                  icon: Icons.person_outline,
+                  iconColor: const AppColor.pair(0xFF5B45D6, 0xFF8F72E0),
+                  iconBackground: const AppColor.pair(0xFFECE8FF, 0xFFE3D8F8),
+                  title: 'Usuário',
+                  subtitle: 'Planos e consultas',
+                  selected: _choice == 'user',
+                  onTap: () => setState(() => _choice = 'user'),
                 ),
-                const SizedBox(height: 26),
-                AuthEntrance(
-                  delay: 540,
-                  child: _loading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: OnboardingColors.text,
-                          ),
-                        )
-                      : _EnterButton(
-                          label: label,
-                          onTap: _choice == null ? null : _continue,
+              ),
+              const SizedBox(height: 26),
+              AuthEntrance(
+                delay: 540,
+                child: _loading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: OnboardingColors.text,
                         ),
-                ),
-              ],
-            ),
+                      )
+                    : _EnterButton(
+                        label: label,
+                        onTap: _choice == null ? null : _continue,
+                      ),
+              ),
+            ],
           ),
         ),
       ),

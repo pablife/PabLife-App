@@ -1,6 +1,5 @@
 import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
-import 'package:fui_kit/fui_kit.dart';
 import 'package:pablife/shared/themes/app_colors.dart';
 
 import '../dashboard_controller.dart';
@@ -24,27 +23,27 @@ class DashboardNavbar extends StatelessWidget {
         // Dashboard, Agenda, Mentorias e Perfil.
         children: [
           DashboardNavbarItem(
-            icon: RegularRounded.BRIEFCASE,
+            icon: Icons.work_outline,
             isSelected: controller.currentIndex == 3,
             onTap: () => controller.changeTab(3),
           ),
           DashboardNavbarItem(
-            icon: RegularRounded.HOME,
+            icon: Icons.home_outlined,
             isSelected: controller.currentIndex == 0,
             onTap: () => controller.changeTab(0),
           ),
           DashboardNavbarItem(
-            icon: RegularRounded.CALENDAR,
+            icon: Icons.calendar_today_outlined,
             isSelected: controller.currentIndex == 1,
             onTap: () => controller.changeTab(1),
           ),
           DashboardNavbarItem(
-            icon: RegularRounded.BOOK_ALT,
+            icon: Icons.menu_book_outlined,
             isSelected: controller.currentIndex == 2,
             onTap: () => controller.changeTab(2),
           ),
           DashboardNavbarItem(
-            icon: RegularRounded.USER,
+            icon: Icons.person_outline,
             isSelected: controller.currentIndex == 4,
             onTap: () => controller.changeTab(4),
           ),
@@ -55,7 +54,7 @@ class DashboardNavbar extends StatelessWidget {
 }
 
 class DashboardNavbarItem extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final bool isSelected;
   final Function() onTap;
   const DashboardNavbarItem({
@@ -78,7 +77,11 @@ class DashboardNavbarItem extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
         builder: (context, color, child) {
-          return FUI(icon, color: color ?? const AppColor(0xFF374957), height: 24);
+          return Icon(
+            icon,
+            color: color ?? const AppColor(0xFF374957),
+            size: 24,
+          );
         },
       ),
     );

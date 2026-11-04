@@ -33,7 +33,7 @@ class OnboardingController extends GetxController with LoaderManagerMixin {
       description:
           'Tenha um plano claro para alcançar seus objetivos com suporte '
           'profissional.',
-      imagePath: 'assets/pages/onboarding/slide_one.png',
+      imagePath: 'assets/pages/onboarding/slide_one.jpg',
       imageDescription:
           'Ilustração: busto clássico lilás com coroa amarela, um jarro '
           'derramando carinhas sorridentes e um vaso com flor',
@@ -117,7 +117,7 @@ class OnboardingController extends GetxController with LoaderManagerMixin {
       description:
           'Nosso app conecta você com especialistas e ajuda a acompanhar suas '
           'metas e seu bem-estar.',
-      imagePath: 'assets/pages/onboarding/slide_two.png',
+      imagePath: 'assets/pages/onboarding/slide_two.jpg',
       imageDescription:
           'Ilustração: rosto de estátua rosa com fone de ouvido verde, um '
           'vaso com flor e um portal com estrelas',
@@ -190,7 +190,7 @@ class OnboardingController extends GetxController with LoaderManagerMixin {
       description:
           'Conciliar saúde, metas pessoais e compromissos pode ser desafiador. '
           'A Pablife ajuda você a dar o primeiro passo.',
-      imagePath: 'assets/pages/onboarding/slide_three.png',
+      imagePath: 'assets/pages/onboarding/slide_three.jpg',
       imageDescription:
           'Ilustração: busto rosa com coroa amarela, um jarro derramando '
           'carinhas e um sol sobre nuvem roxa',

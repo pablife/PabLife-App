@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'modules/auth/pages/choose_profile_page.dart';
 import 'modules/auth/pages/email_input_page.dart';
+import 'modules/auth/pages/password_page.dart';
 import 'modules/dashboard/dashboard_page.dart';
 import 'modules/onboarding/onboarding_page.dart';
 import 'shared/utils/wide_layout.dart';
@@ -27,6 +28,7 @@ class AppRoutes {
     OnboardingPage.route,
     ChooseProfilePage.route,
     EmailInputPage.route,
+    PasswordPage.route,
   };
 
   /// No computador, as telas desenhadas para celular abrem numa coluna

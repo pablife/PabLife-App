@@ -1,6 +1,5 @@
 import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
-import 'package:fui_kit/fui_kit.dart';
 import 'package:pablife/widgets/app_logo.dart';
 import 'package:pablife/widgets/app_text_vector.dart';
 
@@ -23,13 +22,13 @@ class DashboardSideMenu extends StatelessWidget {
     final items = [
       (
         index: 3,
-        icon: RegularRounded.BRIEFCASE,
+        icon: Icons.work_outline,
         label: isProfessional ? 'Pacientes' : 'Profissionais',
       ),
-      (index: 0, icon: RegularRounded.HOME, label: 'Dashboard'),
-      (index: 1, icon: RegularRounded.CALENDAR, label: 'Agenda'),
-      (index: 2, icon: RegularRounded.BOOK_ALT, label: 'Mentorias'),
-      (index: 4, icon: RegularRounded.USER, label: 'Perfil'),
+      (index: 0, icon: Icons.home_outlined, label: 'Dashboard'),
+      (index: 1, icon: Icons.calendar_today_outlined, label: 'Agenda'),
+      (index: 2, icon: Icons.menu_book_outlined, label: 'Mentorias'),
+      (index: 4, icon: Icons.person_outline, label: 'Perfil'),
     ];
 
     return Container(
@@ -63,7 +62,7 @@ class DashboardSideMenu extends StatelessWidget {
 }
 
 class DashboardSideMenuItem extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
@@ -93,7 +92,7 @@ class DashboardSideMenuItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
-                FUI(icon, color: color, height: 22),
+                Icon(icon, color: color, size: 22),
                 const SizedBox(width: 12),
                 Text(
                   label,

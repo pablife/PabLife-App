@@ -272,7 +272,9 @@ class ProfessionalProfilePage extends StatelessWidget {
                                                     "arquivo",
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w500,
-                                                color: const AppColor(0xFF00343C),
+                                                color: const AppColor(
+                                                  0xFF00343C,
+                                                ),
                                                 maxLines: 1,
                                               ),
                                             ),
@@ -342,7 +344,9 @@ class ProfessionalProfilePage extends StatelessWidget {
                                   height: 60,
                                   decoration: BoxDecoration(
                                     color: controller.isLoading
-                                        ? const AppColor(0xFF00343C).withAlpha(179)
+                                        ? const AppColor(
+                                            0xFF00343C,
+                                          ).withAlpha(179)
                                         : const AppColor(0xFF00343C),
                                     borderRadius: const BorderRadius.only(
                                       topLeft: Radius.circular(30),

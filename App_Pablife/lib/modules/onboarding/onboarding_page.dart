@@ -149,18 +149,11 @@ class _Slide extends StatelessWidget {
               ),
             ),
           ),
-          ShaderMask(
-            blendMode: BlendMode.dstIn,
-            shaderCallback: (bounds) => const RadialGradient(
-              radius: .5,
-              stops: [.78, 1],
-              colors: [Colors.white, Colors.transparent],
-            ).createShader(bounds),
-            child: AuthFloatingArt(
-              asset: slide.imagePath,
-              description: slide.imageDescription,
-              aspectRatio: 810 / 741,
-            ),
+          AuthFloatingArt(
+            asset: slide.imagePath,
+            description: slide.imageDescription,
+            aspectRatio: 810 / 741,
+            fadeEdges: true,
           ),
         ],
       ),

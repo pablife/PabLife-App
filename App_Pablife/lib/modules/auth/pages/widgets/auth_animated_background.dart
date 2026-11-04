@@ -38,8 +38,10 @@ class _AuthAnimatedBackgroundState extends State<AuthAnimatedBackground>
   @override
   void initState() {
     super.initState();
+    // O movimento é lento: 24 quadros por segundo bastam e pesam bem menos.
     _ticker = createTicker((elapsed) {
-      _seconds.value = elapsed.inMilliseconds / 1000;
+      final now = elapsed.inMilliseconds / 1000;
+      if (now - _seconds.value >= 1 / 24) _seconds.value = now;
     });
   }
 
@@ -74,12 +76,14 @@ class _AuthAnimatedBackgroundState extends State<AuthAnimatedBackground>
 class _BackgroundPainter extends CustomPainter {
   final ValueNotifier<double> seconds;
 
+  final Map<Color, Paint> _orbPaints = {};
+
   _BackgroundPainter(this.seconds) : super(repaint: seconds);
 
   @override
   void paint(Canvas canvas, Size size) {
     final t = seconds.value;
-    canvas.drawRect(Offset.zero & size, Paint()..color = AuthColors.background);
+    canvas.drawColor(AuthColors.background, BlendMode.src);
 
     _orb(
       canvas,
@@ -156,18 +160,23 @@ class _BackgroundPainter extends CustomPainter {
   ) {
     final k = _wave(t, period);
     final c = center + Offset(30 * k, -24 * k);
-    final r = radius * (1 + .12 * k);
-    canvas.drawCircle(
-      c,
-      r * 1.5,
-      Paint()
+    final r = radius * (1 + .12 * k) * 1.5;
+    // O degradê é criado uma vez e só muda de lugar e tamanho.
+    final paint = _orbPaints.putIfAbsent(
+      color,
+      () => Paint()
         ..shader = RadialGradient(
           colors: [
             color.withValues(alpha: opacity),
             color.withValues(alpha: 0),
           ],
-        ).createShader(Rect.fromCircle(center: c, radius: r * 1.5)),
+        ).createShader(const Rect.fromLTRB(-1, -1, 1, 1)),
     );
+    canvas.save();
+    canvas.translate(c.dx, c.dy);
+    canvas.scale(r);
+    canvas.drawCircle(Offset.zero, 1, paint);
+    canvas.restore();
   }
 
   void _waves(Canvas canvas, Size size, double t) {
@@ -231,11 +240,15 @@ class AuthFloatingArt extends StatefulWidget {
   /// Largura ÷ altura da imagem: reserva o espaço enquanto ela carrega.
   final double aspectRatio;
 
+  /// Esmaece as bordas, para imagens sem fundo transparente.
+  final bool fadeEdges;
+
   const AuthFloatingArt({
     super.key,
     required this.asset,
     required this.description,
     required this.aspectRatio,
+    this.fadeEdges = false,
   });
 
   @override
@@ -265,20 +278,34 @@ class _AuthFloatingArtState extends State<AuthFloatingArt>
     super.dispose();
   }
 
+  Widget _faded(Widget image) => ShaderMask(
+    blendMode: BlendMode.dstIn,
+    shaderCallback: (bounds) => const RadialGradient(
+      radius: .5,
+      stops: [.78, 1],
+      colors: [Colors.white, Colors.transparent],
+    ).createShader(bounds),
+    child: image,
+  );
+
   @override
   Widget build(BuildContext context) {
+    final image = Image.asset(
+      widget.asset,
+      fit: BoxFit.contain,
+      semanticLabel: widget.description,
+    );
     return AnimatedBuilder(
       animation: _float,
       builder: (context, child) => Transform.translate(
         offset: Offset(0, -12 * Curves.easeInOut.transform(_float.value)),
         child: child,
       ),
-      child: AspectRatio(
-        aspectRatio: widget.aspectRatio,
-        child: Image.asset(
-          widget.asset,
-          fit: BoxFit.contain,
-          semanticLabel: widget.description,
+      // A imagem fica pronta numa camada própria: flutuar só move a camada.
+      child: RepaintBoundary(
+        child: AspectRatio(
+          aspectRatio: widget.aspectRatio,
+          child: widget.fadeEdges ? _faded(image) : image,
         ),
       ),
     );

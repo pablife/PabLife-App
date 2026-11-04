@@ -99,8 +99,10 @@ class _OnboardingBackgroundState extends State<OnboardingBackground>
   @override
   void initState() {
     super.initState();
+    // O movimento é lento: 24 quadros por segundo bastam e pesam bem menos.
     _ticker = createTicker((elapsed) {
-      _seconds.value = elapsed.inMilliseconds / 1000;
+      final now = elapsed.inMilliseconds / 1000;
+      if (now - _seconds.value >= 1 / 24) _seconds.value = now;
     });
   }
 
@@ -136,6 +138,9 @@ class _ScenePainter extends CustomPainter {
   final OnboardingScene scene;
   final ValueNotifier<double> seconds;
 
+  Size? _gradientSize;
+  Paint? _gradient;
+
   _ScenePainter(this.scene, this.seconds) : super(repaint: seconds);
 
   /// Formas (cantos em %) por onde cada mancha passa.
@@ -153,15 +158,16 @@ class _ScenePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final t = seconds.value;
-    canvas.drawRect(
-      Offset.zero & size,
-      Paint()
+    if (size != _gradientSize) {
+      _gradientSize = size;
+      _gradient = Paint()
         ..shader = LinearGradient(
           begin: const Alignment(-.5, -1),
           end: const Alignment(.5, 1),
           colors: scene.gradient,
-        ).createShader(Offset.zero & size),
-    );
+        ).createShader(Offset.zero & size);
+    }
+    canvas.drawRect(Offset.zero & size, _gradient!);
 
     for (final blob in scene.blobs) {
       _blob(canvas, size, blob, t);

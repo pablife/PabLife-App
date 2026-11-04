@@ -1,6 +1,5 @@
 import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
-import 'package:fui_kit/fui_kit.dart';
 import 'package:get/get.dart';
 
 import '../../shared/themes/app_colors.dart';
@@ -91,18 +90,20 @@ class ProfilePage extends StatelessWidget {
                                     'Sem consultas disponíveis no período atual.',
                               ),
                             ProfileMenuItem(
-                              icon: FUI(
-                                RegularRounded.WOMAN_HEAD,
+                              icon: const Icon(
+                                Icons.face_3_outlined,
                                 color: AppColors.aquaIcon,
+                                size: 24,
                               ),
                               title: 'Editar Perfil',
                               onTap: controller.navigateToEditProfile,
                             ),
                             const ProfileDivider(),
                             ProfileMenuItem(
-                              icon: FUI(
-                                RegularRounded.SETTINGS,
+                              icon: const Icon(
+                                Icons.settings_outlined,
                                 color: AppColors.aquaIcon,
+                                size: 24,
                               ),
                               title: 'Minha Assinatura',
                               onTap: controller.navigateToSubscription,
@@ -134,9 +135,10 @@ class ProfilePage extends StatelessWidget {
                             const ProfileDivider(),
 
                             ProfileMenuItem(
-                              icon: FUI(
-                                RegularRounded.TRASH,
+                              icon: const Icon(
+                                Icons.delete_outline,
                                 color: AppColors.aquaIcon,
+                                size: 24,
                               ),
                               title: 'Excluir Conta',
                               onTap: controller.showDeleteAccountDialog,
@@ -192,10 +194,10 @@ class ProfileMenuItem extends StatelessWidget {
         fontWeight: FontWeight.w400,
         color: Colors.black.withAlpha(143),
       ),
-      trailing: FUI(
-        RegularRounded.ANGLE_SMALL_RIGHT,
-        width: 24,
-        color: const AppColor(0xFF374957),
+      trailing: const Icon(
+        Icons.chevron_right,
+        size: 24,
+        color: AppColor(0xFF374957),
       ),
       onTap: onTap,
     );
