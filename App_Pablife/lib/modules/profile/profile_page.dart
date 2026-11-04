@@ -108,6 +108,19 @@ class ProfilePage extends StatelessWidget {
                             ),
                             const ProfileDivider(),
 
+                            if (controller.canSwitchProfile) ...[
+                              ProfileMenuItem(
+                                icon: const Icon(
+                                  Icons.swap_horiz,
+                                  color: AppColors.aquaIcon,
+                                  size: 24,
+                                ),
+                                title: controller.switchProfileLabel,
+                                onTap: controller.switchProfile,
+                              ),
+                              const ProfileDivider(),
+                            ],
+
                             ProfileMenuItem(
                               icon: const Icon(
                                 Icons.logout,

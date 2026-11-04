@@ -75,7 +75,11 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
       return;
     }
 
-    professionals = response.data ?? [];
+    // Profissional no lado usuário não agenda consigo mesmo.
+    final myId = _authService.currentUser?.id;
+    professionals = (response.data ?? [])
+        .where((p) => p.user.id != myId)
+        .toList();
     _applyFilters();
     update();
   }

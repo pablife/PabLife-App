@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
+import '../models/user_role.dart';
 import '../repositories/user_repository.dart';
 import 'notification_service.dart';
 import 'subscription_service.dart';
@@ -22,7 +24,54 @@ class AuthService {
   bool _isLoading = false;
   bool _isInitialized = false;
 
-  UserModel? get currentUser => _currentUser;
+  /// Profissional que entrou como usuário: o app inteiro o trata como
+  /// usuário. A conta continua sendo de profissional.
+  bool _actingAsUser = false;
+  bool _hasChosenProfile = false;
+
+  UserModel? get currentUser => _actingAsUser
+      ? _currentUser?.copyWith(role: UserRole.user)
+      : _currentUser;
+
+  bool get isProfessionalAccount => _currentUser?.role == UserRole.professional;
+
+  bool get isActingAsUser => _actingAsUser;
+
+  /// A escolha de entrar como profissional ou usuário já foi feita.
+  bool get hasChosenProfile => _hasChosenProfile;
+
+  String get _profileKey => 'active_profile_${_currentUser?.id}';
+
+  Future<void> setActingAsUser(bool value) async {
+    _actingAsUser = value;
+    _hasChosenProfile = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_profileKey, value ? 'user' : 'professional');
+    await _applyActiveProfile();
+  }
+
+  Future<void> _loadActiveProfile() async {
+    final saved = isProfessionalAccount
+        ? (await SharedPreferences.getInstance()).getString(_profileKey)
+        : null;
+    _hasChosenProfile = saved != null;
+    _actingAsUser = saved == 'user';
+    await _applyActiveProfile();
+  }
+
+  Future<void> _applyActiveProfile() async {
+    _subscriptionService.freeAccess = _actingAsUser;
+    _subscriptionService.clearCache();
+    await _loadUserAccessInfo();
+  }
+
+  Future<void> _clearActiveProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_profileKey);
+    _actingAsUser = false;
+    _hasChosenProfile = false;
+    _subscriptionService.freeAccess = false;
+  }
   UserAccessInfo? get userAccessInfo => _userAccessInfo;
   bool get isAuthenticated => _currentUser != null;
   bool get isLoading => _isLoading;
@@ -108,8 +157,8 @@ class AuthService {
       final response = await _userRepository.getCurrentUser();
       if (response.success && response.data != null) {
         _currentUser = response.data;
-        // Carregar informações de assinatura
-        await _loadUserAccessInfo();
+        // Carrega o lado escolhido e as informações de assinatura
+        await _loadActiveProfile();
       } else {
         _currentUser = null;
         _userAccessInfo = null;
@@ -219,6 +268,7 @@ class AuthService {
     _isLoading = true;
 
     try {
+      await _clearActiveProfile();
       await _client.auth.signOut();
       _currentUser = null;
       _userAccessInfo = null;
