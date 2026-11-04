@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -20,7 +21,7 @@ class EditProfilePage extends StatelessWidget {
       builder: (controller) {
         if (controller.isLoading && controller.currentUser == null) {
           return const Scaffold(
-            backgroundColor: Color(0xFF00343C),
+            backgroundColor: AppColor(0xFF00343C),
             body: Center(child: CircularProgressIndicator(color: Colors.white)),
           );
         }
@@ -28,7 +29,7 @@ class EditProfilePage extends StatelessWidget {
         final user = controller.currentUser;
         if (user == null) {
           return const Scaffold(
-            backgroundColor: Color(0xFF00343C),
+            backgroundColor: AppColor(0xFF00343C),
             body: Center(
               child: Text(
                 'Erro ao carregar perfil',
@@ -39,7 +40,7 @@ class EditProfilePage extends StatelessWidget {
         }
 
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           resizeToAvoidBottomInset: true,
           appBar: AppBarDefault(
             title: 'Editar Perfil',
@@ -60,7 +61,7 @@ class EditProfilePage extends StatelessWidget {
                 child: Container(
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFC1CDFF),
+                    color: AppColor(0xFFC1CDFF),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(39),
                       topRight: Radius.circular(39),
@@ -167,7 +168,7 @@ class EditProfilePage extends StatelessWidget {
                                   onTap: controller.isLoading
                                       ? null
                                       : () => Get.back(),
-                                  backgroundColor: const Color(0xFF0C8DA1),
+                                  backgroundColor: const AppColor(0xFF0C8DA1),
                                   side: EdgeSide.right,
                                 ),
                               ),
@@ -178,7 +179,7 @@ class EditProfilePage extends StatelessWidget {
                                   onTap: controller.isLoading
                                       ? null
                                       : controller.saveProfile,
-                                  backgroundColor: const Color(0xFF00343C),
+                                  backgroundColor: const AppColor(0xFF00343C),
                                   side: EdgeSide.left,
                                   isLoading: controller.isLoading,
                                 ),

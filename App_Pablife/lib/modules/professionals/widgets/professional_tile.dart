@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../../../infra/models/professional_with_user_model.dart';
 import '../../../widgets/design_system/app_image.dart';
@@ -23,16 +24,16 @@ class ProfessionalTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasAppointment = professional.hasAppointment;
     final bgColor = hasAppointment
-        ? const Color(0xFF9BB1F1)
-        : const Color(0xFFAEBEEC);
+        ? const AppColor(0xFF9BB1F1)
+        : const AppColor(0xFFAEBEEC);
 
     final subtitleColor = hasAppointment
-        ? const Color(0xFF3065FF)
-        : const Color(0xFF0C8DA1);
+        ? const AppColor(0xFF3065FF)
+        : const AppColor(0xFF0C8DA1);
 
     final calendarBgColor = hasAppointment
-        ? const Color(0xFF3065FF)
-        : const Color(0xFFC1CDFF);
+        ? const AppColor(0xFF3065FF)
+        : const AppColor(0xFFC1CDFF);
 
     final calendarIcon = hasAppointment
         ? Icons.calendar_today
@@ -52,7 +53,7 @@ class ProfessionalTile extends StatelessWidget {
           foregroundDecoration: isSelected
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: const Color(0xFF00343C), width: 3),
+                  border: Border.all(color: const AppColor(0xFF00343C), width: 3),
                 )
               : null,
           padding: const EdgeInsets.all(15),
@@ -69,12 +70,12 @@ class ProfessionalTile extends StatelessWidget {
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF00343C).withAlpha(51),
+                    color: const AppColor(0xFF00343C).withAlpha(51),
                   ),
                   child: Icon(
                     Icons.person,
                     size: 40,
-                    color: const Color(0xFF00343C).withAlpha(128),
+                    color: const AppColor(0xFF00343C).withAlpha(128),
                   ),
                 ),
               ),
@@ -89,7 +90,7 @@ class ProfessionalTile extends StatelessWidget {
                       professional.typeFormatted,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF00343C),
+                      color: const AppColor(0xFF00343C),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -99,7 +100,7 @@ class ProfessionalTile extends StatelessWidget {
                       professional.user.fullName,
                       fontSize: 24,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF00343C),
+                      color: const AppColor(0xFF00343C),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -136,7 +137,7 @@ class ProfessionalTile extends StatelessWidget {
                     calendarIcon,
                     color: hasAppointment
                         ? Colors.white
-                        : const Color(0xFF00343C),
+                        : const AppColor(0xFF00343C),
                     size: 24,
                   ),
                 ),

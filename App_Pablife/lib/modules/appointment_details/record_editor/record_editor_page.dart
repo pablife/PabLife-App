@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,7 +17,7 @@ class RecordEditorPage extends StatelessWidget {
     return GetBuilder<RecordEditorController>(
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           body: Column(
             children: [
               const SizedBox(height: 32),

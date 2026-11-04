@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../widgets/design_system/app_bar_default.dart';
@@ -15,11 +16,11 @@ class NotificationsPage extends StatelessWidget {
     return GetBuilder<NotificationsController>(
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           appBar: const AppBarDefault(title: 'Notificações'),
           body: Container(
             decoration: const BoxDecoration(
-              color: Color(0xFFC1CDFF),
+              color: AppColor(0xFFC1CDFF),
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(39),
                 topRight: Radius.circular(39),
@@ -27,7 +28,7 @@ class NotificationsPage extends StatelessWidget {
             ),
             child: controller.isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF00343C)),
+                    child: CircularProgressIndicator(color: AppColor(0xFF00343C)),
                   )
                 : controller.notifications.isEmpty
                 ? EmptyStateWidget(

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../design_system/edge_button_rounded.dart';
@@ -25,7 +26,7 @@ class PremiumLockDialog extends StatelessWidget {
         width: 362,
         height: 474,
         decoration: BoxDecoration(
-          color: const Color(0xFFC1CDFF),
+          color: const AppColor(0xFFC1CDFF),
           borderRadius: BorderRadius.circular(25),
         ),
         child: Stack(
@@ -58,7 +59,7 @@ class PremiumLockDialog extends StatelessWidget {
                       contentType!,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
-                      color: const Color(0xFF00343C),
+                      color: const AppColor(0xFF00343C),
                       height: 17 / 14,
                     ),
                   if (contentType != null) const SizedBox(height: 4),
@@ -67,7 +68,7 @@ class PremiumLockDialog extends StatelessWidget {
                       contentTitle!,
                       fontWeight: FontWeight.w400,
                       fontSize: 24,
-                      color: const Color(0xFF00343C),
+                      color: const AppColor(0xFF00343C),
                       height: 29 / 24,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -77,7 +78,7 @@ class PremiumLockDialog extends StatelessWidget {
                     'Conteúdo Bloqueado',
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
-                    color: Color(0xFF00343C),
+                    color: AppColor(0xFF00343C),
                     height: 20 / 16,
                   ),
                 ],
@@ -96,7 +97,7 @@ class PremiumLockDialog extends StatelessWidget {
                     'Faça o upgrade e aproveite todos os recursos sem limitações.',
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
-                    color: Color(0xFF000000),
+                    color: AppColor(0xFF000000),
                     height: 20 / 16,
                     textAlign: TextAlign.center,
                   ),
@@ -116,7 +117,7 @@ class PremiumLockDialog extends StatelessWidget {
                     message,
                     fontWeight: FontWeight.w400,
                     fontSize: 14,
-                    color: const Color(0xFF000000),
+                    color: const AppColor(0xFF000000),
                     height: 17 / 14,
                     textAlign: TextAlign.center,
                     maxLines: 4,
@@ -140,7 +141,7 @@ class PremiumLockDialog extends StatelessWidget {
                       child: EdgeButtonRounded(
                         text: 'Voltar',
                         width: 120,
-                        backgroundColor: const Color(0xFF082C32),
+                        backgroundColor: const AppColor(0xFF082C32),
                         textColor: Colors.white,
                         side: EdgeSide.right,
                         // The design has radius 30px 0px 0px 30px (Left rounded)
@@ -166,7 +167,7 @@ class PremiumLockDialog extends StatelessWidget {
                       child: EdgeButtonRounded(
                         text: 'Quero ser Premium',
                         width: 200,
-                        backgroundColor: const Color(0xFF0C8DA1),
+                        backgroundColor: const AppColor(0xFF0C8DA1),
                         textColor: Colors.white,
                         side: EdgeSide
                             .left, // CSS: radius 30px 0px 0px 30px (Left rounded)

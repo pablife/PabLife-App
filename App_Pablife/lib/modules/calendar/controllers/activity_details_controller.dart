@@ -1,5 +1,5 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 import '../../../infra/models/activity_model.dart';
 import '../../../infra/repositories/activity_repository.dart';
 import '../../../infra/services/activity_service.dart';
@@ -83,7 +83,7 @@ class ActivityDetailsController extends GetxController with LoaderManagerMixin {
           'Tem certeza que deseja excluir esta atividade? Esta ação não pode ser desfeita.',
       confirmText: 'Excluir',
       cancelText: 'Cancelar',
-      confirmButtonColor: const Color(0xFFFF5252),
+      confirmButtonColor: const AppColor(0xFFFF5252),
     );
 
     if (confirmed == true) {

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:fui_kit/fui_kit.dart';
 import 'package:pablife/widgets/app_logo.dart';
@@ -33,7 +34,7 @@ class DashboardSideMenu extends StatelessWidget {
 
     return Container(
       width: 240,
-      color: const Color(0xFF00262C),
+      color: const AppColor(0xFF00262C),
       padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -77,12 +78,12 @@ class DashboardSideMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? Colors.white : const Color(0xFFA9C9CE);
+    final color = isSelected ? Colors.white : const AppColor(0xFFA9C9CE);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Material(
-        color: isSelected ? const Color(0xFF0C8DA1) : Colors.transparent,
+        color: isSelected ? const AppColor(0xFF0C8DA1) : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: onTap,

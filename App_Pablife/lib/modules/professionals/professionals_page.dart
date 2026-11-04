@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../shared/utils/wide_layout.dart';
@@ -21,7 +22,7 @@ class ProfessionalsPage extends StatelessWidget {
         final wide = isWideLayout(context);
 
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           appBar: AppBarDefault(trailing: const NotificationButtonWidget()),
           body: wide
               // Computador: lista à esquerda e o perfil aberto ao lado.
@@ -73,7 +74,7 @@ class ProfessionalsPage extends StatelessWidget {
           child: Container(
             margin: wide ? const EdgeInsets.only(left: 24) : null,
             decoration: BoxDecoration(
-              color: const Color(0xFFC1CDFF),
+              color: const AppColor(0xFFC1CDFF),
               borderRadius: radius,
             ),
             child: Column(
@@ -120,7 +121,7 @@ class _ProfilePanel extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFC1CDFF),
+        color: const AppColor(0xFFC1CDFF),
         borderRadius: BorderRadius.circular(32),
       ),
       child: professional == null
@@ -129,7 +130,7 @@ class _ProfilePanel extends StatelessWidget {
                 controller.isLoading
                     ? ''
                     : 'Escolha um profissional na lista',
-                style: const TextStyle(fontSize: 16, color: Color(0xFF00343C)),
+                style: const TextStyle(fontSize: 16, color: AppColor(0xFF00343C)),
               ),
             )
           : SingleChildScrollView(
@@ -157,7 +158,7 @@ class _ProfilePanel extends StatelessWidget {
                                   style: const TextStyle(
                                     fontSize: 28,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF00343C),
+                                    color: AppColor(0xFF00343C),
                                   ),
                                 ),
                                 const SizedBox(height: 10),

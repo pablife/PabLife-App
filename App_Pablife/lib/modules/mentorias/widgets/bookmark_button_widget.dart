@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 class BookmarkButtonWidget extends StatelessWidget {
@@ -24,8 +25,8 @@ class BookmarkButtonWidget extends StatelessWidget {
             child: Icon(
               isActive ? Icons.bookmark : Icons.bookmark_outline,
               color: isActive
-                  ? const Color(0xFF0C8DA1)
-                  : const Color(0xFF00343C),
+                  ? const AppColor(0xFF0C8DA1)
+                  : const AppColor(0xFF00343C),
               size: 28,
             ),
           ),
@@ -37,7 +38,7 @@ class BookmarkButtonWidget extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(3),
               decoration: const BoxDecoration(
-                color: Color(0xFF0C8DA1),
+                color: AppColor(0xFF0C8DA1),
                 shape: BoxShape.circle,
               ),
               constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
@@ -45,7 +46,7 @@ class BookmarkButtonWidget extends StatelessWidget {
                 child: Text(
                   savedCount.toString(),
                   style: const TextStyle(
-                    color: Color(0xFFF3F3F3),
+                    color: AppColor(0xFFF3F3F3),
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Instrument Sans',

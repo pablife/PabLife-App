@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
@@ -79,7 +80,7 @@ class SubscriptionPlanModel {
       deletedAt: map['deleted_at'] != null
           ? DateTime.parse(map['deleted_at'])
           : null,
-      backgroundColor: backgroundColor ?? const Color(0xFFAEBEEC),
+      backgroundColor: backgroundColor ?? const AppColor(0xFFAEBEEC),
       isSelected: isSelected ?? false,
     );
   }

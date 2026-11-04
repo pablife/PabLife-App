@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/themes/app_colors.dart';
@@ -103,7 +104,7 @@ class WeeklyProgressChart extends StatelessWidget {
               barRods: [
                 BarChartRodData(
                   toY: completed.toDouble(),
-                  color: const Color(0xff0C8DA1),
+                  color: const AppColor(0xFF0C8DA1),
                   width: 40,
                   borderRadius: BorderRadius.circular(25),
                   backDrawRodData: BackgroundBarChartRodData(

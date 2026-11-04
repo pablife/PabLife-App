@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/themes/app_colors.dart';
@@ -20,7 +21,7 @@ class RecordEditorBottomBarWidget extends StatelessWidget {
             child: EdgeButtonRounded(
               text: 'Cancelar',
               onTap: controller.cancel,
-              backgroundColor: const Color(0xFF0C8DA1),
+              backgroundColor: const AppColor(0xFF0C8DA1),
               side: EdgeSide.right,
             ),
           ),
@@ -30,7 +31,7 @@ class RecordEditorBottomBarWidget extends StatelessWidget {
               text: 'Salvar',
               onTap: controller.saveRecord,
               isLoading: controller.isLoading,
-              backgroundColor: const Color(0xFF00343C),
+              backgroundColor: const AppColor(0xFF00343C),
               side: EdgeSide.left,
             ),
           ),

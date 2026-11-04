@@ -1,3 +1,4 @@
+import 'package:pablife/modules/auth/pages/choose_profile_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -52,7 +53,11 @@ class PasswordController extends GetxController with LoaderManagerMixin {
             await _userRepository.setOneSignalUserId('');
           }
         }
-        Get.offAllNamed(DashboardPage.route);
+        Get.offAllNamed(
+          _authService.isProfessionalAccount
+              ? ChooseProfilePage.route
+              : DashboardPage.route,
+        );
       } else {
         AppSnackbar.to.show('Email ou senha incorretos');
       }

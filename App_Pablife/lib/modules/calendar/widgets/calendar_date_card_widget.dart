@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../infra/models/professional_appointment_model.dart';
@@ -35,15 +36,15 @@ class CalendarDateCardWidget extends StatelessWidget {
   });
 
   Color _getCardColor(int index, bool isExpanded) {
-    if (isExpanded) return const Color(0xFF00343C);
+    if (isExpanded) return const AppColor(0xFF00343C);
 
     final colors = [
-      const Color(0xFF001417),
-      const Color(0xFF01181C),
-      const Color(0xFF01424C),
-      const Color(0xFF06505B),
-      const Color(0xFF056574),
-      const Color(0xFF0F8799),
+      const AppColor(0xFF001417),
+      const AppColor(0xFF01181C),
+      const AppColor(0xFF01424C),
+      const AppColor(0xFF06505B),
+      const AppColor(0xFF056574),
+      const AppColor(0xFF0F8799),
     ];
 
     return colors[index % colors.length];

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../../../infra/models/professional_with_user_model.dart';
 import '../../../widgets/design_system/empty_state_widget.dart';
@@ -25,7 +26,7 @@ class ProfessionalsListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) {
       return const Center(
-        child: CircularProgressIndicator(color: Color(0xFF00343C)),
+        child: CircularProgressIndicator(color: AppColor(0xFF00343C)),
       );
     }
 

@@ -64,9 +64,9 @@ const supabase = createClient(
 const EMAIL_REGEX =
   // deno-lint-ignore no-control-regex
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Conta de administrador nunca nasce por esta função pública.
 const VALID_ROLES: ReadonlySet<UserRole> = new Set([
   "user",
-  "admin",
   "professional",
 ] as const);
 const VALID_PROFESSIONAL_TYPES: ReadonlySet<ProfessionalType> = new Set([
@@ -186,7 +186,7 @@ const parsePayload = (
     if (typeof record.role !== "string") {
       errors.push("O campo role deve ser uma string quando informado");
     } else if (!VALID_ROLES.has(record.role as UserRole)) {
-      errors.push("O campo role deve ser user, admin ou professional");
+      errors.push("O campo role deve ser user ou professional");
     } else {
       role = record.role as UserRole;
     }

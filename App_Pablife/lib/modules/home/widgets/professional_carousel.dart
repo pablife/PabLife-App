@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/themes/app_colors.dart';
 import '../../../widgets/design_system/text_default.dart';
@@ -27,7 +28,7 @@ class ProfessionalCarousel extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Container(
               decoration: BoxDecoration(
-                color: Color(0xff95B0FF),
+                color: AppColor(0xFF95B0FF),
                 borderRadius: BorderRadius.circular(16),
               ),
               padding: const EdgeInsets.all(16),
@@ -72,7 +73,7 @@ class ProfessionalCarousel extends StatelessWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Color(0xff3065FF),
+                                color: AppColor(0xFF3065FF),
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: TextDefault(
@@ -89,7 +90,7 @@ class ProfessionalCarousel extends StatelessWidget {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Color(0xff3065FF),
+                          color: AppColor(0xFF3065FF),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -111,8 +112,8 @@ class ProfessionalCarousel extends StatelessWidget {
                         height: 8,
                         decoration: BoxDecoration(
                           color: index == currentIndex
-                              ? Color(0xff3065FF)
-                              : Color(0xffD9D9D9),
+                              ? AppColor(0xFF3065FF)
+                              : AppColor(0xFFD9D9D9),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),

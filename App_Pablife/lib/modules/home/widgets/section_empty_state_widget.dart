@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/utils/wide_layout.dart';
@@ -27,7 +28,7 @@ class SectionEmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       decoration: BoxDecoration(
-        color: backgroundColor ?? const Color(0xFFF5F5F5),
+        color: backgroundColor ?? const AppColor(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -39,7 +40,7 @@ class SectionEmptyState extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.7),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 48, color: const Color(0xFF0C8DA1)),
+            child: Icon(icon, size: 48, color: const AppColor(0xFF0C8DA1)),
           ),
           const SizedBox(height: 16),
           Text(
@@ -47,7 +48,7 @@ class SectionEmptyState extends StatelessWidget {
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
+              color: AppColor(0xFF1A1A1A),
               fontFamily: 'Instrument Sans',
             ),
             textAlign: TextAlign.center,
@@ -58,7 +59,7 @@ class SectionEmptyState extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w400,
-              color: Color(0xFF666666),
+              color: AppColor(0xFF666666),
               fontFamily: 'Instrument Sans',
               height: 1.5,
             ),
@@ -68,7 +69,7 @@ class SectionEmptyState extends StatelessWidget {
           ElevatedButton(
             onPressed: onAction,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0C8DA1),
+              backgroundColor: const AppColor(0xFF0C8DA1),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               shape: RoundedRectangleBorder(
@@ -97,7 +98,7 @@ class SectionEmptyState extends StatelessWidget {
       height: 180,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       decoration: BoxDecoration(
-        color: backgroundColor ?? const Color(0xFFF5F5F5),
+        color: backgroundColor ?? const AppColor(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -108,7 +109,7 @@ class SectionEmptyState extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.7),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 36, color: const Color(0xFF0C8DA1)),
+            child: Icon(icon, size: 36, color: const AppColor(0xFF0C8DA1)),
           ),
           const SizedBox(width: 20),
           Expanded(
@@ -121,7 +122,7 @@ class SectionEmptyState extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1A1A),
+                    color: AppColor(0xFF1A1A1A),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -131,7 +132,7 @@ class SectionEmptyState extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF666666),
+                    color: AppColor(0xFF666666),
                     height: 1.4,
                   ),
                 ),
@@ -139,7 +140,7 @@ class SectionEmptyState extends StatelessWidget {
                 ElevatedButton(
                   onPressed: onAction,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0C8DA1),
+                    backgroundColor: const AppColor(0xFF0C8DA1),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,

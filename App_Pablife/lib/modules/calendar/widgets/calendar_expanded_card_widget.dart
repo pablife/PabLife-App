@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../widgets/design_system/text_default.dart';
@@ -49,7 +50,7 @@ class CalendarExpandedCardWidget extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                     fontSize: 48,
                     height: 1.229,
-                    color: Color(0xFFC1CDFF),
+                    color: AppColor(0xFFC1CDFF),
                   ),
                   children: [
                     TextSpan(text: '$dayNumber.'),
@@ -67,12 +68,12 @@ class CalendarExpandedCardWidget extends StatelessWidget {
                 _capitalize(weekdayLabel),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFFC1CDFF),
+                color: const AppColor(0xFFC1CDFF),
               ),
             ],
           ),
           const Spacer(),
-          Container(width: 3, height: 118.5, color: const Color(0xFFC1CDFF)),
+          Container(width: 3, height: 118.5, color: const AppColor(0xFFC1CDFF)),
           const Spacer(),
           Expanded(
             flex: 2,
@@ -85,14 +86,14 @@ class CalendarExpandedCardWidget extends StatelessWidget {
                       'Sem Consultas',
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFC1CDFF),
+                      color: AppColor(0xFFC1CDFF),
                     )
                   else ...[
                     const TextDefault(
                       'Consultas',
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFC1CDFF),
+                      color: AppColor(0xFFC1CDFF),
                     ),
                     const SizedBox(height: 10),
                     ...appointments.map((appointment) {
@@ -107,7 +108,7 @@ class CalendarExpandedCardWidget extends StatelessWidget {
                               time,
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: const Color(0xFFC1CDFF),
+                              color: const AppColor(0xFFC1CDFF),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -130,14 +131,14 @@ class CalendarExpandedCardWidget extends StatelessWidget {
                       'Tarefas Agendadas',
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFC1CDFF),
+                      color: AppColor(0xFFC1CDFF),
                     ),
                     const SizedBox(height: 4),
                     TextDefault(
                       '$tasksCount tarefa${tasksCount > 1 ? 's' : ''}',
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: Color(0xFFC1CDFF),
+                      color: AppColor(0xFFC1CDFF),
                     ),
                   ],
                   if (tasksCount > 0 && notesCount > 0)
@@ -147,14 +148,14 @@ class CalendarExpandedCardWidget extends StatelessWidget {
                       'Anotações',
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFC1CDFF),
+                      color: AppColor(0xFFC1CDFF),
                     ),
                     const SizedBox(height: 4),
                     TextDefault(
                       '$notesCount anotaç${notesCount > 1 ? 'ões' : 'ão'}',
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: Color(0xFFC1CDFF),
+                      color: AppColor(0xFFC1CDFF),
                     ),
                   ],
                   if (tasksCount == 0 && notesCount == 0) ...[
@@ -162,7 +163,7 @@ class CalendarExpandedCardWidget extends StatelessWidget {
                       'Sem Eventos',
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFC1CDFF),
+                      color: AppColor(0xFFC1CDFF),
                     ),
                   ],
                 ],

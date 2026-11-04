@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -88,7 +89,7 @@ class _EdgeButtonRoundedState extends State<EdgeButtonRounded> {
           elevation: 0,
           minimumSize: const Size(double.infinity, 56),
           disabledBackgroundColor:
-              (widget.backgroundColor ?? const Color(0xFF2D5A5A)).withAlpha(
+              (widget.backgroundColor ?? const AppColor(0xFF2D5A5A)).withAlpha(
                 150,
               ),
         ),

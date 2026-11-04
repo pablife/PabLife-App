@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../../../infra/models/mentoria_model.dart';
 import '../../../widgets/design_system/text_default.dart';
@@ -23,8 +24,8 @@ class MentoriaTile extends StatelessWidget {
         height: 149,
         decoration: BoxDecoration(
           color: mentoria.isSaved
-              ? const Color(0xFF9ECAD0)
-              : const Color(0xFFAEBEEC),
+              ? const AppColor(0xFF9ECAD0)
+              : const AppColor(0xFFAEBEEC),
           borderRadius: BorderRadius.circular(20),
         ),
         padding: const EdgeInsets.all(10),
@@ -45,7 +46,7 @@ class MentoriaTile extends StatelessWidget {
                           mentoria.title,
                           fontSize: 24,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF00343C),
+                          color: const AppColor(0xFF00343C),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           height: 1.2,
@@ -55,7 +56,7 @@ class MentoriaTile extends StatelessWidget {
                           'Duração ${mentoria.durationLabel}',
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF00343C),
+                          color: const AppColor(0xFF00343C),
                           maxLines: 1,
                           height: 1.2,
                         ),
@@ -85,15 +86,15 @@ class MentoriaTile extends StatelessWidget {
                   height: 48.5,
                   decoration: BoxDecoration(
                     color: mentoria.isSaved
-                        ? const Color(0xFF0C8DA1)
-                        : const Color(0xFFC1CDFF),
+                        ? const AppColor(0xFF0C8DA1)
+                        : const AppColor(0xFFC1CDFF),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     mentoria.isSaved ? Icons.bookmark : Icons.bookmark_outline,
                     color: mentoria.isSaved
                         ? Colors.white
-                        : const Color(0xFF00343C),
+                        : const AppColor(0xFF00343C),
                     size: 20,
                   ),
                 ),

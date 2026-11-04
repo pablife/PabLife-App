@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../infra/models/notification_model.dart';
@@ -71,7 +72,7 @@ class NotificationTile extends StatelessWidget {
                   height: 8,
                   margin: const EdgeInsets.only(top: 6, right: 12),
                   decoration: const BoxDecoration(
-                    color: Color(0xFF0C8DA1),
+                    color: AppColor(0xFF0C8DA1),
                     shape: BoxShape.circle,
                   ),
                 )
@@ -86,7 +87,7 @@ class NotificationTile extends StatelessWidget {
                       notification.title,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF00343C),
+                      color: const AppColor(0xFF00343C),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -95,7 +96,7 @@ class NotificationTile extends StatelessWidget {
                       notification.message,
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF00343C).withAlpha(153),
+                      color: const AppColor(0xFF00343C).withAlpha(153),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -104,7 +105,7 @@ class NotificationTile extends StatelessWidget {
                       _formatDate(notification.createdAt),
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF00343C).withAlpha(102),
+                      color: const AppColor(0xFF00343C).withAlpha(102),
                     ),
                   ],
                 ),

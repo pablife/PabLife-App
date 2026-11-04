@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pablife/modules/dashboard/dashboard_controller.dart';
@@ -25,7 +26,7 @@ class UserHomeTasksSectionWidget extends StatelessWidget {
           description: 'Crie uma tarefa e ela será mostrada aqui.',
           buttonLabel: 'Criar tarefa',
           onAction: _handleCreateTask,
-          backgroundColor: const Color(0xFFF5F3FF),
+          backgroundColor: const AppColor(0xFFF5F3FF),
         ),
       );
     }
@@ -40,7 +41,7 @@ class UserHomeTasksSectionWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
+              color: AppColor(0xFF1A1A1A),
               fontFamily: 'Instrument Sans',
             ),
           ),

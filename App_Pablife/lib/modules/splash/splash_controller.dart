@@ -1,3 +1,4 @@
+import 'package:pablife/modules/auth/pages/choose_profile_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -52,6 +53,12 @@ class SplashController extends GetxController with LoaderManagerMixin {
       final user = _authService.currentUser;
       if (user != null) {
         debugPrint('user role: ${user.role}');
+        if (_authService.isProfessionalAccount &&
+            !_authService.hasChosenProfile) {
+          Get.offAllNamed(ChooseProfilePage.route);
+          changeLoading(false);
+          return;
+        }
         if (user.role == UserRole.professional) {
           final professionalResponse = await _professionalRepository
               .getProfessionalByUserId(user.id!);

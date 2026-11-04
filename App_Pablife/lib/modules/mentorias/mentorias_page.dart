@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../widgets/design_system/app_bar_default.dart';
@@ -17,7 +18,7 @@ class MentoriasPage extends StatelessWidget {
     return GetBuilder<MentoriasController>(
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           appBar: AppBarDefault(trailing: const NotificationButtonWidget()),
           body: Column(
             children: [
@@ -35,7 +36,7 @@ class MentoriasPage extends StatelessWidget {
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFFC1CDFF),
+                    color: AppColor(0xFFC1CDFF),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(39),
                       topRight: Radius.circular(39),

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'pages/choose_profile_page.dart';
 import 'pages/email_input_page.dart';
 import 'controllers/email_input_controller.dart';
 import 'pages/password_page.dart';
@@ -13,6 +14,10 @@ import 'pages/recovery_password_code_page.dart';
 import 'controllers/recovery_password_code_controller.dart';
 
 final authRoutes = [
+  GetPage(
+    name: ChooseProfilePage.route,
+    page: () => const ChooseProfilePage(),
+  ),
   GetPage(
     name: EmailInputPage.route,
     page: () => const EmailInputPage(),

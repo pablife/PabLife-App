@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:pablife/widgets/design_system/app_image.dart';
 import 'package:pablife/widgets/design_system/whatsapp_icon.dart';
@@ -21,7 +22,7 @@ class ProfessionalAvatar extends StatelessWidget {
     final placeholder = Container(
       width: size,
       height: size,
-      color: const Color(0xFF89BEC6),
+      color: const AppColor(0xFF89BEC6),
       child: Icon(Icons.person, size: size / 2, color: Colors.white),
     );
 
@@ -173,12 +174,12 @@ class ProfessionalProfileBody extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE0F7FA),
+                    color: const AppColor(0xFFE0F7FA),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.event_available,
-                    color: Color(0xFF006064),
+                    color: AppColor(0xFF006064),
                     size: 28,
                   ),
                 ),
@@ -192,7 +193,7 @@ class ProfessionalProfileBody extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF00343C),
+                          color: AppColor(0xFF00343C),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -200,7 +201,7 @@ class ProfessionalProfileBody extends StatelessWidget {
                         'Agendado',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF006064),
+                          color: AppColor(0xFF006064),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -219,7 +220,7 @@ class ProfessionalProfileBody extends StatelessWidget {
         if (user.phone.isNotEmpty) ...[
           const SizedBox(height: 12),
           _buildContactItem(
-            leading: const WhatsAppIcon(size: 20, color: Color(0xFF0C8DA1)),
+            leading: const WhatsAppIcon(size: 20, color: AppColor(0xFF0C8DA1)),
             text: 'Conversar no WhatsApp',
             onTap: onWhatsApp,
             isAction: true,
@@ -235,7 +236,7 @@ class ProfessionalProfileBody extends StatelessWidget {
           onTap: onScheduleAction,
           backgroundColor: professional.hasAppointment
               ? Colors.redAccent
-              : const Color(0xFF0C8DA1),
+              : const AppColor(0xFF0C8DA1),
         ),
       ],
     );
@@ -247,7 +248,7 @@ class ProfessionalProfileBody extends StatelessWidget {
       style: const TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF00343C),
+        color: AppColor(0xFF00343C),
       ),
     );
   }
@@ -269,7 +270,7 @@ class ProfessionalProfileBody extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: isAction
-                ? Border.all(color: const Color(0xFF0C8DA1), width: 1)
+                ? Border.all(color: const AppColor(0xFF0C8DA1), width: 1)
                 : null,
           ),
           child: Row(
@@ -279,7 +280,7 @@ class ProfessionalProfileBody extends StatelessWidget {
                     icon,
                     size: 20,
                     color: isAction
-                        ? const Color(0xFF0C8DA1)
+                        ? const AppColor(0xFF0C8DA1)
                         : Colors.grey[600],
                   ),
               const SizedBox(width: 12),
@@ -288,7 +289,7 @@ class ProfessionalProfileBody extends StatelessWidget {
                   text,
                   style: TextStyle(
                     fontSize: 16,
-                    color: isAction ? const Color(0xFF0C8DA1) : Colors.black87,
+                    color: isAction ? const AppColor(0xFF0C8DA1) : Colors.black87,
                     fontWeight: isAction ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
@@ -297,7 +298,7 @@ class ProfessionalProfileBody extends StatelessWidget {
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 14,
-                  color: Color(0xFF0C8DA1),
+                  color: AppColor(0xFF0C8DA1),
                 ),
             ],
           ),

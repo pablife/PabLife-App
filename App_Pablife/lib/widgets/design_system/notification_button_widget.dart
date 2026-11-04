@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:fui_kit/fui_kit.dart';
 import 'package:get/get.dart';
@@ -38,7 +39,7 @@ class NotificationButtonWidget extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: const BoxDecoration(
-                      color: Color(0xFF0C8DA1),
+                      color: AppColor(0xFF0C8DA1),
                       shape: BoxShape.circle,
                     ),
                     constraints: const BoxConstraints(
@@ -49,7 +50,7 @@ class NotificationButtonWidget extends StatelessWidget {
                       child: Text(
                         notificationCount > 99 ? '99+' : '$notificationCount',
                         style: const TextStyle(
-                          color: Color(0xFFF3F3F3),
+                          color: AppColor(0xFFF3F3F3),
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'Instrument Sans',

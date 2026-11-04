@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 class ExpandableFabAction {
@@ -13,7 +14,7 @@ class ExpandableFabAction {
     this.iconWidget,
     required this.onTap,
     this.iconColor = Colors.white,
-    this.backgroundColor = const Color(0x33FFFFFF),
+    this.backgroundColor = const AppColor(0x33FFFFFF),
     this.animationDelay = Duration.zero,
   }) : assert(icon != null || iconWidget != null);
 }
@@ -22,7 +23,7 @@ class ExpandableActionFab extends StatefulWidget {
   const ExpandableActionFab({
     super.key,
     required this.actions,
-    this.backgroundColor = const Color(0xFF0C8DA1),
+    this.backgroundColor = const AppColor(0xFF0C8DA1),
     this.collapsedIcon = Icons.add,
     this.closeIcon = Icons.close,
     this.expandedWidth = 280,

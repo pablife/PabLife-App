@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:fui_kit/fui_kit.dart';
 import 'package:get/get.dart';
@@ -21,7 +22,7 @@ class ProfilePage extends StatelessWidget {
       builder: (controller) {
         if (controller.isLoading && controller.currentUser == null) {
           return const Scaffold(
-            backgroundColor: Color(0xFF00343C),
+            backgroundColor: AppColor(0xFF00343C),
             body: Center(child: CircularProgressIndicator(color: Colors.white)),
           );
         }
@@ -29,7 +30,7 @@ class ProfilePage extends StatelessWidget {
         final user = controller.currentUser;
         if (user == null) {
           return const Scaffold(
-            backgroundColor: Color(0xFF00343C),
+            backgroundColor: AppColor(0xFF00343C),
             body: Center(
               child: Text(
                 'Erro ao carregar perfil',
@@ -40,7 +41,7 @@ class ProfilePage extends StatelessWidget {
         }
 
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           appBar: AppBarDefault(trailing: const NotificationButtonWidget()),
           body: Stack(
             children: [
@@ -51,7 +52,7 @@ class ProfilePage extends StatelessWidget {
                 bottom: 0,
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFFC1CDFF),
+                    color: AppColor(0xFFC1CDFF),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(39),
                       topRight: Radius.circular(39),
@@ -107,6 +108,19 @@ class ProfilePage extends StatelessWidget {
                               onTap: controller.navigateToSubscription,
                             ),
                             const ProfileDivider(),
+
+                            if (controller.canSwitchProfile) ...[
+                              ProfileMenuItem(
+                                icon: const Icon(
+                                  Icons.swap_horiz,
+                                  color: AppColors.aquaIcon,
+                                  size: 24,
+                                ),
+                                title: controller.switchProfileLabel,
+                                onTap: controller.switchProfile,
+                              ),
+                              const ProfileDivider(),
+                            ],
 
                             ProfileMenuItem(
                               icon: const Icon(
@@ -181,7 +195,7 @@ class ProfileMenuItem extends StatelessWidget {
       trailing: FUI(
         RegularRounded.ANGLE_SMALL_RIGHT,
         width: 24,
-        color: const Color(0xFF374957),
+        color: const AppColor(0xFF374957),
       ),
       onTap: onTap,
     );

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../../shared/themes/app_colors.dart';
 import 'text_default.dart';
@@ -64,7 +65,7 @@ class AppDialog extends StatelessWidget {
                         onTap:
                             onCancel ?? () => Navigator.of(context).pop(false),
                         backgroundColor:
-                            cancelButtonColor ?? const Color(0xFF0C8DA1),
+                            cancelButtonColor ?? const AppColor(0xFF0C8DA1),
                       ),
                     ),
                     if (confirmText != null) const SizedBox(width: 10),

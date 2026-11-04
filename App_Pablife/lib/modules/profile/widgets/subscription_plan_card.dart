@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -39,7 +40,7 @@ class SubscriptionPlanCard extends StatelessWidget {
             color: plan.backgroundColor,
             borderRadius: BorderRadius.circular(25),
             border: isActive
-                ? Border.all(color: const Color(0xFF00A86B), width: 3)
+                ? Border.all(color: const AppColor(0xFF00A86B), width: 3)
                 : null,
           ),
           child: IntrinsicHeight(
@@ -70,7 +71,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                                   plan.name,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF00343C),
+                                  color: const AppColor(0xFF00343C),
                                 ),
                                 const SizedBox(height: 4),
 
@@ -78,7 +79,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                                   'Plano R\$${plan.price.toStringAsFixed(2).replaceAll('.', ',')}',
                                   fontSize: 20,
                                   fontWeight: FontWeight.w400,
-                                  color: const Color(0xFF00343C),
+                                  color: const AppColor(0xFF00343C),
                                 ),
                                 const SizedBox(height: 4),
 
@@ -92,7 +93,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                                         feature,
                                         fontSize: 12,
                                         fontWeight: FontWeight.w400,
-                                        color: const Color(0xFF00343C),
+                                        color: const AppColor(0xFF00343C),
                                       ),
                                     ),
                                   ),
@@ -130,7 +131,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                                     'Assinatura cancelada - Você ainda tem acesso até ${daysUntilRenewal ?? ''} dia(s)',
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF00343C),
+                                    color: AppColor(0xFF00343C),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -149,14 +150,14 @@ class SubscriptionPlanCard extends StatelessWidget {
                                             : 'Próxima renovação em:',
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF00343C),
+                                        color: const AppColor(0xFF00343C),
                                       ),
                                     ),
                                     TextDefault(
                                       daysUntilRenewal!,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF00343C),
+                                      color: const AppColor(0xFF00343C),
                                     ),
                                   ],
                                 ),
@@ -166,7 +167,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                                 SizedBox(
                                   width: double.infinity,
                                   child: AppButtonDefault(
-                                    backgroundColor: const Color(0xFFFF3395),
+                                    backgroundColor: const AppColor(0xFFFF3395),
                                     onTap: onCancelTap,
                                     text: 'Cancelar Assinatura',
                                     isLoading:
@@ -191,10 +192,10 @@ class SubscriptionPlanCard extends StatelessWidget {
                     height: 26,
                     decoration: BoxDecoration(
                       color: isActive
-                          ? const Color(0xFF00A86B)
+                          ? const AppColor(0xFF00A86B)
                           : (plan.isSelected
-                                ? const Color(0xFFFF3395)
-                                : const Color(0xFFBFC9E5).withAlpha(102)),
+                                ? const AppColor(0xFFFF3395)
+                                : const AppColor(0xFFBFC9E5).withAlpha(102)),
                       shape: BoxShape.circle,
                     ),
                     child: (plan.isSelected || isActive)
@@ -213,7 +214,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00A86B),
+                        color: const AppColor(0xFF00A86B),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const TextDefault(

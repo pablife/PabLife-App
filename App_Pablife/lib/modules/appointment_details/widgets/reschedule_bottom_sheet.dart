@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:pablife/widgets/design_system/whatsapp_icon.dart';
 import 'package:get/get.dart';
@@ -75,7 +76,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFFAEBEEC),
+        color: AppColor(0xFFAEBEEC),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
@@ -89,7 +90,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
             child: Container(
               height: 110,
               decoration: BoxDecoration(
-                color: const Color(0xFFAEBEEC),
+                color: const AppColor(0xFFAEBEEC),
                 borderRadius: BorderRadius.circular(25),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -108,14 +109,14 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                           'Paciente',
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF00343C),
+                          color: AppColor(0xFF00343C),
                           height: 1.214,
                         ),
                         TextDefault(
                           widget.appointment.patientName,
                           fontSize: 24,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF00343C),
+                          color: const AppColor(0xFF00343C),
                           height: 1.208,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -124,7 +125,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                           dateLabel,
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF0C8DA1),
+                          color: const AppColor(0xFF0C8DA1),
                           height: 1.214,
                         ),
                       ],
@@ -137,7 +138,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
           Container(
             height: 214,
             width: double.infinity,
-            color: const Color(0xFF3065FF),
+            color: const AppColor(0xFF3065FF),
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 28),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -153,7 +154,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                           fontWeight: FontWeight.w500,
                           fontSize: 48,
                           height: 1.229,
-                          color: Color(0xFFC1CDFF),
+                          color: AppColor(0xFFC1CDFF),
                         ),
                         children: [
                           TextSpan(text: '$dayNumber.'),
@@ -174,7 +175,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                       weekdayLabel,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFFC1CDFF),
+                      color: const AppColor(0xFFC1CDFF),
                       height: 1.222,
                     ),
                   ],
@@ -183,7 +184,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                 Container(
                   width: 3,
                   height: 118.5,
-                  color: const Color(0xFFC1CDFF),
+                  color: const AppColor(0xFFC1CDFF),
                 ),
                 const SizedBox(width: 30),
                 Expanded(
@@ -195,7 +196,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                         'Horário',
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFC1CDFF),
+                        color: AppColor(0xFFC1CDFF),
                         height: 1.222,
                       ),
                       const SizedBox(height: 8),
@@ -203,7 +204,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                         timeLabel,
                         fontSize: 18,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFFC1CDFF),
+                        color: const AppColor(0xFFC1CDFF),
                         height: 1.222,
                       ),
                     ],
@@ -220,7 +221,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                   child: Container(
                     height: 60,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF00343C),
+                      color: AppColor(0xFF00343C),
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(30),
                         bottomRight: Radius.circular(30),
@@ -258,7 +259,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                   child: Container(
                     height: 60,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF0C8DA1),
+                      color: AppColor(0xFF0C8DA1),
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
                         bottomLeft: Radius.circular(30),

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +15,7 @@ class WaitingApprovalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF00343C),
+      backgroundColor: const AppColor(0xFF00343C),
       body: GetBuilder<WaitingApprovalController>(
         builder: (controller) {
           return SafeArea(
@@ -37,13 +38,13 @@ class WaitingApprovalPage extends StatelessWidget {
                           'Aguardando',
                           fontSize: 36,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFFC1CDFE).withAlpha(112),
+                          color: const AppColor(0xFFC1CDFE).withAlpha(112),
                         ),
                         TextDefault(
                           'Aprovação',
                           fontSize: 36,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFFC1CDFE).withAlpha(112),
+                          color: const AppColor(0xFFC1CDFE).withAlpha(112),
                         ),
                       ],
                     ),
@@ -54,7 +55,7 @@ class WaitingApprovalPage extends StatelessWidget {
                   child: EdgeButtonRounded(
                     text: 'Enviar Mensagem no Whatsapp',
                     onTap: controller.openWhatsApp,
-                    backgroundColor: const Color(0xFF0C8DA1),
+                    backgroundColor: const AppColor(0xFF0C8DA1),
                     side: EdgeSide.left,
                   ),
                 ),

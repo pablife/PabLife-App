@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../widgets/app_text_vector.dart';
@@ -54,7 +55,7 @@ class RecordEditorHeaderWidget extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.description_outlined,
-                color: Color(0xFF00343C),
+                color: AppColor(0xFF00343C),
                 size: 20,
               ),
             ),

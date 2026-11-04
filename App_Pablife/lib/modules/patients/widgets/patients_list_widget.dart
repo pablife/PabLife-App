@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 import '../../../infra/models/professional_appointment_model.dart';
@@ -28,7 +29,7 @@ class PatientsListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) {
       return const Center(
-        child: CircularProgressIndicator(color: Color(0xFF00343C)),
+        child: CircularProgressIndicator(color: AppColor(0xFF00343C)),
       );
     }
 

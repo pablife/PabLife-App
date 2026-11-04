@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -90,7 +91,7 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
       title: 'Remarcar consulta',
       message: 'Remarcar sua consulta para $newDate?',
       confirmText: 'Remarcar',
-      confirmColor: const Color(0xFF0C8DA1),
+      confirmColor: const AppColor(0xFF0C8DA1),
     );
     if (!confirmed) return false;
 
@@ -113,7 +114,7 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
       message:
           'Tem certeza que deseja cancelar esta consulta? Esta ação não pode ser desfeita.',
       confirmText: 'Cancelar consulta',
-      confirmColor: const Color(0xFFFF5252),
+      confirmColor: const AppColor(0xFFFF5252),
     );
     if (!confirmed) return false;
 
@@ -168,7 +169,7 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
         confirmText: confirmText,
         cancelText: 'Voltar',
         confirmButtonColor: confirmColor,
-        cancelButtonColor: const Color(0xFF0C8DA1),
+        cancelButtonColor: const AppColor(0xFF0C8DA1),
         onConfirm: () => Get.back(result: true),
         onCancel: () => Get.back(result: false),
       ),
@@ -199,7 +200,7 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
           decoration: const BoxDecoration(
-            color: Color(0xFF00343C),
+            color: AppColor(0xFF00343C),
             borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
           ),
           child: SafeArea(
@@ -218,7 +219,7 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
                         errorWidget: Container(
                           width: 56,
                           height: 56,
-                          color: const Color(0xFF89BEC6),
+                          color: const AppColor(0xFF89BEC6),
                           child: const Icon(Icons.person, color: Colors.white),
                         ),
                       ),
@@ -247,7 +248,7 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
                             when,
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF9FE1CB),
+                            color: const AppColor(0xFF9FE1CB),
                           ),
                         ],
                       ),
@@ -271,7 +272,7 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
                     icon: const WhatsAppIcon(size: 22),
                     label: 'Conversar no WhatsApp',
                     result: 'whatsapp',
-                    background: const Color(0xFF25D366),
+                    background: const AppColor(0xFF25D366),
                     foreground: Colors.white,
                   ),
                 if (changeable)
@@ -279,8 +280,8 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
                     icon: const Icon(Icons.close),
                     label: 'Cancelar consulta',
                     result: 'cancel',
-                    background: const Color(0xFFDA879A),
-                    foreground: const Color(0xFF4A1B0C),
+                    background: const AppColor(0xFFDA879A),
+                    foreground: const AppColor(0xFF4A1B0C),
                   ),
                 if (isScheduled && !changeable)
                   const Padding(
@@ -305,8 +306,8 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
     required Widget icon,
     required String label,
     required String result,
-    Color background = const Color(0xFFC1CDFF),
-    Color foreground = const Color(0xFF00343C),
+    Color background = const AppColor(0xFFC1CDFF),
+    Color foreground = const AppColor(0xFF00343C),
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),

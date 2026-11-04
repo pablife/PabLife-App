@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pablife/shared/themes/app_colors.dart';
@@ -168,11 +169,11 @@ class SubscriptionController extends GetxController {
 
   Color _getPlanColor(String planId, bool isActive) {
     if (isActive) {
-      return const Color(0xFF90EE90); // Verde para plano ativo
+      return const AppColor(0xFF90EE90); // Verde para plano ativo
     }
     return planId == selectedPlanId
-        ? const Color(0xFFFF80BD) // Rosa para selecionado
-        : const Color(0xFFAEBEEC); // Azul para não selecionado
+        ? const AppColor(0xFFFF80BD) // Rosa para selecionado
+        : const AppColor(0xFFAEBEEC); // Azul para não selecionado
   }
 
   /// Verifica se a assinatura atual está realmente ativa (não cancelada ou expirada)
@@ -209,8 +210,8 @@ class SubscriptionController extends GetxController {
       return plan.copyWith(
         isSelected: isSelected || isActive,
         backgroundColor: isActive
-            ? const Color(0xFF90EE90)
-            : (isSelected ? const Color(0xFFFF80BD) : const Color(0xFFAEBEEC)),
+            ? const AppColor(0xFF90EE90)
+            : (isSelected ? const AppColor(0xFFFF80BD) : const AppColor(0xFFAEBEEC)),
       );
     }).toList();
     update();

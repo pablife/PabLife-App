@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:fui_kit/fui_kit.dart';
 import 'package:pablife/shared/themes/app_colors.dart';
@@ -71,13 +72,13 @@ class DashboardNavbarItem extends StatelessWidget {
       child: TweenAnimationBuilder<Color?>(
         key: ValueKey(isSelected),
         tween: ColorTween(
-          begin: const Color(0xFF374957),
-          end: isSelected ? AppColors.white : const Color(0xFF374957),
+          begin: const AppColor(0xFF374957),
+          end: isSelected ? AppColors.white : const AppColor(0xFF374957),
         ),
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
         builder: (context, color, child) {
-          return FUI(icon, color: color ?? const Color(0xFF374957), height: 24);
+          return FUI(icon, color: color ?? const AppColor(0xFF374957), height: 24);
         },
       ),
     );

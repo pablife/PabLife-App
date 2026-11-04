@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pablife/widgets/design_system/app_button_default.dart';
@@ -21,7 +22,7 @@ class SubscriptionPage extends StatelessWidget {
       },
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           appBar: const AppBarDefault(title: 'Planos'),
           body: Stack(
             children: [
@@ -32,7 +33,7 @@ class SubscriptionPage extends StatelessWidget {
                 bottom: 0,
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFFC1CDFF),
+                    color: AppColor(0xFFC1CDFF),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(39),
                       topRight: Radius.circular(39),
@@ -49,7 +50,7 @@ class SubscriptionPage extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFF3CD),
+                            color: const AppColor(0xFFFFF3CD),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -58,7 +59,7 @@ class SubscriptionPage extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF6C4E00),
+                              color: AppColor(0xFF6C4E00),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -103,7 +104,7 @@ class SubscriptionPage extends StatelessWidget {
                             child: AppButtonDefault(
                               text: 'Voltar',
                               onTap: () => Get.back(),
-                              backgroundColor: const Color(0xFF00343C),
+                              backgroundColor: const AppColor(0xFF00343C),
                             ),
                           ),
                         )
@@ -114,7 +115,7 @@ class SubscriptionPage extends StatelessWidget {
                               child: EdgeButtonRounded(
                                 text: 'Voltar',
                                 onTap: () => Get.back(),
-                                backgroundColor: const Color(0xFF00343C),
+                                backgroundColor: const AppColor(0xFF00343C),
                                 side: EdgeSide.right,
                               ),
                             ),
@@ -123,7 +124,7 @@ class SubscriptionPage extends StatelessWidget {
                               child: EdgeButtonRounded(
                                 text: 'Escolher Plano',
                                 onTap: controller.choosePlan,
-                                backgroundColor: const Color(0xFF0C8DA1),
+                                backgroundColor: const AppColor(0xFF0C8DA1),
                                 side: EdgeSide.left,
                               ),
                             ),

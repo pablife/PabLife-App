@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../controllers/user_home_controller.dart';
 import 'user_home_appointment_carousel_widget.dart';
@@ -23,7 +24,7 @@ class UserHomeAppointmentsSection extends StatelessWidget {
               'Agende uma consulta na tela de profissionais e ela aparecerá aqui.',
           buttonLabel: 'Explorar profissionais',
           onAction: _handleExploreProfessionals,
-          backgroundColor: const Color(0xFFF5FAFF),
+          backgroundColor: const AppColor(0xFFF5FAFF),
         ),
       );
     }

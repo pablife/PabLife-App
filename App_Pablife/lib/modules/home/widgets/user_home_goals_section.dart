@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/user_home_controller.dart';
@@ -25,7 +26,7 @@ class UserHomeGoalsSection extends StatelessWidget {
               'Crie metas para acompanhar seu progresso e alcançar seus objetivos.',
           buttonLabel: 'Criar meta',
           onAction: _handleCreateGoal,
-          backgroundColor: const Color(0xFFFFF5F5),
+          backgroundColor: const AppColor(0xFFFFF5F5),
         ),
       );
     }

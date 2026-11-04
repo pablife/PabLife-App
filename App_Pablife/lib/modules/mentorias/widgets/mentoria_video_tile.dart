@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../../../infra/models/mentoria_video_model.dart';
 import '../../../widgets/design_system/app_image.dart';
@@ -30,14 +31,14 @@ class MentoriaVideoTile extends StatelessWidget {
           ),
           leading: Icon(
             Icons.play_arrow,
-            color: const Color(0xFF00343C),
+            color: const AppColor(0xFF00343C),
             size: 32,
           ),
           title: TextDefault(
             video.title,
             fontSize: 16,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF00343C),
+            color: const AppColor(0xFF00343C),
           ),
           onTap: onTap,
         ),
@@ -56,11 +57,11 @@ class MentoriaVideoTile extends StatelessWidget {
                       Container(
                         width: double.infinity,
                         height: 187,
-                        color: const Color(0xFF00343C).withAlpha(26),
+                        color: const AppColor(0xFF00343C).withAlpha(26),
                         child: const Center(
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Color(0xFFC1CDFF),
+                            color: AppColor(0xFFC1CDFF),
                           ),
                         ),
                       )
@@ -98,7 +99,7 @@ class MentoriaVideoTile extends StatelessWidget {
                           ),
                           child: const Icon(
                             Icons.play_arrow,
-                            color: Color(0xFF242729),
+                            color: AppColor(0xFF242729),
                             size: 32,
                           ),
                         ),
@@ -169,7 +170,7 @@ class MentoriaVideoTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Container(
             height: 1,
-            color: const Color(0xFF00343C).withAlpha(38),
+            color: const AppColor(0xFF00343C).withAlpha(38),
           ),
         ),
       ],
@@ -195,20 +196,20 @@ class _VideoThumbnail extends StatelessWidget {
       placeholder: Container(
         width: double.infinity,
         height: 187,
-        color: const Color(0xFF00343C).withAlpha(26),
+        color: const AppColor(0xFF00343C).withAlpha(26),
         child: const Center(
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: Color(0xFFC1CDFF),
+            color: AppColor(0xFFC1CDFF),
           ),
         ),
       ),
       errorWidget: Container(
         width: double.infinity,
         height: 187,
-        color: const Color(0xFF00343C).withAlpha(26),
+        color: const AppColor(0xFF00343C).withAlpha(26),
         child: const Center(
-          child: Icon(Icons.video_library, color: Color(0xFFC1CDFF), size: 48),
+          child: Icon(Icons.video_library, color: AppColor(0xFFC1CDFF), size: 48),
         ),
       ),
     );

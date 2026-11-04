@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -129,7 +130,7 @@ class _CreateScheduleSlotBottomSheetState
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF0C8DA1)),
+            colorScheme: const ColorScheme.light(primary: AppColor(0xFF0C8DA1)),
           ),
           child: child!,
         );
@@ -201,7 +202,7 @@ class _CreateScheduleSlotBottomSheetState
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFFAEBEEC),
+        color: AppColor(0xFFAEBEEC),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
@@ -222,7 +223,7 @@ class _CreateScheduleSlotBottomSheetState
                     'Criar Horário',
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF00343C),
+                    color: AppColor(0xFF00343C),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
@@ -230,7 +231,7 @@ class _CreateScheduleSlotBottomSheetState
                     'Selecione a data, horário e se deseja repetir',
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: Color(0xFF00343C),
+                    color: AppColor(0xFF00343C),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -254,7 +255,7 @@ class _CreateScheduleSlotBottomSheetState
                     children: [
                       const Icon(
                         Icons.calendar_today,
-                        color: Color(0xFF0C8DA1),
+                        color: AppColor(0xFF0C8DA1),
                         size: 24,
                       ),
                       const SizedBox(width: 12),
@@ -266,7 +267,7 @@ class _CreateScheduleSlotBottomSheetState
                               'Data',
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF00343C),
+                              color: AppColor(0xFF00343C),
                             ),
                             const SizedBox(height: 4),
                             TextDefault(
@@ -276,14 +277,14 @@ class _CreateScheduleSlotBottomSheetState
                               ).format(selectedDate),
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF00343C),
+                              color: const AppColor(0xFF00343C),
                             ),
                           ],
                         ),
                       ),
                       const Icon(
                         Icons.arrow_forward_ios,
-                        color: Color(0xFF0C8DA1),
+                        color: AppColor(0xFF0C8DA1),
                         size: 16,
                       ),
                     ],
@@ -309,7 +310,7 @@ class _CreateScheduleSlotBottomSheetState
                     children: [
                       const Icon(
                         Icons.access_time,
-                        color: Color(0xFF0C8DA1),
+                        color: AppColor(0xFF0C8DA1),
                         size: 24,
                       ),
                       const SizedBox(width: 12),
@@ -321,7 +322,7 @@ class _CreateScheduleSlotBottomSheetState
                               'Horário',
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF00343C),
+                              color: AppColor(0xFF00343C),
                             ),
                             const SizedBox(height: 4),
                             Row(
@@ -331,7 +332,7 @@ class _CreateScheduleSlotBottomSheetState
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: isTimeAvailable
-                                      ? const Color(0xFF00343C)
+                                      ? const AppColor(0xFF00343C)
                                       : Colors.red,
                                 ),
                                 if (!isTimeAvailable) ...[
@@ -350,7 +351,7 @@ class _CreateScheduleSlotBottomSheetState
                       ),
                       const Icon(
                         Icons.arrow_forward_ios,
-                        color: Color(0xFF0C8DA1),
+                        color: AppColor(0xFF0C8DA1),
                         size: 16,
                       ),
                     ],
@@ -370,10 +371,10 @@ class _CreateScheduleSlotBottomSheetState
                         isRecurring = value ?? false;
                       });
                     },
-                    activeColor: const Color(0xFF0C8DA1),
+                    activeColor: const AppColor(0xFF0C8DA1),
                     fillColor: WidgetStateProperty.resolveWith((states) {
                       if (states.contains(WidgetState.selected)) {
-                        return const Color(0xFF0C8DA1);
+                        return const AppColor(0xFF0C8DA1);
                       }
                       return Colors.white;
                     }),
@@ -382,7 +383,7 @@ class _CreateScheduleSlotBottomSheetState
                       borderRadius: BorderRadius.circular(4),
                     ),
                     side: BorderSide(
-                      color: const Color(0xFF00343C).withAlpha(80),
+                      color: const AppColor(0xFF00343C).withAlpha(80),
                       width: 1.5,
                     ),
                   ),
@@ -397,7 +398,7 @@ class _CreateScheduleSlotBottomSheetState
                         'Repetir este horário',
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
-                        color: Color(0xFF00343C),
+                        color: AppColor(0xFF00343C),
                       ),
                     ),
                   ),
@@ -413,7 +414,7 @@ class _CreateScheduleSlotBottomSheetState
                     child: Container(
                       height: 60,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF00343C),
+                        color: AppColor(0xFF00343C),
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(30),
                           bottomRight: Radius.circular(30),
@@ -446,7 +447,7 @@ class _CreateScheduleSlotBottomSheetState
                       height: 60,
                       decoration: BoxDecoration(
                         color: isTimeAvailable
-                            ? const Color(0xFF0C8DA1)
+                            ? const AppColor(0xFF0C8DA1)
                             : Colors.grey,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(30),

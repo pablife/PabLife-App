@@ -1,3 +1,5 @@
+import 'package:pablife/modules/auth/pages/choose_profile_page.dart';
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
@@ -214,6 +216,15 @@ class ProfileController extends GetxController with LoaderManagerMixin {
     await reloadProfile();
   }
 
+  /// Conta de profissional também entra como usuário.
+  bool get canSwitchProfile => _authService.isProfessionalAccount;
+
+  String get switchProfileLabel => _authService.isActingAsUser
+      ? 'Entrar como profissional'
+      : 'Entrar como usuário';
+
+  void switchProfile() => Get.offAllNamed(ChooseProfilePage.route);
+
   Future<void> showLogoutDialog() async {
     final confirmed = await AppDialog.showConfirmation(
       context: Get.context!,
@@ -221,7 +232,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
       message: 'Tem certeza de que deseja sair da sua conta?',
       confirmText: 'Sair',
       cancelText: 'Cancelar',
-      confirmButtonColor: const Color(0xFF00343C),
+      confirmButtonColor: const AppColor(0xFF00343C),
     );
 
     if (confirmed == true) {
@@ -238,7 +249,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
           'Tem certeza que deseja excluir sua conta? Esta ação é irreversível e todos os seus dados serão perdidos.',
       confirmText: 'Excluir',
       cancelText: 'Cancelar',
-      confirmButtonColor: const Color(0xFFFF3395),
+      confirmButtonColor: const AppColor(0xFFFF3395),
     );
 
     if (confirmed == true) {

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../../../widgets/design_system/text_default.dart';
 import '../../../infra/models/home_view_models.dart';
@@ -23,7 +24,7 @@ class UserHomeTaskButtonWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(25),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xffAEBEEC),
+          color: const AppColor(0xFFAEBEEC),
           borderRadius: BorderRadius.circular(25),
         ),
         child: Stack(
@@ -35,7 +36,7 @@ class UserHomeTaskButtonWidget extends StatelessWidget {
                   widthFactor: percentageFactor,
                   heightFactor: 1.0,
                   child: Container(
-                    decoration: const BoxDecoration(color: Color(0xff0C8DA1)),
+                    decoration: const BoxDecoration(color: AppColor(0xFF0C8DA1)),
                   ),
                 ),
               ),

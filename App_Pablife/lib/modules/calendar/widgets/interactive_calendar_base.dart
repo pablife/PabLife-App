@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -181,7 +182,7 @@ class _InteractiveCalendarBaseState extends State<InteractiveCalendarBase> {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F7),
+        color: const AppColor(0xFFF5F5F7),
         borderRadius: borderRadius,
       ),
       child: ClipRRect(
@@ -240,31 +241,31 @@ class _DayCard extends StatelessWidget {
   final void Function(CalendarSlotData slot)? onSlotTap;
 
   static const List<Color> _backgroundColors = [
-    Color(0xFFD8D4E8), // Lavender/Purple light
-    Color(0xFFE0C8D0), // Rose/Pink light
-    Color(0xFFC8E0D8), // Mint/Teal light
-    Color(0xFFE8E0C8), // Cream/Yellow light
-    Color(0xFFD0D8E8), // Sky/Blue light
-    Color(0xFFE8D8C8), // Peach light
+    AppColor(0xFFD8D4E8), // Lavender/Purple light
+    AppColor(0xFFE0C8D0), // Rose/Pink light
+    AppColor(0xFFC8E0D8), // Mint/Teal light
+    AppColor(0xFFE8E0C8), // Cream/Yellow light
+    AppColor(0xFFD0D8E8), // Sky/Blue light
+    AppColor(0xFFE8D8C8), // Peach light
   ];
 
   static const List<Color> _textColors = [
-    Color(0xFF4A3F6B), // Purple dark
-    Color(0xFF6B4A5A), // Rose dark
-    Color(0xFF3A5A4A), // Teal dark
-    Color(0xFF5A5030), // Olive dark
-    Color(0xFF3A4A6B), // Blue dark
-    Color(0xFF6B5A3A), // Brown dark
+    AppColor(0xFF4A3F6B), // Purple dark
+    AppColor(0xFF6B4A5A), // Rose dark
+    AppColor(0xFF3A5A4A), // Teal dark
+    AppColor(0xFF5A5030), // Olive dark
+    AppColor(0xFF3A4A6B), // Blue dark
+    AppColor(0xFF6B5A3A), // Brown dark
   ];
 
   // Cores de destaque para slots selecionáveis (matching text colors)
   static const List<Color> _slotButtonColors = [
-    Color(0xFF4A3F6B), // Purple
-    Color(0xFF6B4A5A), // Rose
-    Color(0xFF3A5A4A), // Teal
-    Color(0xFF5A5030), // Olive
-    Color(0xFF3A4A6B), // Blue
-    Color(0xFF6B5A3A), // Brown
+    AppColor(0xFF4A3F6B), // Purple
+    AppColor(0xFF6B4A5A), // Rose
+    AppColor(0xFF3A5A4A), // Teal
+    AppColor(0xFF5A5030), // Olive
+    AppColor(0xFF3A4A6B), // Blue
+    AppColor(0xFF6B5A3A), // Brown
   ];
 
   Color get _backgroundColor =>
