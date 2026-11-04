@@ -35,6 +35,9 @@ class SignUpController extends GetxController with LoaderManagerMixin {
   void onInit() {
     super.onInit();
     email = Get.arguments as String? ?? '';
+    if (AuthService.instance.entryChoice == 'professional') {
+      accountType = 'profissional';
+    }
   }
 
   void updateFullName(String value) {

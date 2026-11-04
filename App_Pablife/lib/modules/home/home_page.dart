@@ -11,7 +11,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<HomeController>(
       builder: (controller) {
-        return controller.homePage ?? const SizedBox.shrink();
+        return controller.homePage;
       },
     );
   }

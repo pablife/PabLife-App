@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:pablife/modules/dashboard/dashboard_page.dart';
 import 'package:pablife/modules/waiting_approval/pages/waiting_approval_page.dart';
 import '../../../shared/mixins/loader_manager.dart';
 import '../../../shared/utils/app_snackbar.dart';
@@ -23,6 +24,9 @@ class ProfessionalProfileController extends GetxController
   String cpfDocument = '';
   String description = '';
   ProfessionalType professionalType = ProfessionalType.nutritionist;
+
+  /// Usuário já logado completando o cadastro de profissional.
+  bool addToExistingAccount = false;
   String? documentBase64;
   String? documentFileName;
   String? profileImageBase64;
@@ -37,6 +41,7 @@ class ProfessionalProfileController extends GetxController
     fullName = args['fullName'] ?? '';
     phone = args['phone'] ?? '';
     cpfDocument = args['cpfDocument'] ?? '';
+    addToExistingAccount = args['addToExisting'] == true;
   }
 
   void updateProfessionalType(ProfessionalType value) {
@@ -151,6 +156,12 @@ class ProfessionalProfileController extends GetxController
 
     changeLoading(true);
 
+    if (addToExistingAccount) {
+      await _addToExistingAccount();
+      changeLoading(false);
+      return;
+    }
+
     try {
       final userData = UserModel(
         fullName: fullName,
@@ -201,7 +212,30 @@ class ProfessionalProfileController extends GetxController
     }
   }
 
+  Future<void> _addToExistingAccount() async {
+    final response = await _userRepository.addProfessionalProfile(
+      professionalType: professionalType.value,
+      documentBase64: documentBase64!,
+      documentFileName: documentFileName!,
+      description: description,
+    );
+    if (!response.success) {
+      AppSnackbar.to.show(response.message);
+      return;
+    }
+
+    final authService = AuthService.instance;
+    await authService.reloadCurrentUser();
+    await authService.setActingAsUser(false);
+    AppSnackbar.to.show('Cadastro enviado para aprovação!');
+    Get.offAllNamed(WaitingApprovalPage.route);
+  }
+
   void goBack() {
-    Get.back();
+    if (addToExistingAccount) {
+      Get.offAllNamed(DashboardPage.route);
+    } else {
+      Get.back();
+    }
   }
 }

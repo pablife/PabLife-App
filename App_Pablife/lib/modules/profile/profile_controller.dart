@@ -1,3 +1,4 @@
+import 'package:pablife/modules/auth/pages/choose_profile_page.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
@@ -214,6 +215,15 @@ class ProfileController extends GetxController with LoaderManagerMixin {
     await reloadProfile();
   }
 
+  /// Conta de profissional também entra como usuário.
+  bool get canSwitchProfile => _authService.isProfessionalAccount;
+
+  String get switchProfileLabel => _authService.isActingAsUser
+      ? 'Entrar como profissional'
+      : 'Entrar como usuário';
+
+  void switchProfile() => Get.offAllNamed(ChooseProfilePage.route);
+
   Future<void> showLogoutDialog() async {
     final confirmed = await AppDialog.showConfirmation(
       context: Get.context!,
@@ -226,7 +236,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
 
     if (confirmed == true) {
       await _authService.signOut();
-      Get.offAllNamed('/onboarding');
+      Get.offAllNamed(ChooseProfilePage.route);
     }
   }
 
@@ -262,7 +272,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
       AppSnackbar.to.show(response.message);
     } else {
       AppSnackbar.to.show('Conta excluída com sucesso');
-      Get.offAllNamed('/onboarding');
+      Get.offAllNamed(ChooseProfilePage.route);
     }
   }
 

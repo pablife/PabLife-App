@@ -1,8 +1,8 @@
+import 'package:pablife/modules/auth/pages/choose_profile_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:pablife/modules/auth/pages/recovery_password_page.dart';
-import 'package:pablife/modules/dashboard/dashboard_page.dart';
 import '../../../infra/repositories/user_repository.dart';
 import '../../../shared/mixins/loader_manager.dart';
 import '../../../shared/utils/app_snackbar.dart';
@@ -52,7 +52,7 @@ class PasswordController extends GetxController with LoaderManagerMixin {
             await _userRepository.setOneSignalUserId('');
           }
         }
-        Get.offAllNamed(DashboardPage.route);
+        await ChooseProfilePage.enterAfterLogin();
       } else {
         AppSnackbar.to.show('Email ou senha incorretos');
       }

@@ -241,6 +241,35 @@ class UserRepository extends StrautilsTryThis {
     }, action: 'validar email.');
   }
 
+  /// Usuário já cadastrado completa o cadastro de profissional na mesma conta.
+  FStrautilsResponse<bool> addProfessionalProfile({
+    required String professionalType,
+    required String documentBase64,
+    required String documentFileName,
+    String? description,
+  }) {
+    return tryThis(() async {
+      try {
+        await _client.functions.invoke(
+          'add-professional-profile',
+          body: {
+            'professionalType': professionalType,
+            'validationDocumentBase64': documentBase64,
+            'validationDocumentFileName': documentFileName,
+            'description': description,
+          },
+        );
+        return StrautilsResponse.success(true);
+      } on FunctionException catch (e) {
+        final details = e.details;
+        final message = details is Map ? details['error']?.toString() : null;
+        return StrautilsResponse.error(
+          message ?? 'Não foi possível enviar seu cadastro.',
+        );
+      }
+    }, action: 'enviar cadastro de profissional.');
+  }
+
   FStrautilsResponse<String?> updateProfilePhoto({
     required String userId,
     required String imageBase64,

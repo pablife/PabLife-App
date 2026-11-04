@@ -65,6 +65,17 @@ class UserAccessInfo {
     );
   }
 
+  /// Profissional no lado usuário: acesso gratuito a tudo.
+  factory UserAccessInfo.professionalBenefit() {
+    return UserAccessInfo(
+      status: SubscriptionAccessStatus.active,
+      consultationsAvailable: 999,
+      canAccessPlanner: true,
+      canAccessMentorias: true,
+      canScheduleAppointment: true,
+    );
+  }
+
   /// Cria um UserAccessInfo para usuário em trial
   factory UserAccessInfo.trial({required int daysRemaining}) {
     return UserAccessInfo(
@@ -121,6 +132,9 @@ class SubscriptionService {
   final SupabaseClient _client = Supabase.instance.client;
   final SubscriptionPlanRepository _planRepository = SubscriptionPlanRepository();
 
+  /// Ligado quando o profissional está no lado usuário.
+  bool freeAccess = false;
+
   UserAccessInfo? _cachedAccessInfo;
   DateTime? _lastCheck;
   static const _cacheDuration = Duration(minutes: 5);
@@ -146,6 +160,8 @@ class SubscriptionService {
     required String userId,
     bool forceRefresh = false,
   }) async {
+    if (freeAccess) return UserAccessInfo.professionalBenefit();
+
     // Retorna cache se válido e não forçando refresh
     if (!forceRefresh && _isCacheValid) {
       return _cachedAccessInfo!;
