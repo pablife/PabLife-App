@@ -29,6 +29,9 @@ class AuthService {
   bool _actingAsUser = false;
   bool _hasChosenProfile = false;
 
+  /// Resposta de "Você é?" antes do login: 'professional' ou 'user'.
+  String? entryChoice;
+
   UserModel? get currentUser => _actingAsUser
       ? _currentUser?.copyWith(role: UserRole.user)
       : _currentUser;
@@ -60,9 +63,25 @@ class AuthService {
   }
 
   Future<void> _applyActiveProfile() async {
-    _subscriptionService.freeAccess = _actingAsUser;
+    _subscriptionService.freeAccess =
+        _actingAsUser && await _isApprovedProfessional();
     _subscriptionService.clearCache();
     await _loadUserAccessInfo();
+  }
+
+  /// O acesso gratuito do lado usuário é benefício de quem já foi aprovado.
+  Future<bool> _isApprovedProfessional() async {
+    try {
+      final row = await _client
+          .from('tb_professionals')
+          .select('validation_status')
+          .eq('user_id', _currentUser!.id!)
+          .maybeSingle();
+      return row?['validation_status'] == 'approved';
+    } catch (e) {
+      debugPrint('Erro ao verificar aprovação do profissional: $e');
+      return false;
+    }
   }
 
   Future<void> _clearActiveProfile() async {
@@ -72,6 +91,7 @@ class AuthService {
     _hasChosenProfile = false;
     _subscriptionService.freeAccess = false;
   }
+
   UserAccessInfo? get userAccessInfo => _userAccessInfo;
   bool get isAuthenticated => _currentUser != null;
   bool get isLoading => _isLoading;

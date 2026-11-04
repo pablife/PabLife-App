@@ -24,7 +24,7 @@ class CalendarPage extends StatelessWidget {
 
     return GetBuilder<CalendarSwitcherController>(
       builder: (controller) {
-        return controller.calendarPage ?? const SizedBox.shrink();
+        return controller.calendarPage;
       },
     );
   }

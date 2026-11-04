@@ -236,7 +236,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
 
     if (confirmed == true) {
       await _authService.signOut();
-      Get.offAllNamed('/onboarding');
+      Get.offAllNamed(ChooseProfilePage.route);
     }
   }
 
@@ -272,7 +272,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
       AppSnackbar.to.show(response.message);
     } else {
       AppSnackbar.to.show('Conta excluída com sucesso');
-      Get.offAllNamed('/onboarding');
+      Get.offAllNamed(ChooseProfilePage.route);
     }
   }
 
