@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:pablife/modules/auth/pages/choose_profile_page.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -231,7 +232,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
       message: 'Tem certeza de que deseja sair da sua conta?',
       confirmText: 'Sair',
       cancelText: 'Cancelar',
-      confirmButtonColor: const Color(0xFF00343C),
+      confirmButtonColor: const AppColor(0xFF00343C),
     );
 
     if (confirmed == true) {
@@ -248,7 +249,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
           'Tem certeza que deseja excluir sua conta? Esta ação é irreversível e todos os seus dados serão perdidos.',
       confirmText: 'Excluir',
       cancelText: 'Cancelar',
-      confirmButtonColor: const Color(0xFFFF3395),
+      confirmButtonColor: const AppColor(0xFFFF3395),
     );
 
     if (confirmed == true) {

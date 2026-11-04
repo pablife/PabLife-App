@@ -1,3 +1,4 @@
+import 'package:pablife/modules/women_health/women_health_controller.dart';
 import 'package:get/get.dart';
 
 import 'calendar_page.dart';
@@ -41,6 +42,9 @@ final calendarRoutes = [
         }
         if (!Get.isRegistered<UserWideCalendarController>()) {
           Get.lazyPut(() => UserWideCalendarController(), fenix: true);
+        }
+        if (!Get.isRegistered<WomenHealthController>()) {
+          Get.lazyPut(() => WomenHealthController(), fenix: true);
         }
         if (!Get.isRegistered<InteractiveCalendarController>()) {
           Get.lazyPut(() => InteractiveCalendarController(), fenix: true);

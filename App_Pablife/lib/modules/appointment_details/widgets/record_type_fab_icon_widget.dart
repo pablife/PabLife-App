@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -20,7 +21,7 @@ class RecordTypeFabIconWidget extends StatelessWidget {
             width: 24,
             height: 24,
             colorFilter: const ColorFilter.mode(
-              Color(0xFFFFFFFF),
+              AppColor(0xFFFFFFFF),
               BlendMode.srcIn,
             ),
           ),

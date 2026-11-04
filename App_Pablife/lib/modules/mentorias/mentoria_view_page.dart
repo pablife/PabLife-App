@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pablife/widgets/design_system/app_image.dart';
@@ -29,7 +30,7 @@ class MentoriaViewPage extends StatelessWidget {
             : 'Autor não informado';
 
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           extendBodyBehindAppBar: true,
           appBar: const AppBarDefault(title: ''),
           body: Stack(
@@ -41,7 +42,7 @@ class MentoriaViewPage extends StatelessWidget {
                 top: 326,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFC1CDFF),
+                    color: const AppColor(0xFFC1CDFF),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(30),
                       topRight: Radius.circular(30),
@@ -65,7 +66,7 @@ class MentoriaViewPage extends StatelessWidget {
                             mentoria.title,
                             fontSize: 32,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF00343C),
+                            color: const AppColor(0xFF00343C),
                             height: 1.2,
                           ),
                         ),
@@ -76,7 +77,7 @@ class MentoriaViewPage extends StatelessWidget {
                             author,
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF22717D),
+                            color: AppColor(0xFF22717D),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -88,11 +89,11 @@ class MentoriaViewPage extends StatelessWidget {
                                 : 'Se Inscrever',
                             onTap: controller.toggleSave,
                             backgroundColor: controller.isSaved
-                                ? const Color(0xFF0C8DA1)
-                                : const Color(0xFFAEBEEC),
+                                ? const AppColor(0xFF0C8DA1)
+                                : const AppColor(0xFFAEBEEC),
                             textColor: controller.isSaved
                                 ? Colors.white
-                                : const Color(0xFF00343C),
+                                : const AppColor(0xFF00343C),
                             width: 190,
                             side: EdgeSide.left,
                             icon: Icon(
@@ -101,7 +102,7 @@ class MentoriaViewPage extends StatelessWidget {
                                   : Icons.bookmark_border,
                               color: controller.isSaved
                                   ? Colors.white
-                                  : const Color(0xFF00343C),
+                                  : const AppColor(0xFF00343C),
                               size: 20,
                             ),
                           ),
@@ -147,7 +148,7 @@ class MentoriaViewPage extends StatelessWidget {
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 40),
                               child: CircularProgressIndicator(
-                                color: Color(0xFF00343C),
+                                color: AppColor(0xFF00343C),
                               ),
                             ),
                           )
@@ -200,7 +201,7 @@ class MentoriaViewPage extends StatelessWidget {
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 40),
                               child: CircularProgressIndicator(
-                                color: Color(0xFF00343C),
+                                color: AppColor(0xFF00343C),
                               ),
                             ),
                           )
@@ -238,7 +239,7 @@ class MentoriaViewDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(height: 1, color: const Color(0xFF00343C).withAlpha(38));
+    return Container(height: 1, color: const AppColor(0xFF00343C).withAlpha(38));
   }
 }
 
@@ -270,15 +271,15 @@ class _MentoriaBanner extends StatelessWidget {
                     imageUrl: imageUrl,
                     fit: BoxFit.fitWidth,
                     placeholder: Container(
-                      color: const Color(0xFF00343C).withAlpha(153),
+                      color: const AppColor(0xFF00343C).withAlpha(153),
                       child: const Center(
                         child: CircularProgressIndicator(
-                          color: Color(0xFFC1CDFF),
+                          color: AppColor(0xFFC1CDFF),
                         ),
                       ),
                     ),
                     errorWidget: Container(
-                      color: const Color(0xFF00343C).withAlpha(153),
+                      color: const AppColor(0xFF00343C).withAlpha(153),
                       alignment: Alignment.center,
                       child: Icon(
                         Icons.image_not_supported,

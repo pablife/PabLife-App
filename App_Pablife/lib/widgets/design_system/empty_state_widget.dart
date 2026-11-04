@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'text_default.dart';
 
@@ -40,14 +41,14 @@ class EmptyStateWidget extends StatelessWidget {
             Icon(
               icon,
               size: iconSize,
-              color: iconColor ?? const Color(0xFF00343C).withAlpha(128),
+              color: iconColor ?? const AppColor(0xFF00343C).withAlpha(128),
             ),
             const SizedBox(height: 16),
             TextDefault(
               title,
               fontSize: titleFontSize,
               fontWeight: titleFontWeight,
-              color: titleColor ?? const Color(0xFF00343C).withAlpha(128),
+              color: titleColor ?? const AppColor(0xFF00343C).withAlpha(128),
               textAlign: TextAlign.center,
             ),
             if (description != null) ...[
@@ -57,7 +58,7 @@ class EmptyStateWidget extends StatelessWidget {
                 fontSize: descriptionFontSize,
                 fontWeight: descriptionFontWeight,
                 color:
-                    descriptionColor ?? const Color(0xFF00343C).withAlpha(102),
+                    descriptionColor ?? const AppColor(0xFF00343C).withAlpha(102),
                 textAlign: TextAlign.center,
               ),
             ],

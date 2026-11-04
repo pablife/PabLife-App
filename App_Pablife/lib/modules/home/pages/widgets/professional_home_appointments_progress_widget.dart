@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/professional_home_controller.dart';
 import '../../../../widgets/design_system/text_default.dart';
@@ -40,7 +41,7 @@ class ProfessionalHomeAppointmentsProgressWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(25),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFAEBEEC),
+                color: const AppColor(0xFFAEBEEC),
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Stack(
@@ -52,7 +53,7 @@ class ProfessionalHomeAppointmentsProgressWidget extends StatelessWidget {
                         widthFactor: percentageFactor,
                         child: Container(
                           decoration: const BoxDecoration(
-                            color: Color(0xFF0C8DA1),
+                            color: AppColor(0xFF0C8DA1),
                           ),
                         ),
                       ),

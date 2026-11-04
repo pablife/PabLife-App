@@ -1,154 +1,106 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pablife/modules/auth/pages/sign_up_page.dart';
-import 'package:pablife/widgets/app_text_vector.dart';
-import '../controllers/email_input_controller.dart';
-import '../../../widgets/design_system/edge_button_rounded.dart';
-import '../../../widgets/design_system/text_default.dart';
-import '../../../widgets/design_system/app_text_form_field.dart';
-import '../../../shared/themes/app_colors.dart';
 
-class EmailInputPage extends StatelessWidget {
+import '../controllers/email_input_controller.dart';
+import 'widgets/auth_animated_background.dart';
+import 'widgets/auth_form_layout.dart';
+
+class EmailInputPage extends StatefulWidget {
   const EmailInputPage({super.key});
 
   static const route = '/auth/email';
 
   @override
+  State<EmailInputPage> createState() => _EmailInputPageState();
+}
+
+class _EmailInputPageState extends State<EmailInputPage>
+    with SingleTickerProviderStateMixin {
+  bool _touched = false;
+  final _focus = FocusNode();
+  late final AnimationController _shake = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 600),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() {
+      if (!_focus.hasFocus) setState(() => _touched = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    _shake.dispose();
+    super.dispose();
+  }
+
+  void _submit(EmailInputController controller) {
+    if (controller.isLoading) return;
+    if (!controller.isEmailValid) {
+      setState(() => _touched = true);
+      _shake.forward(from: 0);
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    controller.checkEmail();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.aqua,
-      body: GetBuilder<EmailInputController>(
-        builder: (controller) {
-          return SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Center(child: AppTextVector(width: 147, height: 45)),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Image.asset(
-                    'assets/pages/auth/auth_banner.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                Expanded(
-                  flex: 4,
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: AppColors.second,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(32),
-                        topRight: Radius.circular(32),
-                      ),
-                    ),
-                    child: ListView(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 32,
-                            right: 32,
-                            top: 32,
-                          ),
-                          child: const TextDefault(
-                            'Digite seu e-mail',
-                            fontSize: 36,
-                            textAlign: TextAlign.center,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.aquaText,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Opacity(
-                            opacity: 0.56,
-                            child: const TextDefault(
-                              'Informe o e-mail da sua conta para continuar',
-                              fontSize: 16,
-                              textAlign: TextAlign.center,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: AppTextFormField(
-                            labelText: 'E-mail',
-                            hintText: 'seu@email.com',
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.done,
-                            onChanged: controller.updateEmail,
-                            onFieldSubmitted: (_) {
-                              FocusScope.of(context).unfocus();
-                              if (!controller.isLoading) {
-                                controller.checkEmail();
-                              }
-                            },
-                            enabled: !controller.isLoading,
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Opacity(
-                                  opacity: 0.56,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const TextDefault(
-                                        'Não tem conta?',
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Get.toNamed(SignUpPage.route),
-                                        style: TextButton.styleFrom(
-                                          padding: EdgeInsets.zero,
-                                          minimumSize: const Size(50, 30),
-                                          tapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                        ),
-                                        child: const TextDefault(
-                                          'Cadastrar agora',
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              child: EdgeButtonRounded(
-                                text: 'Continuar',
-                                width: 190,
-                                onTap: controller.checkEmail,
-                                isLoading: controller.isLoading,
-                                side: EdgeSide.left,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+    return GetBuilder<EmailInputController>(
+      builder: (controller) {
+        final showError =
+            _touched && controller.email.isNotEmpty && !controller.isEmailValid;
+
+        return AuthFormLayout(
+          title: 'Digite seu e-mail',
+          subtitle: 'Informe o e-mail da sua conta para continuar',
+          field: AnimatedBuilder(
+            animation: _shake,
+            builder: (context, child) => Transform.translate(
+              offset: Offset(math.sin(_shake.value * math.pi * 4) * 6, 0),
+              child: child,
             ),
-          );
-        },
-      ),
+            child: AuthTextField(
+              label: 'E-mail',
+              hint: 'seuemail@exemplo.com',
+              focusNode: _focus,
+              enabled: !controller.isLoading,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+              onChanged: controller.updateEmail,
+              onSubmitted: (_) => _submit(controller),
+              borderColor: showError
+                  ? AuthColors.errorBorder
+                  : controller.isEmailValid
+                  ? AuthColors.accent
+                  : Colors.transparent,
+              focusedBorderColor: showError
+                  ? AuthColors.errorBorder
+                  : AuthColors.accent,
+              errorText: showError
+                  ? 'Digite um e-mail válido, como nome@exemplo.com'
+                  : null,
+            ),
+          ),
+          footerText: 'Não tem conta?',
+          footerLink: 'Cadastrar agora',
+          onFooterLink: () => Get.toNamed(SignUpPage.route),
+          button: AuthContinueButton(
+            enabled: controller.isEmailValid && !controller.isLoading,
+            loading: controller.isLoading,
+            loadingLabel: 'Verificando…',
+            onTap: () => _submit(controller),
+          ),
+        );
+      },
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../widgets/design_system/app_text_form_field.dart';
@@ -12,7 +13,7 @@ class RecordEditorContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: const Color(0xFFC1CDFF),
+      color: const AppColor(0xFFC1CDFF),
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 30),
         child: Column(

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -12,9 +13,9 @@ class RecordCard extends StatelessWidget {
 
   const RecordCard({super.key, required this.record});
 
-  Color get _titleColor => const Color(0xFF00343C);
-  Color get _iconColor => const Color(0xFF033138);
-  Color get _descriptionColor => const Color(0xFF000000).withAlpha(143);
+  Color get _titleColor => const AppColor(0xFF00343C);
+  Color get _iconColor => const AppColor(0xFF033138);
+  Color get _descriptionColor => const AppColor(0xFF000000).withAlpha(143);
 
   String _typeLabel(PatientRecordType type) {
     switch (type) {
@@ -78,7 +79,7 @@ class RecordCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFAEBEEC),
+          color: const AppColor(0xFFAEBEEC),
           borderRadius: BorderRadius.circular(25),
         ),
         child: Column(

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 import '../../../widgets/design_system/text_default.dart';
@@ -233,7 +234,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
     final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF082C32),
+      backgroundColor: const AppColor(0xFF082C32),
       body: Stack(
         children: [
           Column(
@@ -257,12 +258,12 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A3A42),
+        color: const AppColor(0xFF0A3A42),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF00C2A8), width: 1),
+        border: Border.all(color: const AppColor(0xFF00C2A8), width: 1),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00C2A8).withAlpha(38),
+            color: const AppColor(0xFF00C2A8).withAlpha(38),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -273,7 +274,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF00C2A8),
+          color: AppColor(0xFF00C2A8),
           letterSpacing: 0.6,
         ),
       ),
@@ -290,12 +291,12 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF0A3A42),
+                color: const AppColor(0xFF0A3A42),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.arrow_back,
-                color: Color(0xFFC1CDFF),
+                color: AppColor(0xFFC1CDFF),
                 size: 24,
               ),
             ),
@@ -321,7 +322,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
                 style: const TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFFC1CDFF),
+                  color: AppColor(0xFFC1CDFF),
                   height: 1.2,
                   fontFamily: 'Instrument Sans',
                 ),
@@ -331,7 +332,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
                 widget.weekdayLabel,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFFC1CDFF),
+                color: const AppColor(0xFFC1CDFF),
               ),
             ],
           ),
@@ -340,7 +341,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
             width: 3,
             height: 136,
             decoration: BoxDecoration(
-              color: const Color(0xFFC1CDFF),
+              color: const AppColor(0xFFC1CDFF),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -353,28 +354,28 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
                   widget.headerInfo.primaryTitle,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFFC1CDFF),
+                  color: const AppColor(0xFFC1CDFF),
                 ),
                 const SizedBox(height: 8),
                 TextDefault(
                   widget.headerInfo.primarySubtitle,
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFFC1CDFF),
+                  color: const AppColor(0xFFC1CDFF),
                 ),
                 const SizedBox(height: 16),
                 TextDefault(
                   widget.headerInfo.secondaryTitle,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFFC1CDFF),
+                  color: const AppColor(0xFFC1CDFF),
                 ),
                 const SizedBox(height: 8),
                 TextDefault(
                   widget.headerInfo.secondarySubtitle,
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFFC1CDFF),
+                  color: const AppColor(0xFFC1CDFF),
                 ),
               ],
             ),
@@ -393,7 +394,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
   Widget _buildContent() {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFFC1CDFF),
+        color: AppColor(0xFFC1CDFF),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
@@ -424,10 +425,10 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
                 child: Container(
                   height: 46,
                   decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFF00343C)),
+                    border: Border.all(color: const AppColor(0xFF00343C)),
                     borderRadius: BorderRadius.circular(25),
                     color: isSelected
-                        ? const Color(0xFF00343C).withAlpha(26)
+                        ? const AppColor(0xFF00343C).withAlpha(26)
                         : Colors.transparent,
                   ),
                   child: Center(
@@ -438,14 +439,14 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
                           filter.label,
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF082C32),
+                          color: const AppColor(0xFF082C32),
                         ),
                         if (filter.icon != null) ...[
                           const SizedBox(width: 8),
                           Icon(
                             filter.icon,
                             size: 18,
-                            color: const Color(0xFF00343C),
+                            color: const AppColor(0xFF00343C),
                           ),
                         ],
                       ],
@@ -494,7 +495,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
   Widget _buildHourBlock(AgendaHourBlock block) {
     final hasItems = block.items.isNotEmpty;
     final isHighlighted = block.isHighlighted && hasItems;
-    final highlightColor = block.highlightColor ?? const Color(0xFF00C2A8);
+    final highlightColor = block.highlightColor ?? const AppColor(0xFF00C2A8);
 
     final double blockHeight = _calculateBlockHeight(block.items);
 
@@ -554,7 +555,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
               '${block.hour.toString().padLeft(2, '0')}h',
               fontSize: 18,
               fontWeight: FontWeight.w400,
-              color: isHighlighted ? Colors.white : const Color(0xFF00343C),
+              color: isHighlighted ? Colors.white : const AppColor(0xFF00343C),
             ),
           ),
         ],

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pablife/widgets/design_system/text_default.dart';
@@ -60,7 +61,7 @@ class _CalendarTabPageState extends State<CalendarTabPage>
     final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF082C32),
+      backgroundColor: const AppColor(0xFF082C32),
       body: Column(
         children: [
           SizedBox(height: statusBarHeight + 16),
@@ -91,12 +92,12 @@ class _CalendarTabPageState extends State<CalendarTabPage>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A3A42),
+            color: const AppColor(0xFF0A3A42),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF00C2A8), width: 1),
+            border: Border.all(color: const AppColor(0xFF00C2A8), width: 1),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF00C2A8).withAlpha(38),
+                color: const AppColor(0xFF00C2A8).withAlpha(38),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -107,7 +108,7 @@ class _CalendarTabPageState extends State<CalendarTabPage>
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF00C2A8),
+              color: AppColor(0xFF00C2A8),
               letterSpacing: 0.6,
             ),
           ),
@@ -120,19 +121,19 @@ class _CalendarTabPageState extends State<CalendarTabPage>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A3A42),
+        color: const AppColor(0xFF0A3A42),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: const Color(0xFF0C8DA1),
+          color: const AppColor(0xFF0C8DA1),
           borderRadius: BorderRadius.circular(10),
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         labelColor: Colors.white,
-        unselectedLabelColor: const Color(0xFFC1CDFF),
+        unselectedLabelColor: const AppColor(0xFFC1CDFF),
         labelStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -232,29 +233,29 @@ class _TodayTabContent extends StatelessWidget {
 
     switch (item.type) {
       case CalendarItemType.taskPending:
-        backgroundColor = const Color(0xFF00C2A8);
+        backgroundColor = const AppColor(0xFF00C2A8);
         iconData = Icons.check_circle_outline;
         showToggle = true;
         break;
       case CalendarItemType.task:
         backgroundColor = item.isCompleted
-            ? const Color(0xFF0C8DA1)
-            : const Color(0xFF00C2A8);
+            ? const AppColor(0xFF0C8DA1)
+            : const AppColor(0xFF00C2A8);
         iconData = Icons.check_circle_outline;
         showToggle = true;
         break;
       case CalendarItemType.goal:
-        backgroundColor = const Color(0xFF92CA4F);
+        backgroundColor = const AppColor(0xFF92CA4F);
         iconData = Icons.flag_outlined;
         showToggle = true;
         break;
       case CalendarItemType.note:
-        backgroundColor = const Color(0xFFD2CC61);
+        backgroundColor = const AppColor(0xFFD2CC61);
         iconData = Icons.note_outlined;
         showToggle = true;
         break;
       case CalendarItemType.consultation:
-        backgroundColor = const Color(0xFF3065FF);
+        backgroundColor = const AppColor(0xFF3065FF);
         iconData = Icons.favorite_border;
         break;
     }
@@ -379,7 +380,7 @@ class _CalendarTabContent extends StatelessWidget {
       builder: (controller) {
         if (controller.isLoading) {
           return const Center(
-            child: CircularProgressIndicator(color: Color(0xFFC1CDFF)),
+            child: CircularProgressIndicator(color: AppColor(0xFFC1CDFF)),
           );
         }
 
@@ -442,7 +443,7 @@ class _CalendarTabContent extends StatelessWidget {
             id: 'tasks',
             label: tasksCount == 1 ? 'Tarefa' : 'Tarefas',
             count: tasksCount,
-            color: const Color(0xFF00C2A8),
+            color: const AppColor(0xFF00C2A8),
           ),
         );
       }
@@ -453,7 +454,7 @@ class _CalendarTabContent extends StatelessWidget {
             id: 'notes',
             label: notesCount == 1 ? 'Anotação' : 'Anotações',
             count: notesCount,
-            color: const Color(0xFFD2CC61),
+            color: const AppColor(0xFFD2CC61),
           ),
         );
       }
@@ -464,7 +465,7 @@ class _CalendarTabContent extends StatelessWidget {
             id: 'appointments',
             label: appointmentsCount == 1 ? 'Consulta' : 'Consultas',
             count: appointmentsCount,
-            color: const Color(0xFF3065FF),
+            color: const AppColor(0xFF3065FF),
           ),
         );
       }

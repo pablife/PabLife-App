@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/dashboard_goals_controller.dart';
@@ -24,7 +25,7 @@ class DashboardHomePage extends StatelessWidget {
                     'Metas',
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF2D3142),
+                          color: const AppColor(0xFF2D3142),
                         ),
                   ),
                   const SizedBox(height: 24),

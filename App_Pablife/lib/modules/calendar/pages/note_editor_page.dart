@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../shared/themes/app_colors.dart';
@@ -18,7 +19,7 @@ class NoteEditorPage extends StatelessWidget {
     return GetBuilder<NoteEditorController>(
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           body: Column(
             children: [
               const SizedBox(height: 32),
@@ -85,7 +86,7 @@ class NoteEditorPage extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.note_add_outlined,
-                color: Color(0xFF00343C),
+                color: AppColor(0xFF00343C),
                 size: 20,
               ),
             ),
@@ -105,7 +106,7 @@ class NoteEditorPage extends StatelessWidget {
   Widget _buildContent(NoteEditorController controller) {
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(color: Color(0xFFC1CDFF)),
+      decoration: const BoxDecoration(color: AppColor(0xFFC1CDFF)),
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 30),
         child: Column(
@@ -167,7 +168,7 @@ class NoteEditorPage extends StatelessWidget {
             child: EdgeButtonRounded(
               text: 'Cancelar',
               onTap: controller.goBack,
-              backgroundColor: const Color(0xFF0C8DA1),
+              backgroundColor: const AppColor(0xFF0C8DA1),
               side: EdgeSide.right,
             ),
           ),
@@ -177,7 +178,7 @@ class NoteEditorPage extends StatelessWidget {
               text: 'Salvar',
               onTap: controller.saveNote,
               isLoading: controller.isLoading,
-              backgroundColor: const Color(0xFF00343C),
+              backgroundColor: const AppColor(0xFF00343C),
               side: EdgeSide.left,
             ),
           ),

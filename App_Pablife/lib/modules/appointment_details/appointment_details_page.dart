@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,18 +25,18 @@ class AppointmentDetailsPage extends StatelessWidget {
         if (controller.isLoadingAppointment || controller.appointment == null) {
           return Scaffold(
             extendBody: true,
-            backgroundColor: const Color(0xFF00343C),
+            backgroundColor: const AppColor(0xFF00343C),
             appBar: AppBarDefault(trailing: const NotificationButtonWidget()),
             body: Container(
               decoration: const BoxDecoration(
-                color: Color(0xFFC1CDFF),
+                color: AppColor(0xFFC1CDFF),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(39),
                   topRight: Radius.circular(39),
                 ),
               ),
               child: const Center(
-                child: CircularProgressIndicator(color: Color(0xFF00343C)),
+                child: CircularProgressIndicator(color: AppColor(0xFF00343C)),
               ),
             ),
           );
@@ -46,7 +47,7 @@ class AppointmentDetailsPage extends StatelessWidget {
 
         return Scaffold(
           extendBody: true,
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           appBar: AppBarDefault(trailing: const NotificationButtonWidget()),
           body: Column(
             children: [
@@ -54,7 +55,7 @@ class AppointmentDetailsPage extends StatelessWidget {
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFFC1CDFF),
+                    color: AppColor(0xFFC1CDFF),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(39),
                       topRight: Radius.circular(39),
@@ -70,9 +71,9 @@ class AppointmentDetailsPage extends StatelessWidget {
                           showStatusIndicator: true,
                           patient: appointment,
                           customButtonColor: controller.shouldShowCancelButton
-                              ? const Color(0xFFC1CDFF)
-                              : const Color(0xFF0C8DA1),
-                          customTimeColor: const Color(0xFF0C8DA1),
+                              ? const AppColor(0xFFC1CDFF)
+                              : const AppColor(0xFF0C8DA1),
+                          customTimeColor: const AppColor(0xFF0C8DA1),
                           customTrailingIcon: controller.canShowCompleteButton
                               ? Icons.check
                               : appointment.status ==
@@ -83,7 +84,7 @@ class AppointmentDetailsPage extends StatelessWidget {
                               : null,
                           customTrailingIconColor:
                               controller.canShowCompleteButton
-                              ? const Color(0xFF0C8DA1)
+                              ? const AppColor(0xFF0C8DA1)
                               : Colors.black,
                           onTrailingTap: controller.canShowCompleteButton
                               ? controller.completeAppointment
@@ -113,7 +114,7 @@ class AppointmentDetailsPage extends StatelessWidget {
                           child: controller.isLoading
                               ? const Center(
                                   child: CircularProgressIndicator(
-                                    color: Color(0xFF00343C),
+                                    color: AppColor(0xFF00343C),
                                   ),
                                 )
                               : controller.filteredRecords.isEmpty
@@ -167,7 +168,7 @@ class AppointmentDetailsPage extends StatelessWidget {
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFF00343C),
+                                      color: AppColor(0xFF00343C),
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -176,7 +177,7 @@ class AppointmentDetailsPage extends StatelessWidget {
                                     _getScheduledStatusDescription(),
                                     style: const TextStyle(
                                       fontSize: 16,
-                                      color: Color(0xFF00343C),
+                                      color: AppColor(0xFF00343C),
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -219,7 +220,7 @@ class AppointmentDetailsPage extends StatelessWidget {
                                       text: 'Cancelada/remarcada',
                                       onTap:
                                           controller.markCancelledRescheduled,
-                                      backgroundColor: const Color(0xFFDA879A),
+                                      backgroundColor: const AppColor(0xFFDA879A),
                                     ),
                                   ],
                                 ],
@@ -249,7 +250,7 @@ class AppointmentDetailsPage extends StatelessWidget {
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFF00343C),
+                                      color: AppColor(0xFF00343C),
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -258,7 +259,7 @@ class AppointmentDetailsPage extends StatelessWidget {
                                     _getStatusDescription(appointment.status),
                                     style: const TextStyle(
                                       fontSize: 16,
-                                      color: Color(0xFF00343C),
+                                      color: AppColor(0xFF00343C),
                                     ),
                                     textAlign: TextAlign.center,
                                   ),

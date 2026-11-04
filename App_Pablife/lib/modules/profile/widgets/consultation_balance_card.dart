@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -54,12 +55,12 @@ class ConsultationBalanceCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0C8DA1).withAlpha(38),
+                  color: const AppColor(0xFF0C8DA1).withAlpha(38),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
                   Icons.event_available,
-                  color: Color(0xFF0C8DA1),
+                  color: AppColor(0xFF0C8DA1),
                 ),
               ),
               const SizedBox(width: 12),
@@ -102,7 +103,7 @@ class ConsultationBalanceCard extends StatelessWidget {
                       height: 8,
                       margin: const EdgeInsets.only(top: 6, right: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0C8DA1).withAlpha(80),
+                        color: const AppColor(0xFF0C8DA1).withAlpha(80),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -124,7 +125,7 @@ class ConsultationBalanceCard extends StatelessWidget {
                     height: 8,
                     margin: const EdgeInsets.only(top: 6, right: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0C8DA1),
+                      color: const AppColor(0xFF0C8DA1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -151,7 +152,7 @@ class ConsultationBalanceCard extends StatelessWidget {
                       height: 8,
                       margin: const EdgeInsets.only(top: 6, right: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0C8DA1),
+                        color: const AppColor(0xFF0C8DA1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),

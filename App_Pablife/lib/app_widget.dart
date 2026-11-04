@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 
-import '../shared/themes/app_colors.dart';
+import '../shared/themes/app_palette.dart';
 import '../shared/utils/wide_layout.dart';
 import 'app_controller.dart';
 import 'app_routes.dart';
@@ -37,31 +37,7 @@ class AppWidget extends StatelessWidget {
           ),
         );
       },
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.aqua,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        fontFamily: 'InstrumentSans',
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(fontFamily: 'InstrumentSans'),
-          displayMedium: TextStyle(fontFamily: 'InstrumentSans'),
-          displaySmall: TextStyle(fontFamily: 'InstrumentSans'),
-          headlineLarge: TextStyle(fontFamily: 'InstrumentSans'),
-          headlineMedium: TextStyle(fontFamily: 'InstrumentSans'),
-          headlineSmall: TextStyle(fontFamily: 'InstrumentSans'),
-          titleLarge: TextStyle(fontFamily: 'InstrumentSans'),
-          titleMedium: TextStyle(fontFamily: 'InstrumentSans'),
-          titleSmall: TextStyle(fontFamily: 'InstrumentSans'),
-          bodyLarge: TextStyle(fontFamily: 'InstrumentSans'),
-          bodyMedium: TextStyle(fontFamily: 'InstrumentSans'),
-          bodySmall: TextStyle(fontFamily: 'InstrumentSans'),
-          labelLarge: TextStyle(fontFamily: 'InstrumentSans'),
-          labelMedium: TextStyle(fontFamily: 'InstrumentSans'),
-          labelSmall: TextStyle(fontFamily: 'InstrumentSans'),
-        ),
-      ),
+      theme: AppPalette.currentTheme,
       getPages: AppRoutes.pages,
       initialRoute: SplashPage.route,
       initialBinding: BindingsBuilder(() {

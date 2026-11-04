@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -35,12 +36,12 @@ class _UserHomeGoalsProgressSectionState
   Timer? _reloadDebounce;
 
   final List<Color> _goalColors = [
-    const Color(0xFFA8D5A3),
-    const Color(0xFFE8D99F),
-    const Color(0xFFFFB3BA),
-    const Color(0xFFBAE1FF),
-    const Color(0xFFDCC9FF),
-    const Color(0xFFFFDBAC),
+    const AppColor(0xFFA8D5A3),
+    const AppColor(0xFFE8D99F),
+    const AppColor(0xFFFFB3BA),
+    const AppColor(0xFFBAE1FF),
+    const AppColor(0xFFDCC9FF),
+    const AppColor(0xFFFFDBAC),
   ];
 
   @override
@@ -143,7 +144,7 @@ class _UserHomeGoalsProgressSectionState
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
+              color: AppColor(0xFF1A1A1A),
               fontFamily: 'Instrument Sans',
             ),
           ),
@@ -197,7 +198,7 @@ class _UserHomeGoalsProgressSectionState
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0C8DA1),
+                    color: AppColor(0xFF0C8DA1),
                     fontFamily: 'Instrument Sans',
                   ),
                 ),

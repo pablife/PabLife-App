@@ -1,3 +1,4 @@
+import 'package:pablife/modules/women_health/women_health_controller.dart';
 import 'package:get/get.dart';
 import 'package:pablife/modules/calendar/controllers/interactive_calendar_controller.dart';
 import 'package:pablife/modules/home/controllers/home_controller.dart';
@@ -29,6 +30,7 @@ final dashboardRoutes = [
         Get.lazyPut(() => ProfessionalCalendarController(), fenix: true);
         Get.lazyPut(() => ProfessionalWideCalendarController(), fenix: true);
         Get.lazyPut(() => UserWideCalendarController(), fenix: true);
+        Get.put(WomenHealthController());
         Get.put(CalendarSwitcherController());
         Get.put(MentoriasController());
         Get.put(PatientsController());

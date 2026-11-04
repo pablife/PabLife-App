@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../shared/themes/app_colors.dart';
@@ -18,7 +19,7 @@ class TaskEditorPage extends StatelessWidget {
     return GetBuilder<TaskEditorController>(
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           body: Column(
             children: [
               const SizedBox(height: 32),
@@ -84,7 +85,7 @@ class TaskEditorPage extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.check_circle_outline,
-                color: Color(0xFF00343C),
+                color: AppColor(0xFF00343C),
                 size: 20,
               ),
             ),
@@ -106,7 +107,7 @@ class TaskEditorPage extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(top: 10),
       decoration: const BoxDecoration(
-        color: Color(0xFFC1CDFF),
+        color: AppColor(0xFFC1CDFF),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(39),
           topRight: Radius.circular(39),
@@ -183,7 +184,7 @@ class TaskEditorPage extends StatelessWidget {
             'Habilitar Recorrência',
             fontSize: 18,
             fontWeight: FontWeight.w400,
-            color: Color(0xFF00343C),
+            color: AppColor(0xFF00343C),
           ),
           GestureDetector(
             onTap: controller.canToggleRecurrence ? controller.toggleRecurrence : null,
@@ -193,7 +194,7 @@ class TaskEditorPage extends StatelessWidget {
               height: 34,
               decoration: BoxDecoration(
                 color: controller.isRecurrenceEnabled
-                    ? const Color(0xFF0C8DA1)
+                    ? const AppColor(0xFF0C8DA1)
                     : Colors.grey.shade400,
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -207,7 +208,7 @@ class TaskEditorPage extends StatelessWidget {
                   height: 30,
                   margin: const EdgeInsets.symmetric(horizontal: 2),
                   decoration: const BoxDecoration(
-                    color: Color(0xFF00343C),
+                    color: AppColor(0xFF00343C),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -245,16 +246,16 @@ class TaskEditorPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFF00343C)
-                  : const Color(0xFFC1CDFF),
-              border: Border.all(color: const Color(0xFF00343C), width: 1),
+                  ? const AppColor(0xFF00343C)
+                  : const AppColor(0xFFC1CDFF),
+              border: Border.all(color: const AppColor(0xFF00343C), width: 1),
               borderRadius: BorderRadius.circular(25),
             ),
             child: TextDefault(
               day,
               fontSize: 16,
               fontWeight: FontWeight.w400,
-              color: isSelected ? Colors.white : const Color(0xFF00343C),
+              color: isSelected ? Colors.white : const AppColor(0xFF00343C),
             ),
           ),
         );
@@ -272,7 +273,7 @@ class TaskEditorPage extends StatelessWidget {
             child: EdgeButtonRounded(
               text: 'Cancelar',
               onTap: controller.goBack,
-              backgroundColor: const Color(0xFF0C8DA1),
+              backgroundColor: const AppColor(0xFF0C8DA1),
               side: EdgeSide.right,
             ),
           ),
@@ -282,7 +283,7 @@ class TaskEditorPage extends StatelessWidget {
               text: 'Salvar',
               onTap: controller.saveTask,
               isLoading: controller.isLoading,
-              backgroundColor: const Color(0xFF00343C),
+              backgroundColor: const AppColor(0xFF00343C),
               side: EdgeSide.left,
             ),
           ),

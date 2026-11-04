@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import '../../../infra/models/mentoria_module_model.dart';
 import '../../../widgets/design_system/text_default.dart';
@@ -54,12 +55,12 @@ class MentoriaModuleCard extends StatelessWidget {
   Color _parseColor(String colorString) {
     try {
       if (colorString.isEmpty) {
-        return const Color(0xFF00343C);
+        return const AppColor(0xFF00343C);
       }
       final hex = colorString.replaceAll('0x', '');
       return Color(int.parse(hex, radix: 16));
     } catch (e) {
-      return const Color(0xFF00343C);
+      return const AppColor(0xFF00343C);
     }
   }
 }

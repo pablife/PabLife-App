@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -67,12 +68,12 @@ class InteractiveCalendarCardWidget extends StatelessWidget {
     }
 
     final colors = [
-      const Color(0xFFE8D5E2), // Rosa claro
-      const Color(0xFFD4C5D9), // Lilás
-      const Color(0xFFD5C4C4), // Rosa acinzentado
-      const Color(0xFFCDE5DB), // Verde água claro
-      const Color(0xFFD9E2C8), // Verde claro
-      const Color(0xFFE5DCC5), // Bege
+      const AppColor(0xFFE8D5E2), // Rosa claro
+      const AppColor(0xFFD4C5D9), // Lilás
+      const AppColor(0xFFD5C4C4), // Rosa acinzentado
+      const AppColor(0xFFCDE5DB), // Verde água claro
+      const AppColor(0xFFD9E2C8), // Verde claro
+      const AppColor(0xFFE5DCC5), // Bege
     ];
 
     return colors[date.day % colors.length];
@@ -132,7 +133,7 @@ class InteractiveCalendarCardWidget extends StatelessWidget {
       events.add(
         _buildEventChip(
           '$tasksCount ${tasksCount == 1 ? 'Tarefa' : 'Tarefas'}',
-          const Color(0xFF00C2A8),
+          const AppColor(0xFF00C2A8),
         ),
       );
     }
@@ -141,7 +142,7 @@ class InteractiveCalendarCardWidget extends StatelessWidget {
       events.add(
         _buildEventChip(
           '$notesCount ${notesCount == 1 ? 'Nota' : 'Notas'}',
-          const Color(0xFFD2CC61),
+          const AppColor(0xFFD2CC61),
         ),
       );
     }
@@ -150,7 +151,7 @@ class InteractiveCalendarCardWidget extends StatelessWidget {
       events.add(
         _buildEventChip(
           '$appointmentsCount ${appointmentsCount == 1 ? 'Consulta' : 'Consultas'}',
-          const Color(0xFF3065FF),
+          const AppColor(0xFF3065FF),
         ),
       );
     }

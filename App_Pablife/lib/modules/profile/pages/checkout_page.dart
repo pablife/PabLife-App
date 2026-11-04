@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +21,7 @@ class CheckoutPage extends StatelessWidget {
       init: CheckoutController(),
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           appBar: const AppBarDefault(title: 'Pagamento'),
           body: Stack(
             children: [
@@ -31,7 +32,7 @@ class CheckoutPage extends StatelessWidget {
                 bottom: 0,
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFFC1CDFF),
+                    color: AppColor(0xFFC1CDFF),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(39),
                       topRight: Radius.circular(39),
@@ -238,7 +239,7 @@ class CheckoutPage extends StatelessWidget {
                         child: EdgeButtonRounded(
                           text: 'Voltar',
                           onTap: () => Get.back(),
-                          backgroundColor: const Color(0xFF00343C),
+                          backgroundColor: const AppColor(0xFF00343C),
                           side: EdgeSide.right,
                         ),
                       ),
@@ -260,7 +261,7 @@ class CheckoutPage extends StatelessWidget {
                                     controller.processPayment();
                                   }
                                 },
-                          backgroundColor: const Color(0xFF0C8DA1),
+                          backgroundColor: const AppColor(0xFF0C8DA1),
                           side: EdgeSide.left,
                         ),
                       ),
@@ -315,7 +316,7 @@ class CheckoutPage extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1A1F71), Color(0xFF0F4C75)],
+          colors: [AppColor(0xFF1A1F71), AppColor(0xFF0F4C75)],
         ),
         boxShadow: [
           BoxShadow(
@@ -452,7 +453,7 @@ class CheckoutPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF00343C),
+              color: AppColor(0xFF00343C),
             ),
           ),
           const SizedBox(height: 12),
@@ -482,7 +483,7 @@ class CheckoutPage extends StatelessWidget {
                   'Cupom ${controller.couponCode}',
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF0F6E56),
+                    color: AppColor(0xFF0F6E56),
                   ),
                 ),
                 Text(
@@ -490,7 +491,7 @@ class CheckoutPage extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F6E56),
+                    color: AppColor(0xFF0F6E56),
                   ),
                 ),
               ],
@@ -515,7 +516,7 @@ class CheckoutPage extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0C8DA1),
+                  color: AppColor(0xFF0C8DA1),
                 ),
               ),
             ],
@@ -525,7 +526,7 @@ class CheckoutPage extends StatelessWidget {
             const Text(
               'Sem cartão e sem cobrança automática. Ao fim do período, '
               'é só assinar para continuar.',
-              style: TextStyle(fontSize: 13, color: Color(0xFF5F6B7A)),
+              style: TextStyle(fontSize: 13, color: AppColor(0xFF5F6B7A)),
             ),
           ],
         ],
@@ -578,7 +579,7 @@ class _CouponFieldState extends State<_CouponField> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF00343C),
+              color: AppColor(0xFF00343C),
             ),
           ),
           const SizedBox(height: 12),
@@ -588,7 +589,7 @@ class _CouponFieldState extends State<_CouponField> {
                 child: TextField(
                   controller: _controller,
                   textCapitalization: TextCapitalization.characters,
-                  style: const TextStyle(color: Color(0xFF00343C)),
+                  style: const TextStyle(color: AppColor(0xFF00343C)),
                   decoration: InputDecoration(
                     hintText: 'Digite seu cupom',
                     hintStyle: TextStyle(color: Colors.grey[500]),
@@ -599,15 +600,15 @@ class _CouponFieldState extends State<_CouponField> {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFFD0D7F5)),
+                      borderSide: const BorderSide(color: AppColor(0xFFD0D7F5)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFFD0D7F5)),
+                      borderSide: const BorderSide(color: AppColor(0xFFD0D7F5)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF0C8DA1)),
+                      borderSide: const BorderSide(color: AppColor(0xFF0C8DA1)),
                     ),
                   ),
                   onSubmitted: (_) => _apply(),
@@ -617,7 +618,7 @@ class _CouponFieldState extends State<_CouponField> {
               FilledButton(
                 onPressed: _apply,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF0C8DA1),
+                  backgroundColor: const AppColor(0xFF0C8DA1),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -651,14 +652,14 @@ class _CouponFieldState extends State<_CouponField> {
   Widget _buildApplied(CheckoutController checkout) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFE6F7F1),
+        color: const AppColor(0xFFE6F7F1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1D9E75)),
+        border: Border.all(color: const AppColor(0xFF1D9E75)),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          const Icon(Icons.local_offer_outlined, color: Color(0xFF0F6E56)),
+          const Icon(Icons.local_offer_outlined, color: AppColor(0xFF0F6E56)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -669,7 +670,7 @@ class _CouponFieldState extends State<_CouponField> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF085041),
+                    color: AppColor(0xFF085041),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -677,7 +678,7 @@ class _CouponFieldState extends State<_CouponField> {
                   '${checkout.couponFreeDays} dias grátis, sem precisar de cartão',
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF0F6E56),
+                    color: AppColor(0xFF0F6E56),
                   ),
                 ),
               ],
@@ -690,7 +691,7 @@ class _CouponFieldState extends State<_CouponField> {
             },
             child: const Text(
               'Remover',
-              style: TextStyle(color: Color(0xFF0F6E56)),
+              style: TextStyle(color: AppColor(0xFF0F6E56)),
             ),
           ),
         ],

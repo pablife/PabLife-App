@@ -8,6 +8,8 @@ class EmailInputController extends GetxController with LoaderManagerMixin {
 
   String email = '';
 
+  bool get isEmailValid => _isValidEmail(email.trim().toLowerCase());
+
   void updateEmail(String value) {
     email = value;
     update();
@@ -57,6 +59,6 @@ class EmailInputController extends GetxController with LoaderManagerMixin {
 
   bool _isValidEmail(String email) {
     // Aceita "+" e outros caracteres válidos (ex.: nome+teste@gmail.com).
-    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email);
+    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]{2,}$').hasMatch(email);
   }
 }

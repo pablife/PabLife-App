@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 import '../../../infra/models/professional_appointment_model.dart';
@@ -6,18 +7,20 @@ import '../controllers/professional_wide_calendar_controller.dart';
 
 /// Cores da agenda do computador (as mesmas da agenda do celular).
 abstract final class WideAgendaColors {
-  static const background = Color(0xFF00343C);
-  static const panel = Color(0xFFC1CDFF);
-  static const text = Color(0xFF00343C);
-  static const grid = Color(0xFFA9B6EA);
-  static const appointment = Color(0xFF3065FF);
-  static const free = Color(0xFF0C8DA1);
-  static const freeFill = Color(0xFFE7F6F7);
-  static const freeText = Color(0xFF0C6B7A);
-  static const completed = Color(0xFF0C8DA1);
-  static const ongoing = Color(0xFF00C2A8);
-  static const cancelled = Color(0xFF8E99A8);
-  static const noShow = Color(0xFFB3A57F);
+  // No modo Saúde da mulher o planner é claro, sobre fundo rosé.
+  static const background = AppColor.pair(0xFF00343C, 0xFFF7F1EF);
+  static const panel = AppColor.pair(0xFFC1CDFF, 0xFFFFFFFF);
+  static const text = AppColor(0xFF00343C);
+  static const grid = AppColor.pair(0xFFA9B6EA, 0xFFEADFEA);
+  static const appointment = AppColor(0xFF3065FF);
+  static const accent = AppColor.pair(0xFF3065FF, 0xFF4A3560);
+  static const free = AppColor(0xFF0C8DA1);
+  static const freeFill = AppColor(0xFFE7F6F7);
+  static const freeText = AppColor(0xFF0C6B7A);
+  static const completed = AppColor(0xFF0C8DA1);
+  static const ongoing = AppColor(0xFF00C2A8);
+  static const cancelled = AppColor(0xFF8E99A8);
+  static const noShow = AppColor(0xFFB3A57F);
 }
 
 const wideWeekdayShort = [

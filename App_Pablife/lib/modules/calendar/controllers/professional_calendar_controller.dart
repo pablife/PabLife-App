@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -431,7 +432,7 @@ class ProfessionalCalendarController extends GetxController
                                 applyToFuture = value ?? false;
                               });
                             },
-                            activeColor: const Color(0xFFFF5252),
+                            activeColor: const AppColor(0xFFFF5252),
                             checkColor: Colors.white,
                           ),
                           const SizedBox(width: 8),
@@ -451,8 +452,8 @@ class ProfessionalCalendarController extends GetxController
               ),
               confirmText: 'Remover',
               cancelText: 'Cancelar',
-              confirmButtonColor: const Color(0xFFFF5252),
-              cancelButtonColor: const Color(0xFF0C8DA1),
+              confirmButtonColor: const AppColor(0xFFFF5252),
+              cancelButtonColor: const AppColor(0xFF0C8DA1),
               onConfirm: () => Navigator.of(context).pop(applyToFuture),
               onCancel: () => Navigator.of(context).pop(null),
             );

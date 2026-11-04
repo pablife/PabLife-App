@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -118,15 +119,15 @@ class _RescheduleTimePickerPageState extends State<RescheduleTimePickerPage> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return const Scaffold(
-        backgroundColor: Color(0xFF001417),
+        backgroundColor: AppColor(0xFF001417),
         body: Center(
-          child: CircularProgressIndicator(color: Color(0xFFC1CDFF)),
+          child: CircularProgressIndicator(color: AppColor(0xFFC1CDFF)),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF001417),
+      backgroundColor: const AppColor(0xFF001417),
       body: SafeArea(
         child: Column(
           children: [

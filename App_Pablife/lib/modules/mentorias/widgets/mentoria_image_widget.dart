@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
 import '../../../widgets/design_system/app_image.dart';
@@ -22,19 +23,19 @@ class MentoriaImageWidget extends StatelessWidget {
               imageUrl: imageUrl,
               fit: BoxFit.cover,
               placeholder: Container(
-                color: const Color(0xFF00343C).withAlpha(51),
+                color: const AppColor(0xFF00343C).withAlpha(51),
                 child: const Center(
                   child: CircularProgressIndicator(
-                    color: Color(0xFF00343C),
+                    color: AppColor(0xFF00343C),
                     strokeWidth: 2,
                   ),
                 ),
               ),
               errorWidget: Container(
-                color: const Color(0xFF00343C).withAlpha(51),
+                color: const AppColor(0xFF00343C).withAlpha(51),
                 child: const Icon(
                   Icons.image_not_supported,
-                  color: Color(0xFF00343C),
+                  color: AppColor(0xFF00343C),
                   size: 40,
                 ),
               ),

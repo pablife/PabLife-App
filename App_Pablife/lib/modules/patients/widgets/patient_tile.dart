@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -75,13 +76,13 @@ class PatientTile extends StatelessWidget {
 
     Color statusBgColor;
     if (isCancelled) {
-      statusBgColor = Color(0xffda879a);
+      statusBgColor = AppColor(0xFFDA879A);
     } else if (isNoShow || isLateStatus) {
-      statusBgColor = Color(0xffd3cab5);
+      statusBgColor = AppColor(0xFFD3CAB5);
     } else if (isCompleted || isInProgress) {
-      statusBgColor = Color(0xffafcddb);
+      statusBgColor = AppColor(0xFFAFCDDB);
     } else {
-      statusBgColor = const Color(0xFF95B0FF);
+      statusBgColor = const AppColor(0xFF95B0FF);
     }
 
     final bgColor =
@@ -89,16 +90,16 @@ class PatientTile extends StatelessWidget {
         (showStatusIndicator
             ? statusBgColor
             : (isCompleted
-                  ? const Color(0xFF9BD3CC)
+                  ? const AppColor(0xFF9BD3CC)
                   : (isNow
-                        ? const Color(0xFF9BD3CC)
-                        : const Color(0xFF95B0FF))));
+                        ? const AppColor(0xFF9BD3CC)
+                        : const AppColor(0xFF95B0FF))));
 
     final buttonColor =
         customButtonColor ??
         (isCompleted
-            ? const Color(0xFF00C2A8)
-            : (isNow ? const Color(0xFF00C2A8) : const Color(0xFF3065FF)));
+            ? const AppColor(0xFF00C2A8)
+            : (isNow ? const AppColor(0xFF00C2A8) : const AppColor(0xFF3065FF)));
 
     final trailingIcon =
         customTrailingIcon ??
@@ -110,7 +111,7 @@ class PatientTile extends StatelessWidget {
         (forceShowTrailing && showTrailingBase) ||
         (!forceShowTrailing && canCancel && showTrailingBase);
 
-    final textColor = customTextColor ?? const Color(0xFF00343C);
+    final textColor = customTextColor ?? const AppColor(0xFF00343C);
     final timeColor =
         customTimeColor ?? (filledHour ? Colors.white : buttonColor);
 
@@ -153,14 +154,14 @@ class PatientTile extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (statusIcon != null) ...[
-                  Icon(statusIcon, size: 18, color: const Color(0xFF00343C)),
+                  Icon(statusIcon, size: 18, color: const AppColor(0xFF00343C)),
                   const SizedBox(width: 6),
                 ],
                 TextDefault(
                   statusLabel,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF00343C),
+                  color: const AppColor(0xFF00343C),
                 ),
               ],
             ),
@@ -170,7 +171,7 @@ class PatientTile extends StatelessWidget {
                 'Justificativa: $cancellationReason',
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF00343C),
+                color: const AppColor(0xFF00343C),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -190,11 +191,11 @@ class PatientTile extends StatelessWidget {
                   errorWidget: Container(
                     width: 80,
                     height: 80,
-                    color: const Color(0xFF00343C).withAlpha(51),
+                    color: const AppColor(0xFF00343C).withAlpha(51),
                     child: Icon(
                       Icons.person,
                       size: 40,
-                      color: const Color(0xFF00343C).withAlpha(128),
+                      color: const AppColor(0xFF00343C).withAlpha(128),
                     ),
                   ),
                 ),
@@ -290,7 +291,7 @@ class PatientTile extends StatelessWidget {
                         height: 48.5,
                         alignment: Alignment.center,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF25D366),
+                          color: AppColor(0xFF25D366),
                           shape: BoxShape.circle,
                         ),
                         child: const WhatsAppIcon(size: 26),
@@ -340,7 +341,7 @@ class PatientTile extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: currentPageIndex == index
                         ? buttonColor
-                        : const Color(0xFFD9D9D9),
+                        : const AppColor(0xFFD9D9D9),
                   ),
                 ),
               ),
@@ -370,7 +371,7 @@ class PatientTile extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.only(left: 50),
               decoration: BoxDecoration(
-                color: const Color(0xFF3065FF),
+                color: const AppColor(0xFF3065FF),
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Padding(

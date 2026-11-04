@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:pablife/widgets/design_system/whatsapp_icon.dart';
 
@@ -21,7 +22,7 @@ class AppointmentDetailsBottomBarWidget extends StatelessWidget {
           (type) => ExpandableFabAction(
             iconWidget: RecordTypeFabIconWidget(type: type),
             onTap: () => controller.onCreateRecord(type),
-            backgroundColor: const Color(0xFF017D93),
+            backgroundColor: const AppColor(0xFF017D93),
           ),
         )
         .toList();
@@ -38,7 +39,7 @@ class AppointmentDetailsBottomBarWidget extends StatelessWidget {
               child: EdgeButtonRounded(
                 text: 'Enviar Mensagem',
                 onTap: controller.openWhatsApp,
-                backgroundColor: const Color(0xFF00343C),
+                backgroundColor: const AppColor(0xFF00343C),
                 textColor: Colors.white,
                 side: EdgeSide.right,
                 showText: !controller.isFabExpanded,
@@ -49,7 +50,7 @@ class AppointmentDetailsBottomBarWidget extends StatelessWidget {
           const Spacer(),
           if (controller.shouldShowAddRecordButton)
             ExpandableActionFab(
-              backgroundColor: const Color(0xFF0C8DA1),
+              backgroundColor: const AppColor(0xFF0C8DA1),
               expandedWidth: 220,
               height: 60,
               actions: actions,

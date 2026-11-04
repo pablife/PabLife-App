@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../widgets/design_system/text_default.dart';
@@ -33,7 +34,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFFC1CDFF),
+        color: AppColor(0xFFC1CDFF),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
@@ -50,7 +51,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
                   'Confirmar Reagendamento',
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF00343C),
+                  color: AppColor(0xFF00343C),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -58,7 +59,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
                   'Confirme o reagendamento para enviar o novo horário ao paciente',
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: Color(0xFF00343C),
+                  color: AppColor(0xFF00343C),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -67,7 +68,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
           Container(
             height: 214,
             width: double.infinity,
-            color: const Color(0xFF3065FF),
+            color: const AppColor(0xFF3065FF),
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 28),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -83,7 +84,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                           fontSize: 48,
                           height: 1.229,
-                          color: Color(0xFFC1CDFF),
+                          color: AppColor(0xFFC1CDFF),
                         ),
                         children: [
                           TextSpan(text: '$newDayNumber.'),
@@ -104,7 +105,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
                       newWeekdayLabel,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFFC1CDFF),
+                      color: const AppColor(0xFFC1CDFF),
                       height: 1.222,
                     ),
                   ],
@@ -113,7 +114,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
                 Container(
                   width: 3,
                   height: 118.5,
-                  color: const Color(0xFFC1CDFF),
+                  color: const AppColor(0xFFC1CDFF),
                 ),
                 const Spacer(),
                 Expanded(
@@ -125,7 +126,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
                         'Horário',
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFC1CDFF),
+                        color: AppColor(0xFFC1CDFF),
                         height: 1.222,
                       ),
                       const SizedBox(height: 8),
@@ -133,7 +134,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
                         newTimeLabel,
                         fontSize: 18,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFFC1CDFF),
+                        color: const AppColor(0xFFC1CDFF),
                         height: 1.222,
                       ),
                     ],
@@ -150,7 +151,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
                   child: Container(
                     height: 60,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF00343C),
+                      color: AppColor(0xFF00343C),
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(30),
                         bottomRight: Radius.circular(30),
@@ -182,7 +183,7 @@ class RescheduleBottomSheetConfirmationWidget extends StatelessWidget {
                   child: Container(
                     height: 60,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF0C8DA1),
+                      color: AppColor(0xFF0C8DA1),
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
                         bottomLeft: Radius.circular(30),

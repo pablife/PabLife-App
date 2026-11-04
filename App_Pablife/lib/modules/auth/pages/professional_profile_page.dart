@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ class ProfessionalProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF00343C),
+      backgroundColor: const AppColor(0xFF00343C),
       body: GetBuilder<ProfessionalProfileController>(
         builder: (controller) {
           return SafeArea(
@@ -25,7 +26,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00343C),
+                      color: const AppColor(0xFF00343C),
                       borderRadius: BorderRadius.circular(40),
                     ),
                   ),
@@ -37,7 +38,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                   height: 652,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFC1CDFF),
+                      color: const AppColor(0xFFC1CDFF),
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(39),
                         topRight: Radius.circular(39),
@@ -52,7 +53,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                             'Complete seu perfil profissional',
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF00343C),
+                            color: AppColor(0xFF00343C),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -91,11 +92,11 @@ class ProfessionalProfilePage extends StatelessWidget {
                                         color:
                                             controller.professionalType ==
                                                 ProfessionalType.nutritionist
-                                            ? const Color(0xFF00343C)
-                                            : const Color(0xFFC1CDFF),
+                                            ? const AppColor(0xFF00343C)
+                                            : const AppColor(0xFFC1CDFF),
                                         borderRadius: BorderRadius.circular(30),
                                         border: Border.all(
-                                          color: const Color(0xFF00343C),
+                                          color: const AppColor(0xFF00343C),
                                           width: 1,
                                         ),
                                       ),
@@ -110,7 +111,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                                               controller.professionalType ==
                                                   ProfessionalType.nutritionist
                                               ? AppColors.white
-                                              : const Color(0xFF00343C),
+                                              : const AppColor(0xFF00343C),
                                         ),
                                       ),
                                     ),
@@ -136,11 +137,11 @@ class ProfessionalProfilePage extends StatelessWidget {
                                         color:
                                             controller.professionalType ==
                                                 ProfessionalType.psychologist
-                                            ? const Color(0xFF00343C)
-                                            : const Color(0xFFC1CDFF),
+                                            ? const AppColor(0xFF00343C)
+                                            : const AppColor(0xFFC1CDFF),
                                         borderRadius: BorderRadius.circular(30),
                                         border: Border.all(
-                                          color: const Color(0xFF00343C),
+                                          color: const AppColor(0xFF00343C),
                                           width: 1,
                                         ),
                                       ),
@@ -155,7 +156,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                                               controller.professionalType ==
                                                   ProfessionalType.psychologist
                                               ? AppColors.white
-                                              : const Color(0xFF00343C),
+                                              : const AppColor(0xFF00343C),
                                         ),
                                       ),
                                     ),
@@ -175,7 +176,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                                 'Sobre você',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF00343C),
+                                color: const AppColor(0xFF00343C),
                               ),
                               const SizedBox(height: 8),
                               Container(
@@ -231,14 +232,14 @@ class ProfessionalProfilePage extends StatelessWidget {
                                     Icon(
                                       Icons.upload_file,
                                       size: 52,
-                                      color: const Color(0xFF00343C),
+                                      color: const AppColor(0xFF00343C),
                                     ),
                                     const SizedBox(height: 12),
                                     TextDefault(
                                       'Enviar Documento',
                                       fontSize: 16,
                                       fontWeight: FontWeight.w400,
-                                      color: const Color(0xFF00343C),
+                                      color: const AppColor(0xFF00343C),
                                     ),
                                     if (controller.documentBase64 != null &&
                                         controller
@@ -261,7 +262,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                                           children: [
                                             const Icon(
                                               Icons.check_circle,
-                                              color: Color(0xFF00343C),
+                                              color: AppColor(0xFF00343C),
                                               size: 20,
                                             ),
                                             const SizedBox(width: 8),
@@ -271,7 +272,9 @@ class ProfessionalProfilePage extends StatelessWidget {
                                                     "arquivo",
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w500,
-                                                color: const Color(0xFF00343C),
+                                                color: const AppColor(
+                                                  0xFF00343C,
+                                                ),
                                                 maxLines: 1,
                                               ),
                                             ),
@@ -308,7 +311,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                                   child: Container(
                                     height: 60,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF0C8DA1),
+                                      color: const AppColor(0xFF0C8DA1),
                                       borderRadius: const BorderRadius.only(
                                         topLeft: Radius.zero,
                                         bottomLeft: Radius.zero,
@@ -341,8 +344,10 @@ class ProfessionalProfilePage extends StatelessWidget {
                                   height: 60,
                                   decoration: BoxDecoration(
                                     color: controller.isLoading
-                                        ? const Color(0xFF00343C).withAlpha(179)
-                                        : const Color(0xFF00343C),
+                                        ? const AppColor(
+                                            0xFF00343C,
+                                          ).withAlpha(179)
+                                        : const AppColor(0xFF00343C),
                                     borderRadius: const BorderRadius.only(
                                       topLeft: Radius.circular(30),
                                       bottomLeft: Radius.circular(30),
@@ -397,7 +402,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                               width: 135,
                               height: 135,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF89BEC6),
+                                color: const AppColor(0xFF89BEC6),
                                 shape: BoxShape.circle,
                               ),
                               child:
@@ -421,7 +426,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                                 width: 48,
                                 height: 48,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF22717D),
+                                  color: const AppColor(0xFF22717D),
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -432,7 +437,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                                     width: 100,
                                     height: 48,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF22717D),
+                                      color: const AppColor(0xFF22717D),
                                       borderRadius: BorderRadius.only(
                                         topLeft: Radius.circular(80),
                                         topRight: Radius.circular(80),
@@ -449,7 +454,7 @@ class ProfessionalProfilePage extends StatelessWidget {
                                 width: 46,
                                 height: 46,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFF3395),
+                                  color: const AppColor(0xFFFF3395),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(

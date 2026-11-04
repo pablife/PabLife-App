@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -446,7 +447,7 @@ class AppointmentDetailsController extends GetxController
       message: 'Tem certeza que deseja iniciar esta consulta agora?',
       confirmText: 'Iniciar',
       cancelText: 'Cancelar',
-      confirmButtonColor: const Color(0xFF0C8DA1),
+      confirmButtonColor: const AppColor(0xFF0C8DA1),
     );
 
     if (confirmed != true) {

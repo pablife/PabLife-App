@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'text_default.dart';
 
@@ -75,13 +76,13 @@ class _TabsWidgetState extends State<TabsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedColor = widget.selectedColor ?? const Color(0xFF00343C);
+    final selectedColor = widget.selectedColor ?? const AppColor(0xFF00343C);
     final unselectedColor =
-        widget.unselectedColor ?? const Color(0xFF00343C).withAlpha(128);
-    final indicatorColor = widget.indicatorColor ?? const Color(0xFF00343C);
+        widget.unselectedColor ?? const AppColor(0xFF00343C).withAlpha(128);
+    final indicatorColor = widget.indicatorColor ?? const AppColor(0xFF00343C);
     final indicatorBgColor =
         widget.indicatorBackgroundColor ??
-        const Color(0xFF00343C).withAlpha(51);
+        const AppColor(0xFF00343C).withAlpha(51);
 
     return Column(
       children: [

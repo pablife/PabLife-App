@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pablife/widgets/design_system/text_default.dart';
@@ -142,29 +143,29 @@ class UserCalendarPage extends StatelessWidget {
 
     switch (item.type) {
       case CalendarItemType.taskPending:
-        backgroundColor = const Color(0xFF00C2A8);
+        backgroundColor = const AppColor(0xFF00C2A8);
         iconData = Icons.check_circle_outline;
         showToggle = true;
         break;
       case CalendarItemType.task:
         backgroundColor = item.isCompleted
-            ? const Color(0xFF0C8DA1)
-            : const Color(0xFF00C2A8);
+            ? const AppColor(0xFF0C8DA1)
+            : const AppColor(0xFF00C2A8);
         iconData = Icons.check_circle_outline;
         showToggle = true;
         break;
       case CalendarItemType.goal:
-        backgroundColor = const Color(0xFF92CA4F);
+        backgroundColor = const AppColor(0xFF92CA4F);
         iconData = Icons.flag_outlined;
         showToggle = true;
         break;
       case CalendarItemType.note:
-        backgroundColor = const Color(0xFFD2CC61);
+        backgroundColor = const AppColor(0xFFD2CC61);
         iconData = Icons.note_outlined;
         showToggle = true;
         break;
       case CalendarItemType.consultation:
-        backgroundColor = const Color(0xFF3065FF);
+        backgroundColor = const AppColor(0xFF3065FF);
         iconData = Icons.favorite_border;
         break;
     }

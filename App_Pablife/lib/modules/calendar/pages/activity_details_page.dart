@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +21,7 @@ class ActivityDetailsPage extends StatelessWidget {
       builder: (controller) {
         if (controller.isLoading || controller.activity == null) {
           return Scaffold(
-            backgroundColor: const Color(0xFF00343C),
+            backgroundColor: const AppColor(0xFF00343C),
             body: const Center(
               child: CircularProgressIndicator(color: Colors.white),
             ),
@@ -41,28 +42,28 @@ class ActivityDetailsPage extends StatelessWidget {
 
         switch (activity.type) {
           case 'task':
-            typeColor = const Color(0xFF00C2A8);
+            typeColor = const AppColor(0xFF00C2A8);
             typeLabel = 'Tarefa';
             typeIcon = Icons.check_circle_outline;
             break;
           case 'goal':
-            typeColor = const Color(0xFF92CA4F);
+            typeColor = const AppColor(0xFF92CA4F);
             typeLabel = 'Meta';
             typeIcon = Icons.flag_outlined;
             break;
           case 'note':
-            typeColor = const Color(0xFFD2CC61);
+            typeColor = const AppColor(0xFFD2CC61);
             typeLabel = 'Anotação';
             typeIcon = Icons.note_outlined;
             break;
           default:
-            typeColor = const Color(0xFF3065FF);
+            typeColor = const AppColor(0xFF3065FF);
             typeLabel = 'Atividade';
             typeIcon = Icons.event;
         }
 
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           body: SafeArea(
             child: Column(
               children: [
@@ -132,7 +133,7 @@ class ActivityDetailsPage extends StatelessWidget {
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: Icon(typeIcon, color: const Color(0xFF00343C), size: 20),
+              child: Icon(typeIcon, color: const AppColor(0xFF00343C), size: 20),
             ),
             const SizedBox(width: 10),
             TextDefault(
@@ -159,7 +160,7 @@ class ActivityDetailsPage extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(top: 10),
       decoration: const BoxDecoration(
-        color: Color(0xFFC1CDFF),
+        color: AppColor(0xFFC1CDFF),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(39),
           topRight: Radius.circular(39),
@@ -174,7 +175,7 @@ class ActivityDetailsPage extends StatelessWidget {
               activity.name,
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF00343C),
+              color: const AppColor(0xFF00343C),
             ),
             const SizedBox(height: 20),
             if (activity.description != null &&
@@ -190,7 +191,7 @@ class ActivityDetailsPage extends StatelessWidget {
                   activity.description!,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF00343C),
+                  color: const AppColor(0xFF00343C),
                 ),
               ),
               const SizedBox(height: 20),
@@ -210,7 +211,7 @@ class ActivityDetailsPage extends StatelessWidget {
                       'Etapas',
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF00343C),
+                      color: AppColor(0xFF00343C),
                     ),
                     const SizedBox(height: 12),
                     ...List.generate(activity.steps!.length, (index) {
@@ -224,14 +225,14 @@ class ActivityDetailsPage extends StatelessWidget {
                               '${index + 1}. ',
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF00343C),
+                              color: const AppColor(0xFF00343C),
                             ),
                             Expanded(
                               child: TextDefault(
                                 step,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w400,
-                                color: const Color(0xFF00343C),
+                                color: const AppColor(0xFF00343C),
                               ),
                             ),
                           ],
@@ -256,7 +257,7 @@ class ActivityDetailsPage extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.calendar_today,
-                        color: Color(0xFF00343C),
+                        color: AppColor(0xFF00343C),
                         size: 20,
                       ),
                       const SizedBox(width: 12),
@@ -264,7 +265,7 @@ class ActivityDetailsPage extends StatelessWidget {
                         dateStr,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF00343C),
+                        color: const AppColor(0xFF00343C),
                       ),
                     ],
                   ),
@@ -273,7 +274,7 @@ class ActivityDetailsPage extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.access_time,
-                        color: Color(0xFF00343C),
+                        color: AppColor(0xFF00343C),
                         size: 20,
                       ),
                       const SizedBox(width: 12),
@@ -281,7 +282,7 @@ class ActivityDetailsPage extends StatelessWidget {
                         timeStr,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF00343C),
+                        color: const AppColor(0xFF00343C),
                       ),
                     ],
                   ),
@@ -305,7 +306,7 @@ class ActivityDetailsPage extends StatelessWidget {
             child: EdgeButtonRounded(
               text: 'Editar',
               onTap: controller.editActivity,
-              backgroundColor: const Color(0xFF0C8DA1),
+              backgroundColor: const AppColor(0xFF0C8DA1),
               side: EdgeSide.right,
             ),
           ),
@@ -315,7 +316,7 @@ class ActivityDetailsPage extends StatelessWidget {
               text: 'Excluir',
               onTap: controller.promptDeleteActivity,
               isLoading: controller.isLoading,
-              backgroundColor: const Color(0xFFFF5252),
+              backgroundColor: const AppColor(0xFFFF5252),
               side: EdgeSide.left,
             ),
           ),

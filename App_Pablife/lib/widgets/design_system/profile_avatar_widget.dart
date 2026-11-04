@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'app_image.dart';
 
@@ -31,7 +32,7 @@ class ProfileAvatarWidget extends StatelessWidget {
               height: 135,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFF89BEC6),
+                color: AppColor(0xFF89BEC6),
               ),
               child: const Icon(Icons.person, size: 60, color: Colors.white),
             ),
@@ -48,7 +49,7 @@ class ProfileAvatarWidget extends StatelessWidget {
                     width: 46,
                     height: 46,
                     decoration: const BoxDecoration(
-                      color: Color(0xFFFF3395),
+                      color: AppColor(0xFFFF3395),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(

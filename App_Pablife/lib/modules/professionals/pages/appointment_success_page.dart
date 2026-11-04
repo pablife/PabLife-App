@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pablife/modules/dashboard/dashboard_page.dart';
@@ -66,7 +67,7 @@ class AppointmentSuccessPage extends StatelessWidget {
                     onTap: () {
                       Get.offAllNamed(DashboardPage.route);
                     },
-                    backgroundColor: const Color(0xFF0C8DA1),
+                    backgroundColor: const AppColor(0xFF0C8DA1),
                     side: EdgeSide.right,
                   ),
                 ),

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../widgets/app_text_vector.dart';
@@ -14,7 +15,7 @@ class GoalSuggestionsPage extends StatelessWidget {
     return GetBuilder<GoalSuggestionsController>(
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           body: Column(
             children: [
               const SizedBox(height: 32),
@@ -59,7 +60,7 @@ class GoalSuggestionsPage extends StatelessWidget {
                 width: 66,
                 height: 65,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0C8DA1),
+                  color: const AppColor(0xFF0C8DA1),
                   border: Border.all(color: Colors.white, width: 1),
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -89,14 +90,14 @@ class GoalSuggestionsPage extends StatelessWidget {
       ),
       child: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(color: Color(0xFFC1CDFF)),
+        decoration: const BoxDecoration(color: AppColor(0xFFC1CDFF)),
         child: Column(
           children: [
             Expanded(
               child: controller.isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        color: Color(0xFF00343C),
+                        color: AppColor(0xFF00343C),
                       ),
                     )
                   : ListView.builder(

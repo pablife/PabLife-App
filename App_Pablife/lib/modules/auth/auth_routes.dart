@@ -14,10 +14,7 @@ import 'pages/recovery_password_code_page.dart';
 import 'controllers/recovery_password_code_controller.dart';
 
 final authRoutes = [
-  GetPage(
-    name: ChooseProfilePage.route,
-    page: () => const ChooseProfilePage(),
-  ),
+  GetPage(name: ChooseProfilePage.route, page: () => const ChooseProfilePage()),
   GetPage(
     name: EmailInputPage.route,
     page: () => const EmailInputPage(),

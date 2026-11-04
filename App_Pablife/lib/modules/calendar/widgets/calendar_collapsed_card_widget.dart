@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../widgets/design_system/text_default.dart';
@@ -61,14 +62,14 @@ class CalendarCollapsedCardWidget extends StatelessWidget {
               '$dayNumber.$monthNumber',
               fontSize: fontSize,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFFC1CDFF),
+              color: const AppColor(0xFFC1CDFF),
             ),
           ),
           const SizedBox(width: 46),
           Container(
             width: 3,
             height: dividerHeight,
-            color: const Color(0xFFC1CDFF),
+            color: const AppColor(0xFFC1CDFF),
           ),
           const SizedBox(width: 46),
           Expanded(
@@ -76,7 +77,7 @@ class CalendarCollapsedCardWidget extends StatelessWidget {
               _getAvailabilityText(),
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFFC1CDFF),
+              color: const AppColor(0xFFC1CDFF),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

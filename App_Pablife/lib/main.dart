@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:pablife/firebase_options.dart';
 import 'package:pablife/infra/services/env_service.dart';
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
@@ -44,6 +45,8 @@ void main() async {
       return true;
     };
   }
+
+  await AppPalette.restore();
 
   runApp(const AppWidget());
 }

@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -109,7 +110,7 @@ class ProfessionalCalendarPage extends StatelessWidget {
         id: slot.id,
         title: 'Disponível',
         timeLabel: slot.timeLabel,
-        backgroundColor: const Color(0xFFAEBEEC),
+        backgroundColor: const AppColor(0xFFAEBEEC),
         icon: Icons.schedule,
         iconColor: AppColors.aquaText,
         titleColor: AppColors.aquaText,
@@ -132,14 +133,14 @@ class ProfessionalCalendarPage extends StatelessWidget {
     bool strikeThrough = false;
 
     if (appointment.isCompleted) {
-      backgroundColor = const Color(0xFF0C8DA1);
+      backgroundColor = const AppColor(0xFF0C8DA1);
       strikeThrough = true;
       statusLabel = 'Realizada';
     } else if (appointment.isOngoing) {
-      backgroundColor = const Color(0xFF00C2A8);
+      backgroundColor = const AppColor(0xFF00C2A8);
       statusLabel = 'Agora';
     } else {
-      backgroundColor = const Color(0xFF3065FF);
+      backgroundColor = const AppColor(0xFF3065FF);
       statusLabel = null;
       statusColor = Colors.white.withValues(alpha: 0.25);
     }

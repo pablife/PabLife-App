@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../shared/themes/app_colors.dart';
@@ -18,7 +19,7 @@ class GoalEditorPage extends StatelessWidget {
     return GetBuilder<GoalEditorController>(
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFF00343C),
+          backgroundColor: const AppColor(0xFF00343C),
           body: SafeArea(
             child: Column(
               children: [
@@ -94,7 +95,7 @@ class GoalEditorPage extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.flag_outlined,
-                color: Color(0xFF00343C),
+                color: AppColor(0xFF00343C),
                 size: 20,
               ),
             ),
@@ -116,7 +117,7 @@ class GoalEditorPage extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(top: 10),
       decoration: const BoxDecoration(
-        color: Color(0xFFC1CDFF),
+        color: AppColor(0xFFC1CDFF),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(39),
           topRight: Radius.circular(39),
@@ -205,7 +206,7 @@ class GoalEditorPage extends StatelessWidget {
             'Etapas',
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF00343C),
+            color: AppColor(0xFF00343C),
           ),
         ),
         const SizedBox(height: 8),
@@ -227,14 +228,14 @@ class GoalEditorPage extends StatelessWidget {
                 ? controller.addStepField
                 : null,
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF00343C),
+              foregroundColor: const AppColor(0xFF00343C),
             ),
             icon: const Icon(Icons.add),
             label: const TextDefault(
               'Adicionar etapa',
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF00343C),
+              color: AppColor(0xFF00343C),
             ),
           ),
         ),
@@ -252,7 +253,7 @@ class GoalEditorPage extends StatelessWidget {
             child: EdgeButtonRounded(
               text: 'Cancelar',
               onTap: controller.goBack,
-              backgroundColor: const Color(0xFF0C8DA1),
+              backgroundColor: const AppColor(0xFF0C8DA1),
               side: EdgeSide.right,
             ),
           ),
@@ -262,7 +263,7 @@ class GoalEditorPage extends StatelessWidget {
               text: 'Salvar',
               onTap: controller.saveGoal,
               isLoading: controller.isLoading,
-              backgroundColor: const Color(0xFF00343C),
+              backgroundColor: const AppColor(0xFF00343C),
               side: EdgeSide.left,
             ),
           ),

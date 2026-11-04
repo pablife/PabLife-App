@@ -1,3 +1,4 @@
+import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -70,7 +71,7 @@ class _ProfessionalCalendarTabPageState
     final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF082C32),
+      backgroundColor: const AppColor(0xFF082C32),
       body: Column(
         children: [
           SizedBox(height: statusBarHeight + 16),
@@ -94,19 +95,19 @@ class _ProfessionalCalendarTabPageState
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A3A42),
+        color: const AppColor(0xFF0A3A42),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: const Color(0xFF0C8DA1),
+          color: const AppColor(0xFF0C8DA1),
           borderRadius: BorderRadius.circular(10),
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         labelColor: Colors.white,
-        unselectedLabelColor: const Color(0xFFC1CDFF),
+        unselectedLabelColor: const AppColor(0xFFC1CDFF),
         labelStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -198,7 +199,7 @@ class _TodayTabContent extends StatelessWidget {
         id: slot.id,
         title: 'Disponível',
         timeLabel: slot.timeLabel,
-        backgroundColor: const Color(0xFFAEBEEC),
+        backgroundColor: const AppColor(0xFFAEBEEC),
         icon: Icons.schedule,
         iconColor: AppColors.aquaText,
         titleColor: AppColors.aquaText,
@@ -221,14 +222,14 @@ class _TodayTabContent extends StatelessWidget {
     bool strikeThrough = false;
 
     if (appointment.isCompleted) {
-      backgroundColor = const Color(0xFF0C8DA1);
+      backgroundColor = const AppColor(0xFF0C8DA1);
       strikeThrough = true;
       statusLabel = 'Realizada';
     } else if (appointment.isOngoing) {
-      backgroundColor = const Color(0xFF00C2A8);
+      backgroundColor = const AppColor(0xFF00C2A8);
       statusLabel = 'Agora';
     } else {
-      backgroundColor = const Color(0xFF3065FF);
+      backgroundColor = const AppColor(0xFF3065FF);
       statusLabel = null;
       statusColor = Colors.white.withValues(alpha: 0.25);
     }
@@ -321,7 +322,7 @@ class _CalendarTabContent extends StatelessWidget {
       builder: (controller) {
         if (controller.isLoading) {
           return const Center(
-            child: CircularProgressIndicator(color: Color(0xFFC1CDFF)),
+            child: CircularProgressIndicator(color: AppColor(0xFFC1CDFF)),
           );
         }
 
@@ -385,7 +386,7 @@ class _CalendarTabContent extends StatelessWidget {
             id: 'appointments',
             label: consultaLabel,
             count: appointmentsCount,
-            color: const Color(0xFF3065FF),
+            color: const AppColor(0xFF3065FF),
             customLabel: '$appointmentsCount $consultaLabel',
           ),
         );
@@ -399,7 +400,7 @@ class _CalendarTabContent extends StatelessWidget {
             id: 'slot_${slot.id}',
             label: 'disponível',
             count: 1,
-            color: const Color(0xFF00C2A8),
+            color: const AppColor(0xFF00C2A8),
             customLabel: '$timeLabel disponível',
           ),
         );
