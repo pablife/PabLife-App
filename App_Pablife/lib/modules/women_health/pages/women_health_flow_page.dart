@@ -75,12 +75,13 @@ class _WomenHealthFlowPageState extends State<WomenHealthFlowPage> {
   }
 
   Future<void> _finish() async {
-    await WomenHealthController.to.start(
+    final started = await WomenHealthController.to.start(
       newTrail: _trail!,
       newAnswers: Map.of(_answers),
       newLastPeriod: _lastPeriod,
     );
-    Get.back<void>();
+    // Se não salvou, fica aqui com o aviso na tela para tentar de novo.
+    if (started && mounted) Navigator.of(context).pop();
   }
 
   @override

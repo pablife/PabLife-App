@@ -120,9 +120,9 @@ class WomenHealthController extends GetxController {
 
   String? get _userId => AuthService.instance.currentUser?.id;
 
-  Future<void> _save({DateTime? consentAt}) async {
+  Future<bool> _save({DateTime? consentAt}) async {
     final userId = _userId;
-    if (userId == null) return;
+    if (userId == null) return false;
     try {
       await _repository.saveProfile(
         userId: userId,
@@ -132,27 +132,43 @@ class WomenHealthController extends GetxController {
         answers: answers,
         consentAt: consentAt,
       );
+      return true;
     } catch (e) {
       debugPrint('Erro ao salvar Saúde da mulher: $e');
       AppSnackbar.to.show('Não foi possível salvar. Tente novamente.');
+      return false;
     }
   }
 
   // ---------------------------------------------------------------- ações
 
-  Future<void> start({
+  /// Só liga o modo depois de salvar. Devolve false se não conseguiu.
+  Future<bool> start({
     required WomenTrail newTrail,
     required Map<String, String> newAnswers,
     required DateTime? newLastPeriod,
   }) async {
+    final previousTrail = trail;
+    final previousAnswers = answers;
+    final previousPeriod = lastPeriod;
+    final previousLength = cycleLength;
     trail = newTrail;
     answers = newAnswers;
     lastPeriod = newLastPeriod;
     cycleLength = cycleLengthOptions[newAnswers['cycle_length']] ?? 28;
+
+    if (!await _save(consentAt: DateTime.now())) {
+      trail = previousTrail;
+      answers = previousAnswers;
+      lastPeriod = previousPeriod;
+      cycleLength = previousLength;
+      return false;
+    }
+
     showBand = true;
     AppPalette.apply(true);
     update();
-    await _save(consentAt: DateTime.now());
+    return true;
   }
 
   /// "Sair do modo": só acontece quando a usuária confirma. Pode manter os
