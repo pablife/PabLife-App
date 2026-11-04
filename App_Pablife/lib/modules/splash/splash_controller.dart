@@ -12,7 +12,6 @@ import '../../infra/repositories/professional_repository.dart';
 import '../../infra/repositories/user_repository.dart';
 import '../../infra/services/auth_service.dart';
 import '../../shared/mixins/loader_manager.dart';
-import '../onboarding/onboarding_page.dart';
 
 class SplashController extends GetxController with LoaderManagerMixin {
   final AuthService _authService = AuthService.instance;
@@ -55,7 +54,7 @@ class SplashController extends GetxController with LoaderManagerMixin {
         debugPrint('user role: ${user.role}');
         if (_authService.isProfessionalAccount &&
             !_authService.hasChosenProfile) {
-          Get.offAllNamed(ChooseProfilePage.route);
+          await ChooseProfilePage.enterAfterLogin();
           changeLoading(false);
           return;
         }
@@ -78,10 +77,10 @@ class SplashController extends GetxController with LoaderManagerMixin {
 
         Get.offAllNamed(DashboardPage.route);
       } else {
-        Get.offAllNamed(OnboardingPage.route);
+        Get.offAllNamed(ChooseProfilePage.route);
       }
     } else {
-      Get.offAllNamed(OnboardingPage.route);
+      Get.offAllNamed(ChooseProfilePage.route);
     }
 
     changeLoading(false);

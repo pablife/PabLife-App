@@ -8,15 +8,9 @@ import '../pages/user_home_page.dart';
 
 class HomeController extends GetxController {
   final AuthService authService = AuthService.instance;
-  Widget? homePage;
 
-  @override
-  void onInit() {
-    super.onInit();
-    if (authService.currentUser?.role == UserRole.professional) {
-      homePage = const ProfessionalHomePage();
-    } else {
-      homePage = const UserHomePage();
-    }
-  }
+  /// Segue o lado ativo: a mesma conta pode entrar como profissional ou usuário.
+  Widget get homePage => authService.currentUser?.role == UserRole.professional
+      ? const ProfessionalHomePage()
+      : const UserHomePage();
 }

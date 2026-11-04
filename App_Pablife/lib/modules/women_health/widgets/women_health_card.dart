@@ -17,8 +17,8 @@ class WomenHealthCard extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Sair do modo Saúde da mulher?'),
         content: const Text(
-          'O app volta para as cores normais. Seus registros de humor podem '
-          'ficar guardados neste aparelho ou ser apagados.',
+          'O app volta para as cores normais. Seus registros podem ficar '
+          'guardados na sua conta ou ser apagados.',
         ),
         actions: [
           TextButton(

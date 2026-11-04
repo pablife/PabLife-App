@@ -6,30 +6,49 @@ import '../../../infra/services/auth_service.dart';
 import '../../../shared/themes/app_colors.dart';
 import '../../../widgets/design_system/text_default.dart';
 import '../../dashboard/dashboard_page.dart';
+import '../../onboarding/onboarding_page.dart';
+import 'professional_profile_page.dart';
 import '../../waiting_approval/pages/waiting_approval_page.dart';
 
-/// Quem tem conta de profissional escolhe como quer entrar. É a mesma conta
-/// (mesmo e-mail, CPF e senha) nos dois lados.
+/// "Você é?": primeira tela do app, antes do login. Quem tem conta de
+/// profissional também passa por aqui para trocar de lado, pelo Perfil. É a
+/// mesma conta (mesmo e-mail, CPF e senha) nos dois lados.
 class ChooseProfilePage extends StatefulWidget {
   const ChooseProfilePage({super.key});
 
   static const route = '/choose-profile';
 
-  @override
-  State<ChooseProfilePage> createState() => _ChooseProfilePageState();
-}
+  /// Leva para o lado escolhido depois do login ou do cadastro.
+  static Future<void> enterAfterLogin() async {
+    final auth = AuthService.instance;
+    final choice = auth.entryChoice;
+    auth.entryChoice = null;
 
-class _ChooseProfilePageState extends State<ChooseProfilePage> {
-  bool _loading = false;
+    if (!auth.isProfessionalAccount) {
+      if (choice == 'professional') {
+        // Conta de usuário: completa o cadastro de profissional.
+        Get.offAllNamed(
+          ProfessionalProfilePage.route,
+          arguments: {'addToExisting': true},
+        );
+        return;
+      }
+      Get.offAllNamed(DashboardPage.route);
+    } else if (choice == 'user') {
+      await _enterUserSide();
+    } else if (choice == 'professional') {
+      await _enterProfessionalSide();
+    } else {
+      Get.offAllNamed(route);
+    }
+  }
 
-  Future<void> _enterAsUser() async {
-    setState(() => _loading = true);
+  static Future<void> _enterUserSide() async {
     await AuthService.instance.setActingAsUser(true);
     Get.offAllNamed(DashboardPage.route);
   }
 
-  Future<void> _enterAsProfessional() async {
-    setState(() => _loading = true);
+  static Future<void> _enterProfessionalSide() async {
     final auth = AuthService.instance;
     await auth.setActingAsUser(false);
 
@@ -42,6 +61,29 @@ class _ChooseProfilePageState extends State<ChooseProfilePage> {
       return;
     }
     Get.offAllNamed(DashboardPage.route);
+  }
+
+  @override
+  State<ChooseProfilePage> createState() => _ChooseProfilePageState();
+}
+
+class _ChooseProfilePageState extends State<ChooseProfilePage> {
+  bool _loading = false;
+
+  bool get _beforeLogin => !AuthService.instance.isAuthenticated;
+
+  Future<void> _choose(String choice) async {
+    if (_beforeLogin) {
+      AuthService.instance.entryChoice = choice;
+      Get.offAllNamed(OnboardingPage.route);
+      return;
+    }
+    setState(() => _loading = true);
+    if (choice == 'user') {
+      await ChooseProfilePage._enterUserSide();
+    } else {
+      await ChooseProfilePage._enterProfessionalSide();
+    }
   }
 
   @override
@@ -60,16 +102,18 @@ class _ChooseProfilePageState extends State<ChooseProfilePage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const TextDefault(
-                          'Como você quer entrar?',
+                        TextDefault(
+                          _beforeLogin ? 'Você é?' : 'Como você quer entrar?',
                           fontSize: 26,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
-                        const TextDefault(
-                          'Você pode trocar depois, no seu Perfil.',
+                        TextDefault(
+                          _beforeLogin
+                              ? 'Escolha para ir direto à sua área.'
+                              : 'Você pode trocar depois, no seu Perfil.',
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                           color: AppColors.second,
@@ -78,16 +122,20 @@ class _ChooseProfilePageState extends State<ChooseProfilePage> {
                         const SizedBox(height: 28),
                         _Option(
                           icon: Icons.medical_services_outlined,
-                          title: 'Entrar como profissional',
+                          title: _beforeLogin
+                              ? 'Profissional'
+                              : 'Entrar como profissional',
                           subtitle: 'Sua agenda, pacientes e atendimentos',
-                          onTap: _enterAsProfessional,
+                          onTap: () => _choose('professional'),
                         ),
                         const SizedBox(height: 12),
                         _Option(
                           icon: Icons.person_outline,
-                          title: 'Entrar como usuário',
+                          title: _beforeLogin
+                              ? 'Usuário'
+                              : 'Entrar como usuário',
                           subtitle: 'Planner, mentorias e consultas',
-                          onTap: _enterAsUser,
+                          onTap: () => _choose('user'),
                         ),
                       ],
                     ),

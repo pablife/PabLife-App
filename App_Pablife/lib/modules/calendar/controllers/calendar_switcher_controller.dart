@@ -9,18 +9,9 @@ import '../pages/calendar_tab_page.dart';
 class CalendarSwitcherController extends GetxController {
   final AuthService _authService = AuthService.instance;
 
-  Widget? calendarPage;
-
-  @override
-  void onInit() {
-    super.onInit();
-    _initializePage();
-  }
-
-  void _initializePage() {
-    final currentUser = _authService.currentUser;
-    calendarPage = currentUser?.role == UserRole.professional
-        ? const ProfessionalCalendarTabPage()
-        : const CalendarTabPage();
-  }
+  /// Segue o lado ativo: a mesma conta pode entrar como profissional ou usuário.
+  Widget get calendarPage =>
+      _authService.currentUser?.role == UserRole.professional
+      ? const ProfessionalCalendarTabPage()
+      : const CalendarTabPage();
 }

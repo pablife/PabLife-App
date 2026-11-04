@@ -50,3 +50,26 @@ CREATE POLICY "Own women health check-ins"
   TO authenticated
   USING (user_id = public.get_my_uid())
   WITH CHECK (user_id = public.get_my_uid());
+
+-- A exclusão de conta só marca tb_users.deleted_at (anonimiza o resto). Dados de
+-- saúde não ficam guardados: somem junto com a conta.
+CREATE OR REPLACE FUNCTION public.erase_women_health_on_account_delete()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public', 'pg_temp'
+AS $$
+BEGIN
+  IF NEW.deleted_at IS NOT NULL AND OLD.deleted_at IS NULL THEN
+    DELETE FROM public.tb_women_health_check_ins WHERE user_id = NEW.id;
+    DELETE FROM public.tb_women_health_profiles WHERE user_id = NEW.id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.erase_women_health_on_account_delete() FROM PUBLIC, anon, authenticated;
+
+CREATE TRIGGER erase_women_health_on_account_delete
+  AFTER UPDATE OF deleted_at ON public.tb_users
+  FOR EACH ROW EXECUTE FUNCTION public.erase_women_health_on_account_delete();

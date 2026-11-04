@@ -5,14 +5,18 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../infra/models/user_role.dart';
+import '../../infra/repositories/women_health_repository.dart';
 import '../../infra/services/auth_service.dart';
 import '../../shared/themes/app_palette.dart';
+import '../../shared/utils/app_snackbar.dart';
 import 'women_health_data.dart';
 
-/// Modo Saúde da mulher. Nesta versão de teste os dados ficam só neste
-/// aparelho (nada vai para o banco).
+/// Modo Saúde da mulher. Os dados ficam na conta da usuária, em tabelas que
+/// só ela consegue ler.
 class WomenHealthController extends GetxController {
   static WomenHealthController get to => Get.find<WomenHealthController>();
+
+  final WomenHealthRepository _repository = WomenHealthRepository();
 
   WomenTrail? trail;
   DateTime? lastPeriod;
@@ -27,7 +31,7 @@ class WomenHealthController extends GetxController {
 
   bool get isActive => trail != null;
 
-  String get _storageKey =>
+  String get _legacyStorageKey =>
       'women_health_${AuthService.instance.currentUser?.id ?? 'anon'}';
 
   static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -63,7 +67,6 @@ class WomenHealthController extends GetxController {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
     final user = AuthService.instance.currentUser;
     if (user?.id == null) return;
     // O modo é do lado usuário; o profissional fica com as cores normais.
@@ -71,36 +74,68 @@ class WomenHealthController extends GetxController {
       AppPalette.apply(false);
       return;
     }
-    final raw = prefs.getString(_storageKey);
-    if (raw == null) {
-      // Conta sem o modo (ex.: outra pessoa entrou neste aparelho).
-      AppPalette.apply(false);
-      return;
-    }
 
-    final data = jsonDecode(raw) as Map<String, dynamic>;
-    trail = WomenTrail.values.firstWhereOrNull((t) => t.name == data['trail']);
-    final period = data['last_period'] as String?;
-    lastPeriod = period == null ? null : DateTime.parse(period);
-    cycleLength = data['cycle_length'] as int? ?? 28;
-    answers = Map<String, String>.from(data['answers'] as Map? ?? {});
-    checkIns = Map<String, String>.from(data['check_ins'] as Map? ?? {});
-    AppPalette.apply(isActive);
-    update();
+    try {
+      final userId = user.id!;
+      await _moveLocalDataToAccount(userId);
+      final profile = await _repository.getProfile(userId);
+      checkIns = await _repository.getCheckIns(userId);
+      trail = WomenTrail.values.firstWhereOrNull(
+        (t) => t.name == profile?['trail'],
+      );
+      final period = profile?['last_period'] as String?;
+      lastPeriod = period == null ? null : DateTime.parse(period);
+      cycleLength = profile?['cycle_length'] as int? ?? 28;
+      answers = Map<String, String>.from(profile?['answers'] as Map? ?? {});
+      AppPalette.apply(isActive);
+      update();
+    } catch (e) {
+      debugPrint('Erro ao carregar Saúde da mulher: $e');
+    }
   }
 
-  Future<void> _save() async {
+  /// A versão de teste guardava tudo no aparelho: leva para a conta uma vez.
+  Future<void> _moveLocalDataToAccount(String userId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _storageKey,
-      jsonEncode({
-        'trail': trail?.name,
-        'last_period': lastPeriod == null ? null : _dayKey(lastPeriod!),
-        'cycle_length': cycleLength,
-        'answers': answers,
-        'check_ins': checkIns,
-      }),
-    );
+    final raw = prefs.getString(_legacyStorageKey);
+    if (raw == null) return;
+
+    if (await _repository.getProfile(userId) == null) {
+      final data = jsonDecode(raw) as Map<String, dynamic>;
+      await _repository.saveProfile(
+        userId: userId,
+        trail: data['trail'] as String?,
+        lastPeriod: data['last_period'] as String?,
+        cycleLength: data['cycle_length'] as int? ?? 28,
+        answers: Map<String, String>.from(data['answers'] as Map? ?? {}),
+        consentAt: DateTime.now(),
+      );
+      final saved = Map<String, String>.from(data['check_ins'] as Map? ?? {});
+      for (final entry in saved.entries) {
+        await _repository.saveCheckIn(userId, entry.key, entry.value);
+      }
+    }
+    await prefs.remove(_legacyStorageKey);
+  }
+
+  String? get _userId => AuthService.instance.currentUser?.id;
+
+  Future<void> _save({DateTime? consentAt}) async {
+    final userId = _userId;
+    if (userId == null) return;
+    try {
+      await _repository.saveProfile(
+        userId: userId,
+        trail: trail?.name,
+        lastPeriod: lastPeriod == null ? null : _dayKey(lastPeriod!),
+        cycleLength: cycleLength,
+        answers: answers,
+        consentAt: consentAt,
+      );
+    } catch (e) {
+      debugPrint('Erro ao salvar Saúde da mulher: $e');
+      AppSnackbar.to.show('Não foi possível salvar. Tente novamente.');
+    }
   }
 
   // ---------------------------------------------------------------- ações
@@ -117,11 +152,11 @@ class WomenHealthController extends GetxController {
     showBand = true;
     AppPalette.apply(true);
     update();
-    await _save();
+    await _save(consentAt: DateTime.now());
   }
 
   /// "Sair do modo": só acontece quando a usuária confirma. Pode manter os
-  /// registros de humor ou apagar tudo o que foi guardado neste aparelho.
+  /// registros de humor ou apagar tudo o que foi guardado.
   Future<void> exit({required bool eraseData}) async {
     trail = null;
     AppPalette.apply(false);
@@ -134,8 +169,14 @@ class WomenHealthController extends GetxController {
     answers = {};
     checkIns = {};
     update();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_storageKey);
+    final userId = _userId;
+    if (userId == null) return;
+    try {
+      await _repository.deleteAll(userId);
+    } catch (e) {
+      debugPrint('Erro ao apagar Saúde da mulher: $e');
+      AppSnackbar.to.show('Não foi possível apagar. Tente novamente.');
+    }
   }
 
   void setShowBand(bool value) {
@@ -152,13 +193,33 @@ class WomenHealthController extends GetxController {
 
   Future<void> toggleCheckIn(String value) async {
     final key = _dayKey(_today);
-    if (checkIns[key] == value) {
+    final previous = checkIns[key];
+    final remove = previous == value;
+    if (remove) {
       checkIns.remove(key);
     } else {
       checkIns[key] = value;
     }
     update();
-    await _save();
+
+    final userId = _userId;
+    if (userId == null) return;
+    try {
+      if (remove) {
+        await _repository.deleteCheckIn(userId, key);
+      } else {
+        await _repository.saveCheckIn(userId, key, value);
+      }
+    } catch (e) {
+      debugPrint('Erro ao salvar humor: $e');
+      if (previous == null) {
+        checkIns.remove(key);
+      } else {
+        checkIns[key] = previous;
+      }
+      update();
+      AppSnackbar.to.show('Não foi possível salvar o humor.');
+    }
   }
 
   String? get todayCheckIn => checkIns[_dayKey(_today)];

@@ -298,8 +298,9 @@ class _WomenHealthFlowPageState extends State<WomenHealthFlowPage> {
         ),
         const SizedBox(height: 14),
         _body(
-          'Versão de teste: suas respostas ficam só neste aparelho e não vão '
-          'para a Pablife. O modo fica ativo até você pedir para sair.',
+          'Seus dados de saúde são sensíveis (LGPD): só você tem acesso, eles '
+          'não são usados para publicidade e você pode apagá-los quando '
+          'quiser. O modo fica ativo até você pedir para sair.',
         ),
         const SizedBox(height: 16),
         SizedBox(
