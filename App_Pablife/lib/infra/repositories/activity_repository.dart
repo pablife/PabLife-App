@@ -310,6 +310,74 @@ class ActivityRepository extends StrautilsTryThis {
     }, action: 'deletar atividade.');
   }
 
+  /// Tarefas que se repetem e já foram feitas em algum dia: id => início da
+  /// repetição. Apagar uma delas tira também os próximos dias.
+  FStrautilsResponse<Map<String, DateTime>> getDoneRecurringTasks(
+    String userId,
+  ) {
+    return tryThis(() async {
+      final response = await _client
+          .from('tb_activities')
+          .select(
+            'id, tb_activity_recurrence_rules!inner(start_at), '
+            'tb_activity_registers!inner(id)',
+          )
+          .eq('user_id', userId)
+          .eq('type', 'task')
+          .isFilter('deleted_at', null)
+          .isFilter('tb_activity_registers.deleted_at', null);
+
+      return StrautilsResponse.success({
+        for (final row in response as List)
+          row['id'] as String: DateTime.parse(
+            row['tb_activity_recurrence_rules']['start_at'] as String,
+          ).toLocal(),
+      });
+    }, action: 'buscar tarefas que se repetem.');
+  }
+
+  /// Tarefas avulsas já feitas do usuário: id => data e hora da tarefa.
+  FStrautilsResponse<Map<String, DateTime>> getDoneSingleTasks(String userId) {
+    return tryThis(() async {
+      final response = await _client
+          .from('tb_activities')
+          .select('id, due_at, tb_activity_registers!inner(id)')
+          .eq('user_id', userId)
+          .eq('type', 'task')
+          .isFilter('deleted_at', null)
+          .isFilter('activity_recurrence_rule_id', null)
+          .not('due_at', 'is', null)
+          .isFilter('tb_activity_registers.deleted_at', null);
+
+      return StrautilsResponse.success({
+        for (final row in response as List)
+          row['id'] as String: DateTime.parse(
+            row['due_at'] as String,
+          ).toLocal(),
+      });
+    }, action: 'buscar tarefas feitas.');
+  }
+
+  /// Apaga as tarefas (mesma exclusão de [deleteActivity]). A agenda mostra
+  /// uma tarefa apagada nos dias anteriores à data da exclusão; por isso a
+  /// tarefa de um dia passado leva a própria data, para sumir também de lá.
+  FStrautilsResponse<bool> deleteTasks(Map<String, DateTime> tasks) {
+    return tryThis(() async {
+      final now = DateTime.now();
+      await Future.wait(
+        tasks.entries.map((task) {
+          final deletedAt = task.value.isBefore(now) ? task.value : now;
+          return _client
+              .from('tb_activities')
+              .update({'deleted_at': deletedAt.toUtc().toIso8601String()})
+              .eq('id', task.key);
+        }),
+      );
+
+      return StrautilsResponse.success(true);
+    }, action: 'apagar tarefas feitas.');
+  }
+
   FStrautilsResponse<Map<String, int>> getActivityStatistics() {
     return tryThis(() async {
       final allActivities = await _client

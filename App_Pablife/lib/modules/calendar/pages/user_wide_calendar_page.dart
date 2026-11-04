@@ -14,6 +14,7 @@ abstract final class _PlannerColors {
   static const note = Color(0xFFD2CC61);
   static const noteText = Color(0xFF3D3A10);
   static const appointment = Color(0xFF3065FF);
+  static const holiday = Color(0xFFE0567A);
 }
 
 /// Agenda do usuário no computador: "+ Criar", minicalendário e filtros à
@@ -294,7 +295,7 @@ class _PhoneCalendar extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: GetBuilder<UserWideCalendarController>(
           builder: (c) {
             final totals = c.totals;
@@ -340,6 +341,20 @@ class _PhoneCalendar extends StatelessWidget {
                     value: c.showAppointments,
                     count: totals.appointments,
                     onChanged: (v) => c.setFilter(appointments: v),
+                  ),
+                  WideFilterRow(
+                    label: 'Feriados',
+                    color: _PlannerColors.holiday,
+                    value: c.showHolidays,
+                    count: c.holidaysInRange,
+                    onChanged: c.setShowHolidays,
+                  ),
+                  const SizedBox(height: 8),
+                  _DeleteDoneTasksButton(
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      c.deleteDoneTasks(context);
+                    },
                   ),
                 ],
               ),
@@ -458,8 +473,19 @@ class _SideColumn extends StatelessWidget {
                   count: totals.appointments,
                   onChanged: (v) => controller.setFilter(appointments: v),
                 ),
+                WideFilterRow(
+                  label: 'Feriados',
+                  color: _PlannerColors.holiday,
+                  value: controller.showHolidays,
+                  count: controller.holidaysInRange,
+                  onChanged: controller.setShowHolidays,
+                ),
               ],
             ),
+          ),
+          const SizedBox(height: 8),
+          _DeleteDoneTasksButton(
+            onPressed: () => controller.deleteDoneTasks(context),
           ),
           const SizedBox(height: 16),
           _card(
@@ -604,6 +630,8 @@ class _UserWeekViewState extends State<_UserWeekView> {
                     ),
                     child: Column(
                       children: [
+                        if (controller.holidayOn(day) case final holiday?)
+                          _HolidayChip(name: holiday),
                         for (final item in eventsByDay[day]!.where(_isAllDay))
                           Padding(
                             padding: const EdgeInsets.only(bottom: 2),
@@ -831,6 +859,69 @@ class _PlannerChip extends StatelessWidget {
   }
 }
 
+/// Feriado na faixa "dia todo": não tem check nem detalhes.
+class _HolidayChip extends StatelessWidget {
+  final String name;
+
+  const _HolidayChip({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Feriado: $name',
+      child: Container(
+        height: 24,
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+          color: _PlannerColors.holiday,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botão "Apagar tarefas feitas", na coluna do computador e nos filtros do
+/// celular.
+class _DeleteDoneTasksButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _DeleteDoneTasksButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: const Color(0xFFD32F2F),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+        icon: const Icon(Icons.delete_outline, size: 20),
+        label: const Text(
+          'Apagar tarefas feitas',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+}
+
 // ------------------------------------------------------------------ mês
 
 class _UserMonthView extends StatelessWidget {
@@ -906,7 +997,9 @@ class _UserMonthView extends StatelessWidget {
   Widget _dayCell(DateTime day, int month) {
     final c = controller.countsOn(day);
     if (compact) return _compactDayCell(day, month, c);
+    final holiday = controller.holidayOn(day);
     final pills = [
+      if (holiday != null) _pill(holiday, _PlannerColors.holiday, Colors.white),
       if (c.appointments > 0)
         _pill(
           '${c.appointments} ${c.appointments == 1 ? 'consulta' : 'consultas'}',
@@ -964,6 +1057,7 @@ class _UserMonthView extends StatelessWidget {
 
   Widget _compactDayCell(DateTime day, int month, UserDayCounts c) {
     final dots = [
+      if (controller.holidayOn(day) != null) _PlannerColors.holiday,
       if (c.appointments > 0) _PlannerColors.appointment,
       if (c.tasks > 0) _PlannerColors.task,
       if (c.notes > 0) _PlannerColors.note,
@@ -1069,6 +1163,8 @@ class _UserYearView extends StatelessWidget {
             _legend(_PlannerColors.task, 'tarefas'),
             _legend(_PlannerColors.note, 'anotações'),
             _legend(_PlannerColors.goal, 'metas'),
+            if (controller.showHolidays)
+              _legend(_PlannerColors.holiday, 'feriados'),
           ],
         ),
       ],
@@ -1140,6 +1236,8 @@ class _UserYearView extends StatelessWidget {
     final c = controller.countsOn(day);
     final fill = c.appointments > 0
         ? _PlannerColors.appointment
+        : controller.holidayOn(day) != null
+        ? _PlannerColors.holiday
         : c.tasks > 0
         ? _PlannerColors.task
         : c.notes > 0
