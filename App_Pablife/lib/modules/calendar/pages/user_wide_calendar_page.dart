@@ -10,6 +10,7 @@ import '../../women_health/women_health_controller.dart';
 import '../../women_health/women_health_data.dart';
 import '../controllers/professional_wide_calendar_controller.dart';
 import '../controllers/user_wide_calendar_controller.dart';
+import '../widgets/calendar_connect_dialog.dart';
 import '../widgets/wide_agenda_views.dart';
 
 /// Cores dos itens do planner (as mesmas do celular).
@@ -429,6 +430,16 @@ class _PhoneCalendar extends StatelessWidget {
                       },
                     ),
                   const SizedBox(height: 8),
+                  _ConnectCalendarButton(
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      CalendarConnectDialog.show(
+                        context,
+                        womenTrailTitle: women.trail?.title,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
                   _DeleteDoneTasksButton(
                     onPressed: () {
                       Navigator.of(sheetContext).pop();
@@ -569,6 +580,13 @@ class _SideColumn extends StatelessWidget {
                     onChanged: women.setShowBand,
                   ),
               ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          _ConnectCalendarButton(
+            onPressed: () => CalendarConnectDialog.show(
+              context,
+              womenTrailTitle: women.trail?.title,
             ),
           ),
           const SizedBox(height: 8),
@@ -1038,6 +1056,34 @@ class _HolidayChip extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Abre a conexão com o calendário, na coluna do computador e nos filtros do
+/// celular.
+class _ConnectCalendarButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _ConnectCalendarButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: WideAgendaColors.accent,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+        icon: const Icon(Icons.event_available, size: 20),
+        label: const Text(
+          'Conectar ao calendário',
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
     );
