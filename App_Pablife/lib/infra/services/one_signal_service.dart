@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class OneSignalService {
@@ -17,6 +17,10 @@ class OneSignalService {
     required String? oneSignalUserId,
     required DateTime sendAfter,
   }) async {
+    // No navegador o OneSignal recusa esta chamada. Os lembretes da consulta
+    // também são agendados pelo banco, ao criar o agendamento.
+    if (kIsWeb) return false;
+
     // Cannot send notification without a valid OneSignal user ID
     if (oneSignalUserId == null || oneSignalUserId.isEmpty) {
       debugPrint('⚠️ [OneSignalService] Cannot schedule notification: oneSignalUserId is null or empty');
@@ -38,11 +42,19 @@ class OneSignalService {
       'small_icon': 'ic_notification_small',
     };
 
-    final response = await http.post(
-      Uri.parse(_oneSignalUrl),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+    // Lembrete é um extra: se falhar, não pode virar erro de quem o chamou
+    // (a consulta, por exemplo, já foi salva nesse ponto).
+    final http.Response response;
+    try {
+      response = await http.post(
+        Uri.parse(_oneSignalUrl),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+    } catch (e) {
+      debugPrint('❌ [OneSignalService] Falha ao agendar lembrete: $e');
+      return false;
+    }
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
