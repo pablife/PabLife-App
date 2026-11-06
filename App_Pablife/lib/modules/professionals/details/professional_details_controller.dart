@@ -8,9 +8,8 @@ import '../../../infra/services/subscription_service.dart';
 import '../../../shared/mixins/loader_manager.dart';
 import '../../../shared/utils/app_snackbar.dart';
 import '../../../widgets/dialogs/premium_lock_dialog.dart';
-import '../../calendar/widgets/interactive_calendar_base.dart';
+import '../booking/booking_page.dart';
 import '../widgets/cancel_appointment_dialog.dart';
-import '../widgets/schedule_appointment_bottom_sheet.dart';
 
 class ProfessionalDetailsController extends GetxController
     with LoaderManagerMixin {
@@ -105,35 +104,13 @@ class ProfessionalDetailsController extends GetxController
       return;
     }
 
-    final result = await ScheduleAppointmentBottomSheet.show<dynamic>(
-      Get.context!,
-      professional,
+    final result = await Get.toNamed<String>(
+      BookingPage.route,
+      arguments: professional,
     );
 
-    if (result == 'message') {
-      openWhatsApp();
-      return;
-    }
-
-    if (result is CalendarSlotData) {
-      changeLoading(true);
-      final response = await _repository.scheduleAppointment(
-        professionalId: professional.professional.id!,
-        appointmentTimeId: result.id,
-        slotStartAt: result.startAt,
-      );
-      changeLoading(false);
-
-      if (!response.success) {
-        AppSnackbar.to.show(response.message);
-      } else {
-        AppSnackbar.to.show('Agendamento realizado com sucesso');
-        await _authService.reloadUserAccessInfo();
-        // Ideally we would reload the professional data here to get the appointment details
-        // For now we can just go back or show success
-        Get.back();
-      }
-    }
+    // "Trocar" e a consulta já marcada voltam para a lista de profissionais.
+    if (result != null) Get.back();
   }
 
   Future<void> openWhatsApp() async {

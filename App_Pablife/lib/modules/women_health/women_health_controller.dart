@@ -263,6 +263,35 @@ class WomenHealthController extends GetxController {
     return day < ovulation ? 'Folicular' : 'Lútea';
   }
 
+  /// Fase do dia para quem acompanha o ciclo. As próximas são previsões.
+  WomenCyclePhase? cyclePhaseOn(DateTime day) {
+    final date = _dateOnly(day);
+    if (lastPeriod == null || date.isBefore(lastPeriod!)) return null;
+    final future = date.isAfter(_today);
+    return switch (_phase(cycleDay(date))) {
+      'Menstruação' => WomenCyclePhase(
+        WomenCycleKind.menstruation,
+        future ? 'Previsão de menstruação' : 'Menstruação registrada',
+      ),
+      'Ovulação' => const WomenCyclePhase(
+        WomenCycleKind.fertile,
+        'Previsão de ovulação',
+      ),
+      'Fértil' => const WomenCyclePhase(
+        WomenCycleKind.fertile,
+        'Previsão de período fértil',
+      ),
+      'Folicular' => const WomenCyclePhase(
+        WomenCycleKind.other,
+        'Fase folicular (estimativa)',
+      ),
+      _ => const WomenCyclePhase(
+        WomenCycleKind.other,
+        'Fase lútea (estimativa)',
+      ),
+    };
+  }
+
   DateTime get nextPeriod {
     final today = _today;
     final elapsed = today.difference(lastPeriod!).inDays;

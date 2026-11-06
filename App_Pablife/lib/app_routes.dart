@@ -13,6 +13,7 @@ import 'modules/dashboard/dashboard_routes.dart';
 import 'modules/waiting_approval/waiting_approval_routes.dart';
 import 'modules/calendar/calendar_routes.dart';
 import 'modules/mentorias/mentorias_routes.dart';
+import 'modules/professionals/booking/booking_page.dart';
 import 'modules/professionals/professionals_routes.dart';
 import 'modules/profile/profile_routes.dart';
 import 'modules/notifications/notifications_routes.dart';
@@ -29,6 +30,7 @@ class AppRoutes {
     ChooseProfilePage.route,
     EmailInputPage.route,
     PasswordPage.route,
+    BookingPage.route,
   };
 
   /// No computador, as telas desenhadas para celular abrem numa coluna

@@ -225,6 +225,16 @@ class WomenNotice {
 }
 
 /// Faixa colorida do dia na agenda (fase, semana ou sintoma).
+enum WomenCycleKind { menstruation, fertile, other }
+
+/// Fase estimada do ciclo em um dia, com o nome mostrado à usuária.
+class WomenCyclePhase {
+  final WomenCycleKind kind;
+  final String label;
+
+  const WomenCyclePhase(this.kind, this.label);
+}
+
 class WomenBand {
   final String label;
   final Color color;
