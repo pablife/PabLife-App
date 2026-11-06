@@ -127,11 +127,10 @@ class _ProfilePanel extends StatelessWidget {
       child: professional == null
           ? Center(
               child: Text(
-                controller.isLoading ? '' : 'Escolha um profissional na lista',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: AppColor(0xFF00343C),
-                ),
+                controller.isLoading
+                    ? ''
+                    : 'Escolha um profissional na lista',
+                style: const TextStyle(fontSize: 16, color: AppColor(0xFF00343C)),
               ),
             )
           : SingleChildScrollView(

@@ -53,10 +53,7 @@ class ProfessionalTile extends StatelessWidget {
           foregroundDecoration: isSelected
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: const AppColor(0xFF00343C),
-                    width: 3,
-                  ),
+                  border: Border.all(color: const AppColor(0xFF00343C), width: 3),
                 )
               : null,
           padding: const EdgeInsets.all(15),

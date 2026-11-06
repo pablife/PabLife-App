@@ -97,11 +97,10 @@ void main() {
       ]),
     );
 
-    expect(c.periods.map((p) => (p.name, p.slots.map((s) => s.id).toList())), [
-      ('Manhã', ['m']),
-      ('Tarde', ['t', 't2']),
-      ('Noite', ['n']),
-    ]);
+    expect(
+      c.periods.map((p) => '${p.name}: ${p.slots.map((s) => s.id).join(',')}'),
+      ['Manhã: m', 'Tarde: t,t2', 'Noite: n'],
+    );
   });
 
   test('não mostra período sem horário', () async {
