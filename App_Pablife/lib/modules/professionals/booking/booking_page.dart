@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../infra/models/professional_schedule_slot.dart';
+import '../../../infra/models/professional_with_user_model.dart';
 import '../../../shared/themes/app_palette.dart';
 import '../../../shared/utils/wide_layout.dart';
 import '../../calendar/widgets/calendar_connect_dialog.dart';
@@ -125,6 +126,13 @@ class BookingPage extends StatelessWidget {
   const BookingPage({super.key});
 
   static const route = '/book-appointment';
+
+  /// Abre o agendamento. Devolve 'booked' ou 'change', ou null se a pessoa só
+  /// voltou. As rotas do app não têm tipo: pedir `toNamed<String>` dá erro.
+  static Future<String?> open(ProfessionalWithUserModel professional) async {
+    final result = await Get.toNamed(route, arguments: professional);
+    return result as String?;
+  }
 
   @override
   Widget build(BuildContext context) {

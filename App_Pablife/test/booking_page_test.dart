@@ -151,6 +151,46 @@ void main() {
     }
   }
 
+  testWidgets('abrir a tela pela rota do app não dá erro', (tester) async {
+    String? result;
+    await tester.pumpWidget(
+      GetMaterialApp(
+        getPages: [
+          GetPage(
+            name: '/',
+            page: () => Scaffold(
+              body: TextButton(
+                onPressed: () async {
+                  result = await BookingPage.open(_professional());
+                },
+                child: const Text('Agendar'),
+              ),
+            ),
+          ),
+          GetPage(
+            name: BookingPage.route,
+            page: () => Scaffold(
+              body: TextButton(
+                onPressed: () => Get.back(result: 'change'),
+                child: const Text('Trocar'),
+              ),
+            ),
+          ),
+        ],
+        initialRoute: '/',
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Agendar'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Trocar'));
+    await tester.pumpAndSettle();
+    expect(result, 'change');
+  });
+
   testWidgets('no computador, "Quero este" pega o primeiro horário', (
     tester,
   ) async {

@@ -104,10 +104,7 @@ class ProfessionalDetailsController extends GetxController
       return;
     }
 
-    final result = await Get.toNamed<String>(
-      BookingPage.route,
-      arguments: professional,
-    );
+    final result = await BookingPage.open(professional);
 
     // "Trocar" e a consulta já marcada voltam para a lista de profissionais.
     if (result != null) Get.back();

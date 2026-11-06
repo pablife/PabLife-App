@@ -242,10 +242,7 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
       return;
     }
 
-    final result = await Get.toNamed<String>(
-      BookingPage.route,
-      arguments: professional,
-    );
+    final result = await BookingPage.open(professional);
 
     if (result == 'booked') await loadProfessionals();
   }
