@@ -8,9 +8,8 @@ import '../../infra/models/professional_with_user_model.dart';
 import '../../infra/services/auth_service.dart';
 import '../../infra/services/subscription_service.dart';
 import '../../widgets/dialogs/premium_lock_dialog.dart';
-import '../calendar/widgets/interactive_calendar_base.dart';
+import 'booking/booking_page.dart';
 import 'widgets/cancel_appointment_dialog.dart';
-import 'widgets/schedule_appointment_bottom_sheet.dart';
 
 class ProfessionalsController extends GetxController with LoaderManagerMixin {
   final ProfessionalRepository _repository = ProfessionalRepository();
@@ -243,36 +242,15 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
       return;
     }
 
-    final result = await ScheduleAppointmentBottomSheet.show<dynamic>(
-      Get.context!,
-      professional,
-    );
+    final result = await BookingPage.open(professional);
 
-    if (result == 'message') {
-      _openWhatsApp(professional);
-      return;
-    }
+    if (result == 'booked') await loadProfessionals();
+  }
 
-    if (result is CalendarSlotData) {
-      changeLoading(true);
-      final response = await _repository.scheduleAppointment(
-        professionalId: professional.professional.id!,
-        appointmentTimeId: result.id,
-        slotStartAt: result.startAt,
-      );
-      changeLoading(false);
-
-      if (!response.success) {
-        AppSnackbar.to.show(response.message);
-      } else {
-        // Recarregar informações de assinatura após agendar
-        await _authService.reloadUserAccessInfo();
-        await loadProfessionals();
-
-        // Navegar para tela de sucesso
-        Get.offAllNamed('/appointment-success');
-      }
-    }
+  /// Mostra só os profissionais com quem a pessoa tem consulta marcada.
+  Future<void> showScheduledOnly() async {
+    await loadProfessionals();
+    if (!showOnlyScheduled) toggleScheduledFilter();
   }
 
   /// WhatsApp a partir do painel do perfil: como na página de detalhes, só
