@@ -49,7 +49,7 @@ class BookmarkButtonWidget extends StatelessWidget {
                     color: AppColor(0xFFF3F3F3),
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
-                    fontFamily: 'Instrument Sans',
+                    fontFamily: 'PlusJakartaSans',
                   ),
                 ),
               ),

@@ -11,7 +11,14 @@ class WomenHealthCard extends StatelessWidget {
   const WomenHealthCard({super.key, required this.controller});
 
   /// O modo só muda com a confirmação da usuária.
-  Future<void> _confirmExit(BuildContext context) async {
+  Future<void> _confirmExit(BuildContext context) =>
+      confirmExit(context, controller);
+
+  /// Pergunta antes de sair do modo (usado também no Perfil).
+  static Future<void> confirmExit(
+    BuildContext context,
+    WomenHealthController controller,
+  ) async {
     final choice = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(

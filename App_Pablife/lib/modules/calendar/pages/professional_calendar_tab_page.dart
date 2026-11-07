@@ -111,12 +111,12 @@ class _ProfessionalCalendarTabPageState
         labelStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          fontFamily: 'Instrument Sans',
+          fontFamily: 'PlusJakartaSans',
         ),
         unselectedLabelStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
-          fontFamily: 'Instrument Sans',
+          fontFamily: 'PlusJakartaSans',
         ),
         padding: const EdgeInsets.all(4),
         tabs: const [

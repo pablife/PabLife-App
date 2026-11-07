@@ -24,9 +24,9 @@ class DashboardHomePage extends StatelessWidget {
                   Text(
                     'Metas',
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: const AppColor(0xFF2D3142),
-                        ),
+                      fontWeight: FontWeight.w700,
+                      color: const AppColor(0xFF2D3142),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   if (controller.isLoading)
@@ -76,11 +76,7 @@ class DashboardHomePage extends StatelessWidget {
         padding: const EdgeInsets.all(32.0),
         child: Column(
           children: [
-            Icon(
-              Icons.track_changes,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.track_changes, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               'Nenhuma meta criada',

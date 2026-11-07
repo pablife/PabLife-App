@@ -88,7 +88,7 @@ Future<void> _pump(
 
   await tester.pumpWidget(
     GetMaterialApp(
-      theme: ThemeData(fontFamily: 'InstrumentSans'),
+      theme: ThemeData(fontFamily: 'PlusJakartaSans'),
       home: const BookingPage(),
     ),
   );
@@ -97,10 +97,10 @@ Future<void> _pump(
 
 void main() {
   setUpAll(() async {
-    final font = FontLoader('InstrumentSans')
+    final font = FontLoader('PlusJakartaSans')
       ..addFont(
         rootBundle.load(
-          'assets/fonts/Instrument_Sans/static/InstrumentSans-Regular.ttf',
+          'assets/fonts/PlusJakartaSans/PlusJakartaSans-Regular.ttf',
         ),
       );
     await font.load();

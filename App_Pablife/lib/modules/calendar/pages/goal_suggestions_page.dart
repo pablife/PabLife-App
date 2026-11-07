@@ -156,7 +156,7 @@ class GoalSuggestionsPage extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
                 height: 1.1,
-                fontFamily: 'Instrument Sans',
+                fontFamily: 'PlusJakartaSans',
               ),
             ),
             const SizedBox(height: 15),

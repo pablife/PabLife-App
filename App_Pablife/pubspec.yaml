@@ -62,19 +62,18 @@ flutter:
     - assets/pages/premium/
     - assets/icons/
   # Na web o Flutter baixa todas as fontes declaradas antes da primeira tela,
-  # então aqui ficam só as usadas (Elms Sans e Instrument Sans Condensed/
-  # SemiCondensed não aparecem no app; itálico só no peso regular).
+  # então aqui fica só a fonte da repaginação, Plus Jakarta Sans (licença OFL
+  # em assets/fonts/PlusJakartaSans/OFL.txt).
   fonts:
-    - family: InstrumentSans
+    - family: PlusJakartaSans
       fonts:
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-Regular.ttf
+        - asset: assets/fonts/PlusJakartaSans/PlusJakartaSans-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-Italic.ttf
-          weight: 400
-          style: italic
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-Medium.ttf
+        - asset: assets/fonts/PlusJakartaSans/PlusJakartaSans-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-SemiBold.ttf
+        - asset: assets/fonts/PlusJakartaSans/PlusJakartaSans-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Instrument_Sans/static/InstrumentSans-Bold.ttf
+        - asset: assets/fonts/PlusJakartaSans/PlusJakartaSans-Bold.ttf
           weight: 700
+        - asset: assets/fonts/PlusJakartaSans/PlusJakartaSans-ExtraBold.ttf
+          weight: 800

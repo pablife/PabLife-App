@@ -22,13 +22,13 @@ void main() {
     final box = tester.renderObject<RenderDecoratedBox>(
       find.byType(DecoratedBox),
     );
-    expect(box, paints..rect(color: const Color(0xFF00343D)));
+    expect(box, paints..rect(color: const Color(0xFF052F33)));
 
     AppPalette.isRose = true;
     AppPalette.resetCachedDecorations();
     box.markNeedsPaint();
     await tester.pump();
 
-    expect(box, paints..rect(color: const Color(0xFF4A3560)));
+    expect(box, paints..rect(color: const Color(0xFF3A1D4F)));
   });
 }

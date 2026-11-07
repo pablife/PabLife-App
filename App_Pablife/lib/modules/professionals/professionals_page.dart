@@ -1,13 +1,12 @@
-import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../shared/themes/pab_colors.dart';
 import '../../shared/utils/wide_layout.dart';
-import '../../widgets/design_system/app_bar_default.dart';
-import '../../widgets/design_system/notification_button_widget.dart';
+import '../home/pages/user_home_page.dart';
 import 'professionals_controller.dart';
+import 'widgets/clock_filter_button_widget.dart';
 import 'widgets/professional_profile_sections.dart';
-import 'widgets/professionals_search_field.dart';
-import 'widgets/professional_tabs_widget.dart';
 import 'widgets/professionals_list_widget.dart';
 
 class ProfessionalsPage extends StatelessWidget {
@@ -22,88 +21,206 @@ class ProfessionalsPage extends StatelessWidget {
         final wide = isWideLayout(context);
 
         return Scaffold(
-          backgroundColor: const AppColor(0xFF00343C),
-          appBar: AppBarDefault(trailing: const NotificationButtonWidget()),
+          backgroundColor: PabColors.background,
           body: wide
               // Computador: lista à esquerda e o perfil aberto ao lado.
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 24, 24),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                        width: 440,
-                        child: _buildListColumn(controller, wide: true),
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      width: 440,
+                      child: _ListColumn(controller: controller, wide: true),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: _ProfilePanel(controller: controller),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(child: _ProfilePanel(controller: controller)),
-                    ],
-                  ),
+                    ),
+                  ],
                 )
-              : _buildListColumn(controller, wide: false),
+              : _ListColumn(controller: controller, wide: false),
         );
       },
     );
   }
+}
 
-  Widget _buildListColumn(
-    ProfessionalsController controller, {
-    required bool wide,
-  }) {
-    final radius = wide
-        ? BorderRadius.circular(32)
-        : const BorderRadius.only(
-            topLeft: Radius.circular(39),
-            topRight: Radius.circular(39),
-          );
+class _ListColumn extends StatelessWidget {
+  final ProfessionalsController controller;
+  final bool wide;
 
+  const _ListColumn({required this.controller, required this.wide});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 10),
-        ProfessionalsSearchField(
-          controller: controller.searchController,
-          showOnlyScheduled: controller.showOnlyScheduled,
-          scheduledCount: controller.filteredProfessionals
-              .where((p) => p.hasAppointment)
-              .length,
-          onChanged: (value) {},
-          onClockTap: controller.toggleScheduledFilter,
-        ),
-        const SizedBox(height: 20),
+        _Header(controller: controller),
         Expanded(
-          child: Container(
-            margin: wide ? const EdgeInsets.only(left: 24) : null,
-            decoration: BoxDecoration(
-              color: const AppColor(0xFFC1CDFF),
-              borderRadius: radius,
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 18),
-                ProfessionalTabsWidget(
-                  types: controller.professionalTypes,
-                  selectedType: controller.selectedType,
-                  onTypeSelected: controller.changeType,
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: ProfessionalsListWidget(
-                    isLoading: controller.isLoading,
-                    professionals: controller.filteredProfessionals,
-                    showOnlyScheduled: controller.showOnlyScheduled,
-                    // No computador o clique abre o perfil no painel ao lado.
-                    onProfessionalTap: wide
-                        ? controller.selectProfessional
-                        : controller.openProfessional,
-                    onCalendarTap: controller.handleCalendarAction,
-                    selected: wide ? controller.selected : null,
-                  ),
-                ),
-              ],
-            ),
+          child: ProfessionalsListWidget(
+            isLoading: controller.isLoading,
+            professionals: controller.filteredProfessionals,
+            showOnlyScheduled: controller.showOnlyScheduled,
+            // No computador o clique abre o perfil no painel ao lado.
+            onProfessionalTap: wide
+                ? controller.selectProfessional
+                : controller.openProfessional,
+            onCalendarTap: controller.handleCalendarAction,
+            selected: wide ? controller.selected : null,
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Topo escuro: título, notificações, busca e Psicólogos/Nutricionistas.
+class _Header extends StatelessWidget {
+  final ProfessionalsController controller;
+
+  const _Header({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheduledCount = controller.filteredProfessionals
+        .where((p) => p.hasAppointment)
+        .length;
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: PabColors.ink,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Profissionais',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: PabColors.onInk,
+                      ),
+                    ),
+                  ),
+                  PabNotificationBell(),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Container(
+                constraints: const BoxConstraints(minHeight: 48),
+                padding: const EdgeInsets.only(left: 14),
+                decoration: BoxDecoration(
+                  color: PabColors.card,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.search, size: 18, color: PabColors.muted),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: controller.searchController,
+                        textInputAction: TextInputAction.search,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: PabColors.ink,
+                        ),
+                        decoration: const InputDecoration(
+                          hintText: 'Buscar profissional',
+                          hintStyle: TextStyle(color: PabColors.muted),
+                          border: InputBorder.none,
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                    Tooltip(
+                      message: controller.showOnlyScheduled
+                          ? 'Mostrar todos'
+                          : 'Só com consulta marcada',
+                      child: ClockFilterButtonWidget(
+                        showOnlyScheduled: controller.showOnlyScheduled,
+                        scheduledCount: scheduledCount,
+                        onTap: controller.toggleScheduledFilter,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: PabColors.onInk.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    for (final type in controller.professionalTypes)
+                      Expanded(
+                        child: _TypeTab(
+                          label: type,
+                          selected: controller.selectedType == type,
+                          onTap: () => controller.changeType(type),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TypeTab extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TypeTab({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: selected ? PabColors.accent : Colors.transparent,
+        borderRadius: BorderRadius.circular(11),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(11),
+          child: SizedBox(
+            height: 44,
+            child: Center(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: selected ? PabColors.ink : PabColors.onInk,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -119,18 +236,16 @@ class _ProfilePanel extends StatelessWidget {
     final professional = controller.selected;
 
     return Container(
-      margin: const EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
-        color: const AppColor(0xFFC1CDFF),
-        borderRadius: BorderRadius.circular(32),
+        color: PabColors.card,
+        border: Border.all(color: PabColors.line),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: professional == null
           ? Center(
               child: Text(
-                controller.isLoading
-                    ? ''
-                    : 'Escolha um profissional na lista',
-                style: const TextStyle(fontSize: 16, color: AppColor(0xFF00343C)),
+                controller.isLoading ? '' : 'Escolha um profissional na lista',
+                style: const TextStyle(fontSize: 16, color: PabColors.muted),
               ),
             )
           : SingleChildScrollView(
@@ -156,9 +271,9 @@ class _ProfilePanel extends StatelessWidget {
                                 Text(
                                   professional.user.fullName,
                                   style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColor(0xFF00343C),
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w800,
+                                    color: PabColors.ink,
                                   ),
                                 ),
                                 const SizedBox(height: 10),

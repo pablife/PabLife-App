@@ -150,7 +150,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                     RichText(
                       text: TextSpan(
                         style: const TextStyle(
-                          fontFamily: 'Instrument Sans',
+                          fontFamily: 'PlusJakartaSans',
                           fontWeight: FontWeight.w500,
                           fontSize: 48,
                           height: 1.229,

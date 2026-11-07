@@ -289,7 +289,9 @@ class ProfessionalProfileBody extends StatelessWidget {
                   text,
                   style: TextStyle(
                     fontSize: 16,
-                    color: isAction ? const AppColor(0xFF0C8DA1) : Colors.black87,
+                    color: isAction
+                        ? const AppColor(0xFF0C8DA1)
+                        : Colors.black87,
                     fontWeight: isAction ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
