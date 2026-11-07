@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../infra/models/user_role.dart';
 import '../../infra/repositories/women_health_repository.dart';
 import '../../infra/services/auth_service.dart';
+import '../../infra/repositories/user_preferences_repository.dart';
 import '../../shared/themes/app_palette.dart';
 import '../../shared/utils/app_snackbar.dart';
 import 'women_health_data.dart';
@@ -167,6 +168,7 @@ class WomenHealthController extends GetxController {
 
     showBand = true;
     AppPalette.apply(true);
+    UserPreferencesRepository().saveTheme(rose: true);
     update();
     return true;
   }
@@ -176,6 +178,7 @@ class WomenHealthController extends GetxController {
   Future<void> exit({required bool eraseData}) async {
     trail = null;
     AppPalette.apply(false);
+    UserPreferencesRepository().saveTheme(rose: false);
     if (!eraseData) {
       update();
       await _save();

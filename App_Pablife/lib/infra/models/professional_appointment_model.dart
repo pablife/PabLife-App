@@ -6,7 +6,10 @@ enum AppointmentStatus {
   scheduled,
   completed,
   cancelled,
-  noShow;
+  noShow,
+
+  /// A chamada caiu ou não conectou: a consulta volta para o saldo.
+  technicalIssue;
 
   static AppointmentStatus fromString(String value) {
     switch (value) {
@@ -18,6 +21,8 @@ enum AppointmentStatus {
         return AppointmentStatus.cancelled;
       case 'no_show':
         return AppointmentStatus.noShow;
+      case 'technical_issue':
+        return AppointmentStatus.technicalIssue;
       default:
         return AppointmentStatus.scheduled;
     }
@@ -33,6 +38,8 @@ enum AppointmentStatus {
         return 'cancelled';
       case AppointmentStatus.noShow:
         return 'no_show';
+      case AppointmentStatus.technicalIssue:
+        return 'technical_issue';
     }
   }
 }

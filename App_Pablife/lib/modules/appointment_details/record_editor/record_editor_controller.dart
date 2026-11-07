@@ -25,11 +25,20 @@ class RecordEditorController extends GetxController with LoaderManagerMixin {
 
   bool get isEditing => args.isEditing;
 
+  /// Compartilhar com o paciente. Desligado, só quem escreveu vê.
+  late bool isShared;
+
+  void setShared(bool value) {
+    isShared = value;
+    update();
+  }
+
   @override
   void onInit() {
     super.onInit();
     args = Get.arguments as RecordEditorArguments;
     recordType = args.type;
+    isShared = args.record?.isShared ?? recordType.sharedByDefault;
 
     // Se estiver editando, carrega os dados do registro
     if (args.isEditing && args.record != null) {
@@ -68,6 +77,7 @@ class RecordEditorController extends GetxController with LoaderManagerMixin {
           recordId: args.record!.id,
           title: title,
           description: description,
+          isShared: isShared,
         );
 
         if (response.success) {
@@ -87,6 +97,7 @@ class RecordEditorController extends GetxController with LoaderManagerMixin {
           type: recordType,
           title: title,
           description: description,
+          isShared: isShared,
         );
 
         if (response.success) {

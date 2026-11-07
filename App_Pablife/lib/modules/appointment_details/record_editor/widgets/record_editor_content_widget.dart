@@ -31,12 +31,38 @@ class RecordEditorContentWidget extends StatelessWidget {
               maxLines: 15,
               minLines: 12,
             ),
+            const SizedBox(height: 15),
+            Material(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              child: SwitchListTile(
+                value: controller.isShared,
+                onChanged: controller.isLoading ? null : controller.setShared,
+                title: const Text(
+                  'Compartilhar com o paciente',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  controller.isShared
+                      ? 'O paciente vê este registro.'
+                      : 'Privado: só você vê este registro.',
+                ),
+                secondary: Icon(
+                  controller.isShared ? Icons.visibility : Icons.lock_outline,
+                ),
+              ),
+            ),
             if (controller.isEditing) ...[
               const SizedBox(height: 20),
               TextButton(
-                onPressed: controller.isLoading ? null : controller.deleteRecord,
+                onPressed: controller.isLoading
+                    ? null
+                    : controller.deleteRecord,
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
