@@ -55,6 +55,37 @@ class UserPreferencesRepository {
     }
   }
 
+  Future<bool> loadPushNotifications() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return true;
+    try {
+      final row = await _client
+          .from('tb_user_preferences')
+          .select('push_notifications')
+          .eq('user_id', userId)
+          .maybeSingle();
+      return row?['push_notifications'] as bool? ?? true;
+    } catch (e) {
+      debugPrint('Preferência de notificações indisponível: $e');
+      return true;
+    }
+  }
+
+  Future<bool> savePushNotifications(bool on) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return false;
+    try {
+      await _client.from('tb_user_preferences').upsert({
+        'user_id': userId,
+        'push_notifications': on,
+      });
+      return true;
+    } catch (e) {
+      debugPrint('Não foi possível guardar a preferência de notificações: $e');
+      return false;
+    }
+  }
+
   /// O visual guardado, ou null se a pessoa ainda não escolheu.
   Future<bool?> loadRoseTheme() async {
     final userId = _client.auth.currentUser?.id;

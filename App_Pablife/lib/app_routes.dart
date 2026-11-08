@@ -5,6 +5,8 @@ import 'modules/auth/pages/password_page.dart';
 import 'modules/auth/pages/recovery_password_code_page.dart';
 import 'modules/auth/pages/recovery_password_page.dart';
 import 'modules/auth/pages/visual_choice_page.dart';
+import 'modules/consultations/my_consultations_page.dart';
+import 'modules/profile/pages/edit_profile_page.dart';
 import 'modules/auth/pages/account_created_page.dart';
 import 'modules/auth/pages/professional_profile_page.dart';
 import 'modules/auth/pages/sign_up_page.dart';
@@ -46,6 +48,8 @@ class AppRoutes {
     AccountCreatedPage.route,
     ProfessionalProfilePage.route,
     WaitingApprovalPage.route,
+    MyConsultationsPage.route,
+    EditProfilePage.route,
     BookingPage.route,
   };
 

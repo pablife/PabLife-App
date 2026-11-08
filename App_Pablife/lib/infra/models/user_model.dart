@@ -19,6 +19,9 @@ class UserModel {
   final DateTime? deletedAt;
   final String? oneSignalUserId;
 
+  /// "Como prefere ser chamado(a)" (Editar perfil).
+  final String? preferredName;
+
   UserModel({
     this.id,
     required this.fullName,
@@ -34,6 +37,7 @@ class UserModel {
     required this.updatedAt,
     this.deletedAt,
     this.oneSignalUserId,
+    this.preferredName,
   });
 
   Map<String, dynamic> toMap() {
@@ -79,6 +83,7 @@ class UserModel {
           ? DateTime.parse(map['deleted_at'])
           : null,
       oneSignalUserId: map['one_signal_user_id'],
+      preferredName: map['preferred_name'] as String?,
     );
   }
 

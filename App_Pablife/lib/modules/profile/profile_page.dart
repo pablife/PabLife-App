@@ -10,6 +10,7 @@ import '../../shared/utils/wide_layout.dart';
 import '../../widgets/pab_logo.dart';
 import '../../widgets/pabi/pabi.dart';
 import '../auth/pages/student_proof_page.dart';
+import '../consultations/my_consultations_page.dart';
 import '../home/controllers/user_home_controller.dart';
 import '../home/pages/user_home_page.dart';
 import '../women_health/pages/women_health_flow_page.dart';
@@ -620,6 +621,12 @@ class _Menu extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       (Icons.face_outlined, 'Editar perfil', controller.navigateToEditProfile),
+      if (!controller.isProfessionalView)
+        (
+          Icons.event_note_outlined,
+          'Minhas consultas',
+          () => Get.toNamed(MyConsultationsPage.route),
+        ),
       (
         Icons.workspace_premium_outlined,
         'Minha assinatura',

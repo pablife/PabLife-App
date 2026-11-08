@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../infra/repositories/payment_repository.dart';
+import '../consultations/my_consultations_page.dart';
 import 'controllers/checkout_controller.dart';
 import 'controllers/subscription_controller.dart';
 import 'pages/checkout_page.dart';
@@ -17,6 +18,10 @@ final profileRoutes = [
     bindings: [BindingsBuilder.put(ProfileController.new)],
   ),
   GetPage(name: EditProfilePage.route, page: () => const EditProfilePage()),
+  GetPage(
+    name: MyConsultationsPage.route,
+    page: () => const MyConsultationsPage(),
+  ),
   GetPage(name: PaymentMethodPage.route, page: () => const PaymentMethodPage()),
   GetPage(
     name: SubscriptionPage.route,
