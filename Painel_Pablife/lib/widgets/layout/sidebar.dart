@@ -19,6 +19,7 @@ import '../../modules/notifications/notifications_page.dart';
 import '../../modules/professionals/professionals_page.dart';
 import '../../modules/students/students_page.dart';
 import '../../modules/users/users_page.dart';
+import '../../modules/verses/verses_page.dart';
 import '../../shared/controllers/layout_controller.dart';
 import '../../shared/themes/app_colors.dart';
 import '../../shared/utils/app_assets.dart';
@@ -186,6 +187,13 @@ class SidebarContent extends StatelessWidget {
                         currentRoute: currentRoute,
                       ),
                       SidebarItem(
+                        icon: Icons.auto_stories_outlined,
+                        label: 'Versículos',
+                        route: VersesPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
                         icon: Icons.notifications_outlined,
                         label: 'Notificações',
                         route: NotificationsPage.route,
@@ -298,6 +306,7 @@ class SidebarContent extends StatelessWidget {
         CouponConsultationsPage.route,
       ),
       item(Icons.school_outlined, 'Estudantes', StudentsPage.route),
+      item(Icons.auto_stories_outlined, 'Versículos', VersesPage.route),
     ];
   }
 

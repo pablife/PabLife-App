@@ -192,8 +192,13 @@ class ProfessionalAppointmentModel {
                 dueAt,
                 startTime,
               ).add(const Duration(hours: 1));
-    final finishAt =
-        _combineNullableDateAndTime(dueAt, finishTime) ?? endOfScheduledWindow;
+    // Horário que se repete toda semana não tem data (due_at vazio): o fim
+    // vem da janela da consulta. Antes caía no dia de hoje e a consulta
+    // sumia do Dashboard depois desse horário.
+    final finishAt = dueAt == null
+        ? endOfScheduledWindow
+        : _combineNullableDateAndTime(dueAt, finishTime) ??
+              endOfScheduledWindow;
 
     return ProfessionalAppointmentModel(
       id: map['id']?.toString() ?? '',

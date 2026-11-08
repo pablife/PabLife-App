@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../shared/themes/app_palette.dart';
 import '../shared/themes/pab_colors.dart';
+import '../shared/utils/wide_layout.dart';
+import 'pab_logo.dart';
 
 /// Título do topo escuro das abas. No visual Saúde da Mulher ganha a linha
 /// "SAÚDE DA MULHER" em cima, como no canvas.
@@ -16,6 +18,12 @@ class PabPageTitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        // No computador o logo fica no menu lateral.
+        if (!isWideLayout(context))
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: PabLogo(size: 22),
+          ),
         if (AppPalette.isRose)
           const Padding(
             padding: EdgeInsets.only(bottom: 2),

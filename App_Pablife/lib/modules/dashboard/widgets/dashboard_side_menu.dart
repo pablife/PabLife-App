@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/themes/pab_colors.dart';
+import '../../../widgets/pab_logo.dart';
 import '../dashboard_controller.dart';
 import 'dashboard_navbar.dart';
 
@@ -26,7 +27,7 @@ class DashboardSideMenu extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.only(left: 8, bottom: 32),
-            child: PabWordmark(),
+            child: PabLogo(size: 30),
           ),
           for (final tab in dashboardTabs(isProfessional: isProfessional))
             DashboardSideMenuItem(
@@ -35,51 +36,6 @@ class DashboardSideMenu extends StatelessWidget {
               isSelected: controller.currentIndex == tab.index,
               onTap: () => controller.changeTab(tab.index),
             ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Marca "pablife" do menu: círculo e o "life" na cor de destaque.
-class PabWordmark extends StatelessWidget {
-  final Color color;
-
-  const PabWordmark({super.key, this.color = PabColors.onInk});
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Pablife',
-      excludeSemantics: true,
-      child: Row(
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: PabColors.accent, width: 2),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text.rich(
-            TextSpan(
-              children: [
-                const TextSpan(text: 'pab'),
-                TextSpan(
-                  text: 'life',
-                  style: TextStyle(color: PabColors.accent),
-                ),
-              ],
-            ),
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-              color: color,
-            ),
-          ),
         ],
       ),
     );

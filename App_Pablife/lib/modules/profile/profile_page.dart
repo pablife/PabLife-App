@@ -6,8 +6,11 @@ import '../../infra/repositories/user_preferences_repository.dart';
 import '../../shared/themes/app_palette.dart';
 import '../../shared/themes/pab_colors.dart';
 import '../../widgets/design_system/profile_avatar_widget.dart';
+import '../../shared/utils/wide_layout.dart';
+import '../../widgets/pab_logo.dart';
 import '../../widgets/pabi/pabi.dart';
 import '../auth/pages/student_proof_page.dart';
+import '../home/controllers/user_home_controller.dart';
 import '../home/pages/user_home_page.dart';
 import '../women_health/pages/women_health_flow_page.dart';
 import '../women_health/widgets/women_health_card.dart';
@@ -66,6 +69,8 @@ class ProfilePage extends StatelessWidget {
                         if (!controller.isProfessionalView) ...[
                           const _StudentDiscountCard(),
                           const SizedBox(height: 12),
+                          const _ToolsSection(),
+                          const SizedBox(height: 12),
                         ],
                         _Menu(controller: controller),
                         const SizedBox(height: 12),
@@ -93,6 +98,65 @@ class ProfilePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// "Ferramentas": o que aparece no Dashboard. Começa com o versículo do dia.
+class _ToolsSection extends StatelessWidget {
+  const _ToolsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Get.isRegistered<UserHomeController>()) {
+      return const SizedBox.shrink();
+    }
+    return GetBuilder<UserHomeController>(
+      builder: (home) => Container(
+        padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
+        decoration: BoxDecoration(
+          color: PabColors.card,
+          border: Border.all(color: PabColors.line),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Ferramentas',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: PabColors.ink,
+              ),
+            ),
+            const SizedBox(height: 2),
+            const Text(
+              'Escolha o que aparece no seu Dashboard.',
+              style: TextStyle(fontSize: 13, color: PabColors.muted),
+            ),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.only(right: 4),
+              value: home.showDailyVerse,
+              onChanged: home.setShowDailyVerse,
+              activeThumbColor: PabColors.card,
+              activeTrackColor: PabColors.accent,
+              title: const Text(
+                'Versículo do dia',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: PabColors.ink,
+                ),
+              ),
+              subtitle: const Text(
+                'Uma mensagem da Bíblia todos os dias no Dashboard.',
+                style: TextStyle(fontSize: 13, color: PabColors.muted),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -246,9 +310,12 @@ class _Header extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           child: Column(
             children: [
-              const Align(
-                alignment: Alignment.centerRight,
-                child: PabNotificationBell(),
+              Row(
+                children: [
+                  if (!isWideLayout(context)) const PabLogo(size: 22),
+                  const Spacer(),
+                  const PabNotificationBell(),
+                ],
               ),
               ProfileAvatarWidget(
                 imageUrl: user.imageUrl,
