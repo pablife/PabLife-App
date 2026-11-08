@@ -9,6 +9,7 @@ import '../../../infra/services/auth_service.dart';
 import '../../../infra/models/user_model.dart';
 import '../../../infra/models/user_role.dart';
 import '../../../infra/models/user_status.dart';
+import '../entry_visual.dart';
 
 class SignUpController extends GetxController with LoaderManagerMixin {
   final AuthService _authService = AuthService.instance;
@@ -111,6 +112,7 @@ class SignUpController extends GetxController with LoaderManagerMixin {
         );
 
         if (success) {
+          await EntryVisual.onAccountCreated(professional: false);
           Get.offAllNamed(SplashPage.route);
         } else {
           final errorMessage =

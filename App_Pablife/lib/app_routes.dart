@@ -2,6 +2,9 @@ import 'package:get/get.dart';
 import 'modules/auth/pages/choose_profile_page.dart';
 import 'modules/auth/pages/email_input_page.dart';
 import 'modules/auth/pages/password_page.dart';
+import 'modules/auth/pages/recovery_password_code_page.dart';
+import 'modules/auth/pages/recovery_password_page.dart';
+import 'modules/auth/pages/visual_choice_page.dart';
 import 'modules/dashboard/dashboard_page.dart';
 import 'modules/onboarding/onboarding_page.dart';
 import 'shared/utils/wide_layout.dart';
@@ -28,8 +31,11 @@ class AppRoutes {
     DashboardPage.route,
     OnboardingPage.route,
     ChooseProfilePage.route,
+    VisualChoicePage.route,
     EmailInputPage.route,
     PasswordPage.route,
+    RecoveryPasswordPage.route,
+    RecoveryPasswordCodePage.route,
     BookingPage.route,
   };
 

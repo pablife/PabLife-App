@@ -201,8 +201,24 @@ const womenMenopauseSymptoms = [
   WomenMood('Sono ruim', '🥱'),
 ];
 
+/// Humores da tela "Como estou hoje" (canvas), com o rosto da Pabi.
+const womenCheckInMoods = [
+  WomenMood('Feliz', '😄'),
+  WomenMood('Tranquila', '😌'),
+  WomenMood('Cansada', '😴'),
+  WomenMood('Triste', '😢'),
+  WomenMood('Ansiosa', '😰'),
+  WomenMood('Irritada', '😤'),
+  WomenMood('Com cólica', '🤕'),
+  WomenMood('Sensível', '🥺'),
+];
+
 WomenMood? womenMoodByLabel(String? label) {
-  for (final mood in [...womenMoods, ...womenMenopauseSymptoms]) {
+  for (final mood in [
+    ...womenCheckInMoods,
+    ...womenMoods,
+    ...womenMenopauseSymptoms,
+  ]) {
     if (mood.label == label) return mood;
   }
   return null;

@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import '../../../infra/models/activity_model.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../../../shared/utils/wide_layout.dart';
+import '../../../widgets/pab_page_title.dart';
+import '../widgets/phone_agenda_views.dart';
 import '../../women_health/women_health_controller.dart';
 import '../../women_health/women_health_data.dart';
 import '../controllers/professional_wide_calendar_controller.dart';
@@ -144,23 +146,49 @@ class _PhoneCalendar extends StatelessWidget {
             child: _WithWomenHealth(
               panel: Container(
                 color: PabColors.background,
-                padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
-                child: Column(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 96),
                   children: [
                     _FilterChips(controller: controller, women: women),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: switch (controller.view) {
-                        WideAgendaView.day || WideAgendaView.week =>
-                          _UserWeekView(controller: controller, compact: true),
-                        WideAgendaView.month => _UserMonthView(
-                          controller: controller,
-                          compact: true,
+                    const SizedBox(height: 12),
+                    switch (controller.view) {
+                      WideAgendaView.day => PhoneDayView(
+                        controller: controller,
+                        women: women.isActive ? women : null,
+                      ),
+                      WideAgendaView.week => PhoneWeekView(
+                        controller: controller,
+                        women: women.isActive ? women : null,
+                      ),
+                      WideAgendaView.month => PhoneMonthView(
+                        controller: controller,
+                        women: women.isActive ? women : null,
+                      ),
+                      WideAgendaView.year => PhoneYearView(
+                        controller: controller,
+                      ),
+                    },
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _PhoneAction(
+                            label: 'Conectar calendário',
+                            onTap: () => CalendarConnectDialog.show(
+                              context,
+                              womenTrailTitle: women.trail?.title,
+                            ),
+                          ),
                         ),
-                        WideAgendaView.year => _UserYearView(
-                          controller: controller,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _PhoneAction(
+                            label: 'Apagar feitas',
+                            danger: true,
+                            onTap: () => controller.deleteDoneTasks(context),
+                          ),
                         ),
-                      },
+                      ],
                     ),
                   ],
                 ),
@@ -312,6 +340,42 @@ class _PhoneCalendar extends StatelessWidget {
   }
 }
 
+/// Botões do fim da agenda no celular.
+class _PhoneAction extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  final bool danger;
+
+  const _PhoneAction({
+    required this.label,
+    required this.onTap,
+    this.danger = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(0, 44),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        backgroundColor: PabColors.card,
+        foregroundColor: danger ? const Color(0xFFA3263F) : PabColors.ink,
+        side: BorderSide(
+          color: danger ? const Color(0xFFF2C4CF) : PabColors.lineStrong,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
 /// Topo da agenda no celular (canvas "Agenda — mobile"): título, período,
 /// Hoje, anterior e próximo, e as visões Dia, Semana, Mês e Ano.
 class _PhoneHeader extends StatelessWidget {
@@ -358,14 +422,7 @@ class _PhoneHeader extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Agenda',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            color: PabColors.onInk,
-                          ),
-                        ),
+                        const PabPageTitle('Agenda'),
                         const SizedBox(height: 2),
                         Text(
                           c.title,
@@ -535,7 +592,7 @@ class _FilterChips extends StatelessWidget {
       height: 44,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.zero,
         itemCount: chips.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (_, index) {
@@ -777,9 +834,7 @@ class _UserWeekView extends StatefulWidget {
   final UserWideCalendarController controller;
 
   /// Celular: coluna das horas mais estreita.
-  final bool compact;
-
-  const _UserWeekView({required this.controller, this.compact = false});
+  const _UserWeekView({required this.controller});
 
   @override
   State<_UserWeekView> createState() => _UserWeekViewState();
@@ -788,7 +843,7 @@ class _UserWeekView extends StatefulWidget {
 class _UserWeekViewState extends State<_UserWeekView> {
   static const _hourHeight = 60.0;
 
-  double get _gutter => widget.compact ? 40 : 56;
+  double get _gutter => 56;
 
   final _scroll = ScrollController(initialScrollOffset: 7 * _hourHeight);
 
@@ -922,9 +977,7 @@ class _UserWeekViewState extends State<_UserWeekView> {
                             child: Padding(
                               padding: const EdgeInsets.only(right: 8, top: 2),
                               child: Text(
-                                widget.compact
-                                    ? wideTwo(hour)
-                                    : '${wideTwo(hour)}:00',
+                                '${wideTwo(hour)}:00',
                                 style: const TextStyle(
                                   fontSize: 11,
                                   color: WideAgendaColors.text,
@@ -1253,9 +1306,7 @@ class _UserMonthView extends StatelessWidget {
   final UserWideCalendarController controller;
 
   /// Celular: bolinhas coloridas no lugar das etiquetas "2 tarefas".
-  final bool compact;
-
-  const _UserMonthView({required this.controller, this.compact = false});
+  const _UserMonthView({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -1321,7 +1372,6 @@ class _UserMonthView extends StatelessWidget {
 
   Widget _dayCell(DateTime day, int month) {
     final c = controller.countsOn(day);
-    if (compact) return _compactDayCell(day, month, c);
     final holiday = controller.holidayOn(day);
     final pills = [
       if (holiday != null) _pill(holiday, _PlannerColors.holiday, Colors.white),
@@ -1384,57 +1434,6 @@ class _UserMonthView extends StatelessWidget {
               child: ClipRect(
                 child: Wrap(spacing: 3, runSpacing: 3, children: pills),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _compactDayCell(DateTime day, int month, UserDayCounts c) {
-    final dots = [
-      if (controller.holidayOn(day) != null) _PlannerColors.holiday,
-      if (c.appointments > 0) _PlannerColors.appointment,
-      if (c.tasks > 0) _PlannerColors.task,
-      if (c.notes > 0) _PlannerColors.note,
-      if (c.goals > 0) _PlannerColors.goal,
-    ];
-
-    return InkWell(
-      onTap: () => controller.openDay(day),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        decoration: BoxDecoration(
-          color: WomenHealthController.to
-              .bandOn(day)
-              ?.color
-              .withValues(alpha: 0.45),
-          border: const Border(
-            right: BorderSide(color: WideAgendaColors.grid),
-            bottom: BorderSide(color: WideAgendaColors.grid),
-          ),
-        ),
-        child: Column(
-          children: [
-            WideDayNumber(day: day, faded: day.month != month),
-            if (WomenHealthController.to.moodOn(day) case final mood?)
-              _DayMood(mood: mood, size: 14),
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 3,
-              runSpacing: 3,
-              alignment: WrapAlignment.center,
-              children: [
-                for (final color in dots)
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-              ],
             ),
           ],
         ),

@@ -49,6 +49,51 @@ class WomenHealthRepository {
     });
   }
 
+  /// Sintomas, energia, sono e texto do dia. Gravado à parte: se o banco
+  /// ainda não tiver essas colunas, o humor continua salvo.
+  Future<bool> saveCheckInDetails(
+    String userId,
+    String day, {
+    required List<String> symptoms,
+    required int? energy,
+    required String? sleep,
+    required String? note,
+  }) async {
+    try {
+      await _client
+          .from(_checkIns)
+          .update({
+            'symptoms': symptoms,
+            'energy': energy,
+            'sleep': sleep,
+            'note': note,
+          })
+          .eq('user_id', userId)
+          .eq('day', day);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Detalhes guardados do dia, ou null se não houver (ou o banco ainda não
+  /// tiver as colunas).
+  Future<Map<String, dynamic>?> getCheckInDetails(
+    String userId,
+    String day,
+  ) async {
+    try {
+      return await _client
+          .from(_checkIns)
+          .select('symptoms, energy, sleep, note')
+          .eq('user_id', userId)
+          .eq('day', day)
+          .maybeSingle();
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> deleteCheckIn(String userId, String day) {
     return _client
         .from(_checkIns)

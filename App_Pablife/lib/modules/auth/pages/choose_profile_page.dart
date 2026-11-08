@@ -8,15 +8,16 @@ import '../../dashboard/dashboard_page.dart';
 import '../../onboarding/onboarding_page.dart';
 import '../../onboarding/widgets/onboarding_background.dart';
 import '../../waiting_approval/pages/waiting_approval_page.dart';
-import 'email_input_page.dart';
 import 'professional_profile_page.dart';
+import 'visual_choice_page.dart';
 import 'widgets/auth_animated_background.dart';
 
-const _scene = OnboardingScene(
+/// Fundo de "Você é?" e da escolha do visual.
+const entryScene = OnboardingScene(
   gradient: [
-    AppColor.pair(0xFFDFE5FD, 0xFFF7F1EF),
-    AppColor.pair(0xFFD5DFFC, 0xFFF1E7EE),
-    AppColor.pair(0xFFCCCBF8, 0xFFE3D8F8),
+    AppColor.pair(0xFFDFE5FD, 0xFFFCE8F3),
+    AppColor.pair(0xFFD5DFFC, 0xFFF2E0F5),
+    AppColor.pair(0xFFCCCBF8, 0xFFE8D8F8),
   ],
   blobs: [
     BackgroundBlob(
@@ -154,7 +155,7 @@ class _ChooseProfilePageState extends State<ChooseProfilePage> {
 
     if (_beforeLogin) {
       AuthService.instance.entryChoice = choice;
-      Get.offAllNamed(EmailInputPage.route);
+      Get.toNamed(VisualChoicePage.route);
       return;
     }
     setState(() => _loading = true);
@@ -169,14 +170,15 @@ class _ChooseProfilePageState extends State<ChooseProfilePage> {
   Widget build(BuildContext context) {
     final label = switch (_choice) {
       'professional' => 'Entrar como profissional',
-      'user' => 'Entrar como usuário',
+      'user' =>
+        AppPalette.isRose ? 'Entrar como usuária' : 'Entrar como usuário',
       _ => 'Escolha uma opção',
     };
 
     return Scaffold(
       body: Stack(
         children: [
-          const Positioned.fill(child: OnboardingBackground(scene: _scene)),
+          const Positioned.fill(child: OnboardingBackground(scene: entryScene)),
           SafeArea(
             child: Column(
               children: [
@@ -281,7 +283,7 @@ class _ChooseProfilePageState extends State<ChooseProfilePage> {
                   icon: Icons.person_outline,
                   iconColor: const AppColor.pair(0xFF5B45D6, 0xFF8F72E0),
                   iconBackground: const AppColor.pair(0xFFECE8FF, 0xFFE3D8F8),
-                  title: 'Usuário',
+                  title: AppPalette.isRose ? 'Usuária' : 'Usuário',
                   subtitle: 'Planos e consultas',
                   selected: _choice == 'user',
                   onTap: () => setState(() => _choice = 'user'),

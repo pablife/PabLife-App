@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../shared/themes/pab_colors.dart';
+import '../../widgets/pab_page_title.dart';
 import 'mentorias_controller.dart';
 import 'widgets/mentorias_list_widget.dart';
 
@@ -80,16 +81,7 @@ class _Header extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Expanded(
-                    child: Text(
-                      'Mentorias',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: PabColors.onInk,
-                      ),
-                    ),
-                  ),
+                  const Expanded(child: PabPageTitle('Mentorias')),
                   Semantics(
                     button: true,
                     toggled: saved,

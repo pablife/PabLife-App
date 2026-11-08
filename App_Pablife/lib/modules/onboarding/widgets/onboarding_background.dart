@@ -6,15 +6,15 @@ import 'package:flutter/scheduler.dart';
 import '../../../shared/themes/app_palette.dart';
 
 abstract final class OnboardingColors {
-  static const text = AppColor.pair(0xFF052F33, 0xFF4A3560);
-  static const body = AppColor.pair(0xFF2A4649, 0xFF5A466E);
-  static const muted = AppColor.pair(0xFF35575B, 0xFF6B5A7B);
-  static const accent = AppColor.pair(0xFF0E7F7B, 0xFF8F72E0);
+  static const text = AppColor.pair(0xFF052F33, 0xFF3A1D4F);
+  static const body = AppColor.pair(0xFF2A4649, 0xFF5E4A66);
+  static const muted = AppColor.pair(0xFF35575B, 0xFF7A5A86);
+  static const accent = AppColor.pair(0xFF0E7F7B, 0xFFD63A74);
   static const pink = AppColor.pair(0xFFFF8ECF, 0xFFEEC3D8);
-  static const yellow = AppColor.pair(0xFFF5E94C, 0xFFF1E7EE);
-  static const lilac = AppColor.pair(0xFFA497F7, 0xFFAD94EE);
+  static const yellow = AppColor.pair(0xFFF5E94C, 0xFFFFC2E6);
+  static const lilac = AppColor.pair(0xFFA497F7, 0xFFD9B8F5);
   static const lime = AppColor.pair(0xFFC6F45A, 0xFFD6A6DB);
-  static const sky = AppColor.pair(0xFF8FD3F4, 0xFFE3D8F8);
+  static const sky = AppColor.pair(0xFF8FD3F4, 0xFFFF8ECF);
 }
 
 /// Mancha colorida. Posição: use [left] ou [right], e [top] ou [bottom].

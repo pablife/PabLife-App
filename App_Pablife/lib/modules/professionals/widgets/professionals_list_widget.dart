@@ -11,6 +11,8 @@ class ProfessionalsListWidget extends StatelessWidget {
   final void Function(ProfessionalWithUserModel) onProfessionalTap;
   final void Function(ProfessionalWithUserModel) onCalendarTap;
   final ProfessionalWithUserModel? selected;
+  final List<String> Function(ProfessionalWithUserModel) topicsOf;
+  final DateTime? Function(ProfessionalWithUserModel) nextSlotOf;
 
   const ProfessionalsListWidget({
     super.key,
@@ -20,6 +22,8 @@ class ProfessionalsListWidget extends StatelessWidget {
     required this.onProfessionalTap,
     required this.onCalendarTap,
     this.selected,
+    required this.topicsOf,
+    required this.nextSlotOf,
   });
 
   @override
@@ -56,6 +60,8 @@ class ProfessionalsListWidget extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 10),
           child: ProfessionalTile(
             professional: professional,
+            topics: topicsOf(professional),
+            nextSlot: nextSlotOf(professional),
             onTap: () => onProfessionalTap(professional),
             onCalendarTap: () => onCalendarTap(professional),
             isSelected:

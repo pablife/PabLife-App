@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../infra/repositories/user_preferences_repository.dart';
+import '../../shared/themes/app_palette.dart';
 import '../../shared/themes/pab_colors.dart';
 import '../../widgets/design_system/profile_avatar_widget.dart';
 import '../../widgets/pabi/pabi.dart';
@@ -55,10 +57,10 @@ class ProfilePage extends StatelessWidget {
                           _BalanceCard(controller: controller),
                           const SizedBox(height: 12),
                         ],
-                        if (!controller.isProfessionalView) ...[
-                          const _VisualSection(),
-                          const SizedBox(height: 12),
-                        ],
+                        _VisualSection(
+                          professional: controller.isProfessionalView,
+                        ),
+                        const SizedBox(height: 12),
                         _Menu(controller: controller),
                         const SizedBox(height: 12),
                         TextButton.icon(
@@ -213,67 +215,125 @@ class _BalanceCard extends StatelessWidget {
 }
 
 /// Visual do app: Pablife ou Saúde da Mulher. Entrar na Saúde da Mulher passa
-/// pelo questionário e pelo consentimento; sair pede confirmação.
+/// pelo questionário e pelo consentimento; sair pede confirmação. Para o
+/// profissional, muda só a figura e as cores.
 class _VisualSection extends StatelessWidget {
-  const _VisualSection();
+  final bool professional;
+
+  const _VisualSection({required this.professional});
+
+  static void _setProfessionalVisual(bool rose) {
+    AppPalette.apply(rose);
+    UserPreferencesRepository().saveTheme(rose: rose);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (professional) {
+      return _box(
+        subtitle: 'Muda só a figura e as cores do app.',
+        rose: AppPalette.isRose,
+        onPablife: () => _setProfessionalVisual(false),
+        onWomen: () => _setProfessionalVisual(true),
+      );
+    }
     if (!Get.isRegistered<WomenHealthController>()) {
       return const SizedBox.shrink();
     }
     return GetBuilder<WomenHealthController>(
-      builder: (women) {
-        final rose = women.isActive;
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: PabColors.card,
-            border: Border.all(color: PabColors.line),
-            borderRadius: BorderRadius.circular(20),
+      builder: (women) => _box(
+        subtitle: 'Muda a figura, as cores e os conteúdos do app.',
+        rose: women.isActive,
+        onPablife: () => WomenHealthCard.confirmExit(context, women),
+        onWomen: WomenHealthFlowPage.open,
+        trail: women.trail?.title,
+      ),
+    );
+  }
+
+  Widget _box({
+    required String subtitle,
+    required bool rose,
+    required VoidCallback onPablife,
+    required VoidCallback onWomen,
+    String? trail,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: PabColors.card,
+        border: Border.all(color: PabColors.line),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Visual do app',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: PabColors.ink,
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: const TextStyle(fontSize: 13, color: PabColors.muted),
+          ),
+          const SizedBox(height: 12),
+          Row(
             children: [
-              const Text(
-                'Visual do app',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: PabColors.ink,
+              Expanded(
+                child: _VisualOption(
+                  title: 'Pablife',
+                  women: false,
+                  inUse: !rose,
+                  onTap: onPablife,
                 ),
               ),
-              const SizedBox(height: 2),
-              const Text(
-                'Muda a figura, as cores e os conteúdos do app.',
-                style: TextStyle(fontSize: 13, color: PabColors.muted),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _VisualOption(
-                      title: 'Pablife',
-                      women: false,
-                      inUse: !rose,
-                      onTap: () => WomenHealthCard.confirmExit(context, women),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _VisualOption(
-                      title: 'Saúde da Mulher',
-                      women: true,
-                      inUse: rose,
-                      onTap: WomenHealthFlowPage.open,
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: _VisualOption(
+                  title: 'Saúde da Mulher',
+                  women: true,
+                  inUse: rose,
+                  onTap: onWomen,
+                ),
               ),
             ],
           ),
-        );
-      },
+          // A troca de trilha saiu da agenda e fica aqui.
+          if (rose && trail != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Trilha: $trail',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: PabColors.ink,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: WomenHealthFlowPage.open,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    foregroundColor: PabColors.accentText,
+                  ),
+                  child: const Text(
+                    'Trocar trilha',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

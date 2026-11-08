@@ -18,6 +18,8 @@ enum PabiMood {
   /// Humor da Pabi para o registro do dia (opções do app).
   static PabiMood fromCheckIn(String? checkIn) => switch (checkIn) {
     'Feliz' || 'Energética' => PabiMood.feliz,
+    'Com cólica' => PabiMood.colica,
+    'Sensível' => PabiMood.sensivel,
     'Cansada' || 'Sono ruim' => PabiMood.cansada,
     'Triste' || 'Desanimada' => PabiMood.triste,
     'Ansiosa' || 'Confusa' => PabiMood.ansiosa,
