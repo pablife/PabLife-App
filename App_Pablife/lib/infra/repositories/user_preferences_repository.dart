@@ -23,6 +23,38 @@ class UserPreferencesRepository {
     }
   }
 
+  /// Mostrar o "Versículo do dia" no Dashboard (ligado se nunca mudou).
+  Future<bool> loadShowDailyVerse() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return true;
+    try {
+      final row = await _client
+          .from('tb_user_preferences')
+          .select('show_daily_verse')
+          .eq('user_id', userId)
+          .maybeSingle();
+      return row?['show_daily_verse'] as bool? ?? true;
+    } catch (e) {
+      debugPrint('Preferência do versículo indisponível: $e');
+      return true;
+    }
+  }
+
+  Future<bool> saveShowDailyVerse(bool show) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return false;
+    try {
+      await _client.from('tb_user_preferences').upsert({
+        'user_id': userId,
+        'show_daily_verse': show,
+      });
+      return true;
+    } catch (e) {
+      debugPrint('Não foi possível guardar a preferência do versículo: $e');
+      return false;
+    }
+  }
+
   /// O visual guardado, ou null se a pessoa ainda não escolheu.
   Future<bool?> loadRoseTheme() async {
     final userId = _client.auth.currentUser?.id;

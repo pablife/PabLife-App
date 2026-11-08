@@ -6,6 +6,7 @@ import '../../../infra/services/notification_service.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../../../shared/utils/wide_layout.dart';
 import '../../../widgets/banners/banner_carousel_widget.dart';
+import '../../../widgets/pab_logo.dart';
 import '../../../widgets/pabi/pabi.dart';
 import '../../appointment_details/widgets/patient_appointment_options_sheet.dart';
 import '../../calendar/calendar_controller.dart';
@@ -15,6 +16,7 @@ import '../../profile/pages/subscription_page.dart';
 import '../../women_health/pages/mood_check_in_page.dart';
 import '../../women_health/women_health_controller.dart';
 import '../../women_health/women_health_data.dart';
+import '../../../infra/repositories/daily_verse_repository.dart';
 import '../controllers/user_home_controller.dart';
 
 const _months = [
@@ -94,10 +96,13 @@ class _HomeBody extends StatelessWidget {
     final goals = _GoalsCard(controller: c);
     final tasks = _TasksCard(controller: c);
     final cycle = _womenMode ? _CycleCard(women: women!) : null;
+    final verse = c.showDailyVerse ? c.dailyVerse : null;
+    final verseCard = verse == null ? null : _VerseCard(verse: verse);
 
     final List<Widget> content;
     if (wide) {
       content = [
+        if (verseCard != null) ...[verseCard, gap],
         if (cycle != null) ...[cycle, gap],
         _Grid(
           minItemWidth: 260,
@@ -114,6 +119,7 @@ class _HomeBody extends StatelessWidget {
       ];
     } else {
       content = [
+        if (verseCard != null) ...[verseCard, gap],
         if (cycle != null) ...[cycle, gap],
         appointment,
         if (!_womenMode) ...[gap, balance],
@@ -260,62 +266,74 @@ class _Header extends StatelessWidget {
             wide ? 32 : 16,
             52,
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              if (w != null) ...[
-                Semantics(
-                  button: true,
-                  label: 'Registrar como estou hoje',
-                  excludeSemantics: true,
-                  child: Material(
-                    color: PabColors.onInk.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(18),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(18),
-                      onTap: () => showMoodSheet(context, w),
-                      child: Pabi(
-                        mood: PabiMood.fromCheckIn(w.todayCheckIn),
-                        women: true,
-                        size: 60,
+              // No computador o logo fica no menu lateral.
+              if (!wide)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 14),
+                  child: PabLogo(size: 22),
+                ),
+              Row(
+                children: [
+                  if (w != null) ...[
+                    Semantics(
+                      button: true,
+                      label: 'Registrar como estou hoje',
+                      excludeSemantics: true,
+                      child: Material(
+                        color: PabColors.onInk.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(18),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(18),
+                          onTap: () => showMoodSheet(context, w),
+                          child: Pabi(
+                            mood: PabiMood.fromCheckIn(w.todayCheckIn),
+                            women: true,
+                            size: 60,
+                          ),
+                        ),
                       ),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          w != null ? 'SAÚDE DA MULHER' : '$greeting,',
+                          style: TextStyle(
+                            fontSize: w != null ? 12 : 14,
+                            letterSpacing: w != null ? 0.5 : 0,
+                            fontWeight: w != null
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                            color: PabColors.onInkSoft,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          w != null
+                              ? '$greeting${firstName.isEmpty ? '' : ', $firstName'}'
+                              : (name.isEmpty ? 'Olá!' : name),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: wide ? 28 : 22,
+                            fontWeight: FontWeight.w800,
+                            color: PabColors.onInk,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      w != null ? 'SAÚDE DA MULHER' : '$greeting,',
-                      style: TextStyle(
-                        fontSize: w != null ? 12 : 14,
-                        letterSpacing: w != null ? 0.5 : 0,
-                        fontWeight: w != null
-                            ? FontWeight.w700
-                            : FontWeight.w600,
-                        color: PabColors.onInkSoft,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      w != null
-                          ? '$greeting${firstName.isEmpty ? '' : ', $firstName'}'
-                          : (name.isEmpty ? 'Olá!' : name),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: wide ? 28 : 22,
-                        fontWeight: FontWeight.w800,
-                        color: PabColors.onInk,
-                      ),
-                    ),
-                  ],
-                ),
+                  const SizedBox(width: 12),
+                  const PabNotificationBell(),
+                ],
               ),
-              const SizedBox(width: 12),
-              const PabNotificationBell(),
             ],
           ),
         ),
@@ -686,6 +704,70 @@ class _AppointmentCard extends StatelessWidget {
                   onTap: () => _goToTab(3),
                 )
               : _PrimaryButton(label: 'Ver consulta', onTap: () => _open(next)),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Versículo do dia" (pode ser tirado em Perfil > Ferramentas).
+class _VerseCard extends StatelessWidget {
+  final DailyVerse verse;
+
+  const _VerseCard({required this.verse});
+
+  @override
+  Widget build(BuildContext context) {
+    final source = [
+      verse.reference,
+      if (verse.translation?.trim().isNotEmpty ?? false) verse.translation!,
+    ].join(' · ');
+    return _Card(
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _IconBox(
+            icon: Icons.auto_stories_outlined,
+            background: PabColors.lilac,
+            foreground: PabColors.lilacText,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'VERSÍCULO DO DIA',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                    color: PabColors.lilacText,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '“${verse.text.trim()}”',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    height: 1.5,
+                    fontStyle: FontStyle.italic,
+                    color: PabColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  source,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: PabColors.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

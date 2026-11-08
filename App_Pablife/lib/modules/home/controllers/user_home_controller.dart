@@ -9,6 +9,8 @@ import '../../../infra/models/user_model.dart';
 import '../../../infra/models/weekly_task_activity_summary_model.dart';
 import '../../../infra/repositories/activity_repository.dart';
 import '../../../infra/repositories/appointment_repository.dart';
+import '../../../infra/repositories/daily_verse_repository.dart';
+import '../../../infra/repositories/user_preferences_repository.dart';
 import '../../../infra/repositories/banner_repository.dart';
 import '../../../infra/services/activity_service.dart';
 import '../../../infra/services/auth_service.dart';
@@ -73,6 +75,31 @@ class UserHomeController extends GetxController with LoaderManagerMixin {
     _loadAppointments();
     _loadBalanceExpiry();
     _loadBanners();
+    _loadDailyVerse();
+  }
+
+  /// Versículo do dia e se a pessoa quer vê-lo (Perfil > Ferramentas).
+  DailyVerse? dailyVerse;
+  bool showDailyVerse = true;
+
+  Future<void> _loadDailyVerse() async {
+    final results = await Future.wait([
+      UserPreferencesRepository().loadShowDailyVerse(),
+      DailyVerseRepository().today(),
+    ]);
+    showDailyVerse = results[0] as bool;
+    dailyVerse = results[1] as DailyVerse?;
+    update();
+  }
+
+  Future<void> setShowDailyVerse(bool show) async {
+    showDailyVerse = show;
+    update();
+    final saved = await UserPreferencesRepository().saveShowDailyVerse(show);
+    if (!saved) {
+      showDailyVerse = !show;
+      update();
+    }
   }
 
   Future<void> _loadBanners() async {
@@ -171,6 +198,7 @@ class UserHomeController extends GetxController with LoaderManagerMixin {
 
   Future<void> refreshData() async {
     await Future.wait([
+      _loadDailyVerse(),
       loadActivities(),
       loadWeeklyProgress(),
       _loadAppointments(),

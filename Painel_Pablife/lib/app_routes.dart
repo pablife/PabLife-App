@@ -24,6 +24,7 @@ import 'modules/finance/finance_report_controller.dart';
 import 'modules/banners/banners_routes.dart';
 import 'modules/coupons/coupons_routes.dart';
 import 'modules/students/students_page.dart';
+import 'modules/verses/verses_page.dart';
 import 'modules/notifications/notifications_routes.dart';
 import 'modules/subscriptions/cancelled_subscriptions_page.dart';
 import 'modules/subscriptions/cancelled_subscriptions_controller.dart';
@@ -133,6 +134,7 @@ class AppRoutes {
     // Cupons - rotas separadas no módulo
     ...CouponsRoutes.routes,
     StudentsPage.page,
+    VersesPage.page,
 
     // Notifications - rotas separadas no módulo
     ...NotificationsRoutes.routes,
