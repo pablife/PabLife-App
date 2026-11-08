@@ -115,21 +115,22 @@ class RegistrationLayout extends StatelessWidget {
             ],
           ),
         ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-          decoration: const BoxDecoration(
-            color: PabColors.card,
-            border: Border(top: BorderSide(color: PabColors.line)),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: footer,
+        if (footer.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+            decoration: const BoxDecoration(
+              color: PabColors.card,
+              border: Border(top: BorderSide(color: PabColors.line)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: footer,
+              ),
             ),
           ),
-        ),
       ],
     );
 
@@ -613,6 +614,54 @@ class RegFilePicker extends StatelessWidget {
             style: TextStyle(fontSize: 12, color: PabColors.muted),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Moldura das telas com topo próprio (consulta, sala de espera): ocupa a
+/// tela no celular e vira um cartão no centro no computador.
+class PabCardFrame extends StatelessWidget {
+  final Widget child;
+  final Color background;
+  final double maxWidth;
+
+  const PabCardFrame({
+    super.key,
+    required this.child,
+    this.background = PabColors.background,
+    this.maxWidth = 520,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isWideLayout(context)) {
+      return Scaffold(backgroundColor: background, body: child);
+    }
+    return Scaffold(
+      backgroundColor: _page,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: 860),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: background,
+                  border: Border.all(color: PabColors.line),
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

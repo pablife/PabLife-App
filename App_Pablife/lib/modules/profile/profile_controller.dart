@@ -14,7 +14,11 @@ import '../../infra/services/auth_service.dart';
 import '../../infra/services/subscription_service.dart';
 import '../../infra/models/user_model.dart';
 import '../../infra/models/user_role.dart';
+import '../../infra/repositories/consultation_repository.dart';
 import '../../infra/repositories/professional_repository.dart';
+import '../../infra/repositories/user_preferences_repository.dart';
+import '../auth/pages/recovery_password_page.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import '../../widgets/design_system/app_dialog.dart';
 import 'pages/edit_profile_page.dart';
 import 'pages/subscription_page.dart';
@@ -36,6 +40,12 @@ class ProfileController extends GetxController with LoaderManagerMixin {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController preferredNameController = TextEditingController();
+  final TextEditingController meetingUrlController = TextEditingController();
+
+  /// "Receber notificações" (Editar perfil).
+  bool pushNotifications = true;
+  String? _professionalId;
 
   @override
   void onReady() {
@@ -60,6 +70,9 @@ class ProfileController extends GetxController with LoaderManagerMixin {
 
       if (currentUser != null) {
         fullNameController.text = currentUser!.fullName;
+        preferredNameController.text = currentUser!.preferredName ?? '';
+        pushNotifications = await UserPreferencesRepository()
+            .loadPushNotifications();
         emailController.text = currentUser!.email;
         phoneController.text = currentUser!.phone;
 
@@ -70,6 +83,10 @@ class ProfileController extends GetxController with LoaderManagerMixin {
               professionalResponse.data != null) {
             descriptionController.text =
                 professionalResponse.data!.description ?? '';
+            _professionalId = professionalResponse.data!.id;
+            meetingUrlController.text =
+                await ConsultationRepository().myMeetingUrl(_professionalId!) ??
+                '';
           }
         }
 
@@ -98,6 +115,8 @@ class ProfileController extends GetxController with LoaderManagerMixin {
     emailController.dispose();
     phoneController.dispose();
     descriptionController.dispose();
+    preferredNameController.dispose();
+    meetingUrlController.dispose();
     super.onClose();
   }
 
@@ -165,6 +184,35 @@ class ProfileController extends GetxController with LoaderManagerMixin {
     return base64Encode(bytes);
   }
 
+  /// Liga ou desliga as notificações no celular e guarda a escolha.
+  Future<void> setPushNotifications(bool on) async {
+    pushNotifications = on;
+    update();
+    final saved = await UserPreferencesRepository().savePushNotifications(on);
+    if (!saved) {
+      pushNotifications = !on;
+      update();
+      AppSnackbar.to.show('Não foi possível salvar agora.');
+      return;
+    }
+    if (!kIsWeb) {
+      try {
+        if (on) {
+          await OneSignal.User.pushSubscription.optIn();
+        } else {
+          await OneSignal.User.pushSubscription.optOut();
+        }
+      } catch (e) {
+        debugPrint('OneSignal: $e');
+      }
+    }
+  }
+
+  /// "Alterar senha": manda um código por e-mail (mesmo fluxo de "Esqueci").
+  void changePassword() {
+    Get.toNamed(RecoveryPasswordPage.route, arguments: currentUser?.email);
+  }
+
   void navigateToEditProfile() {
     Get.toNamed(EditProfilePage.route);
   }
@@ -196,9 +244,22 @@ class ProfileController extends GetxController with LoaderManagerMixin {
       description: currentUser!.role == UserRole.professional
           ? descriptionController.text.trim()
           : null,
+      preferredName: preferredNameController.text,
     );
 
+    String? linkError;
+    if (response.success && _professionalId != null) {
+      linkError = await ConsultationRepository().saveMeetingUrl(
+        _professionalId!,
+        meetingUrlController.text,
+      );
+    }
+
     changeLoading(false);
+    if (linkError != null) {
+      AppSnackbar.to.show(linkError);
+      return;
+    }
 
     if (!response.success) {
       AppSnackbar.to.show(response.message);

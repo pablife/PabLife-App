@@ -8,7 +8,6 @@ import '../../../shared/utils/wide_layout.dart';
 import '../../../widgets/banners/banner_carousel_widget.dart';
 import '../../../widgets/pab_logo.dart';
 import '../../../widgets/pabi/pabi.dart';
-import '../../appointment_details/widgets/patient_appointment_options_sheet.dart';
 import '../../calendar/calendar_controller.dart';
 import '../../dashboard/dashboard_controller.dart';
 import '../../notifications/notifications_page.dart';
@@ -17,6 +16,7 @@ import '../../women_health/pages/mood_check_in_page.dart';
 import '../../women_health/women_health_controller.dart';
 import '../../women_health/women_health_data.dart';
 import '../../../infra/repositories/daily_verse_repository.dart';
+import '../../consultations/my_consultations_page.dart';
 import '../controllers/user_home_controller.dart';
 
 const _months = [
@@ -251,7 +251,11 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = controller.user?.fullName.trim() ?? '';
-    final firstName = name.split(RegExp(r'\s+')).first;
+    // "Como prefere ser chamado(a)" (Editar perfil), senão o primeiro nome.
+    final preferred = controller.user?.preferredName?.trim() ?? '';
+    final firstName = preferred.isNotEmpty
+        ? preferred
+        : name.split(RegExp(r'\s+')).first;
     final greeting = _greeting(DateTime.now());
     final w = women;
 
@@ -590,9 +594,10 @@ class _AppointmentCard extends StatelessWidget {
     return '$label · ${_two(start.hour)}:${_two(start.minute)}';
   }
 
-  Future<void> _open(ProfessionalAppointmentModel a) async {
-    final changed = await PatientAppointmentOptionsSheet.show(a);
-    if (changed) controller.refreshData();
+  /// Card de consulta abre "Minhas consultas" (e atualiza ao voltar).
+  Future<void> _openList() async {
+    await Get.toNamed(MyConsultationsPage.route);
+    controller.refreshData();
   }
 
   @override
@@ -647,7 +652,7 @@ class _AppointmentCard extends StatelessWidget {
             _PrimaryButton(
               label: next == null ? 'Agendar' : 'Ver',
               dark: true,
-              onTap: next == null ? () => _goToTab(3) : () => _open(next),
+              onTap: next == null ? () => _goToTab(3) : _openList,
             ),
           ],
         ),
@@ -703,7 +708,7 @@ class _AppointmentCard extends StatelessWidget {
                   label: 'Agendar consulta',
                   onTap: () => _goToTab(3),
                 )
-              : _PrimaryButton(label: 'Ver consulta', onTap: () => _open(next)),
+              : _PrimaryButton(label: 'Ver minhas consultas', onTap: _openList),
         ],
       ),
     );

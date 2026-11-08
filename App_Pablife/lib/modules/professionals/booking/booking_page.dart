@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../infra/models/professional_appointment_model.dart';
+import '../../../infra/models/professional_model.dart';
 import '../../../infra/models/professional_schedule_slot.dart';
+import '../../../infra/models/user_model.dart';
+import '../../../infra/models/user_role.dart';
+import '../../../infra/models/user_status.dart';
 import '../../../infra/models/professional_with_user_model.dart';
 import '../../../shared/themes/app_palette.dart';
 import '../../../shared/utils/wide_layout.dart';
@@ -9,7 +14,7 @@ import '../../calendar/widgets/calendar_connect_dialog.dart';
 import '../../dashboard/dashboard_controller.dart';
 import '../../dashboard/dashboard_page.dart';
 import '../../women_health/women_health_data.dart';
-import '../professionals_controller.dart';
+import '../../consultations/my_consultations_page.dart';
 import 'booking_controller.dart';
 
 /// Cores do agendamento: a segunda é a do modo Saúde da mulher.
@@ -134,6 +139,46 @@ class BookingPage extends StatelessWidget {
     return result as String?;
   }
 
+  /// Remarcar a consulta nesta mesma tela. Devolve true se remarcou.
+  static Future<bool> reschedule(
+    ProfessionalAppointmentModel appointment,
+  ) async {
+    final user = appointment.professionalData?['user'] as Map? ?? const {};
+    final now = DateTime.now();
+    final professional = ProfessionalWithUserModel(
+      professional: ProfessionalModel(
+        id: appointment.professionalId,
+        userId: user['id']?.toString() ?? '',
+        type:
+            appointment.professionalData?['type']?.toString() ??
+            appointment.professionalType ??
+            '',
+        validationDocumentUrl: '',
+        validationStatus: 'approved',
+        createdAt: now,
+        updatedAt: now,
+      ),
+      user: UserModel(
+        id: user['id']?.toString(),
+        fullName: user['full_name']?.toString() ?? 'Profissional',
+        email: '',
+        phone: user['phone']?.toString() ?? '',
+        cpfDocument: '',
+        imageUrl: user['image_url']?.toString(),
+        termsAccepted: true,
+        role: UserRole.professional,
+        status: UserStatus.active,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    final result = await Get.toNamed(
+      route,
+      arguments: {'professional': professional, 'rescheduleId': appointment.id},
+    );
+    return result == 'booked';
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<BookingController>(
@@ -173,11 +218,10 @@ void _backToDashboard(int tab) {
 
 void _openPlanner() => _backToDashboard(1);
 
+/// "Ver minhas consultas": a lista do paciente (Perfil > Minhas consultas).
 void _openMyAppointments() {
-  _backToDashboard(3);
-  if (Get.isRegistered<ProfessionalsController>()) {
-    Get.find<ProfessionalsController>().showScheduledOnly();
-  }
+  _backToDashboard(0);
+  Get.toNamed(MyConsultationsPage.route);
 }
 
 // ------------------------------------------------------------- computador
@@ -323,8 +367,10 @@ class _WideHeader extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
-                          'Agendar consulta',
+                        Text(
+                          c.rescheduling
+                              ? 'Remarcar consulta'
+                              : 'Agendar consulta',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
@@ -555,7 +601,8 @@ class _MobileHeader extends StatelessWidget {
     final subtitle = switch (c.step) {
       BookingStep.pick => 'Passo 1 de 2 · Data e horário',
       BookingStep.confirm => 'Passo 2 de 2 · Confirmação',
-      BookingStep.done => 'Agendamento concluído',
+      BookingStep.done =>
+        c.rescheduling ? 'Remarcação concluída' : 'Agendamento concluído',
     };
 
     return Container(
@@ -581,6 +628,8 @@ class _MobileHeader extends StatelessWidget {
                         Text(
                           c.step == BookingStep.done
                               ? 'Tudo certo'
+                              : c.rescheduling
+                              ? 'Remarcar consulta'
                               : 'Agendar consulta',
                           style: const TextStyle(
                             fontSize: 19,
@@ -1669,7 +1718,11 @@ class _Confirmation extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _Button(
-          label: c.booking ? 'Agendando...' : 'Confirmar agendamento',
+          label: c.booking
+              ? (c.rescheduling ? 'Remarcando...' : 'Agendando...')
+              : (c.rescheduling
+                    ? 'Confirmar nova data'
+                    : 'Confirmar agendamento'),
           onTap: c.booking ? null : c.confirm,
         ),
         const SizedBox(height: 8),
@@ -1707,8 +1760,8 @@ class _Done extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        const Text(
-          'Consulta agendada!',
+        Text(
+          c.rescheduling ? 'Consulta remarcada!' : 'Consulta agendada!',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 26,

@@ -58,6 +58,7 @@ flutter:
     - assets/images/
     - assets/pages/onboarding/
     - assets/pages/auth/
+    - assets/pages/consultations/
     - assets/pages/waiting_approval/
     - assets/pages/premium/
     - assets/icons/

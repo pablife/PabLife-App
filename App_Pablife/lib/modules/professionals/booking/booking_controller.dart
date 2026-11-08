@@ -41,6 +41,9 @@ class BookingController extends GetxController {
 
   /// Modo Saúde da mulher ativo: muda os textos e mostra o ciclo.
   final bool womenMode;
+
+  /// Remarcando uma consulta (mesma tela; muda o texto e a ação final).
+  final bool rescheduling;
   final WomenCyclePhase? Function(DateTime day)? _cyclePhaseOn;
 
   BookingController({
@@ -50,12 +53,38 @@ class BookingController extends GetxController {
     DateTime Function()? now,
     void Function(String message)? notify,
     this.womenMode = false,
+    this.rescheduling = false,
     WomenCyclePhase? Function(DateTime day)? cyclePhaseOn,
   }) : _loadSlots = loadSlots,
        _book = book,
        _now = now ?? DateTime.now,
        _notify = notify ?? AppSnackbar.to.show,
        _cyclePhaseOn = cyclePhaseOn;
+
+  /// Remarcar: mesmos horários do profissional; confirmar troca o horário
+  /// da consulta (com as regras de prazo do banco).
+  factory BookingController.reschedule(
+    ProfessionalWithUserModel professional,
+    String appointmentId,
+  ) {
+    final base = BookingController.live(professional);
+    final appointments = AppointmentRepository();
+    return BookingController(
+      professional: professional,
+      womenMode: base.womenMode,
+      cyclePhaseOn: base._cyclePhaseOn,
+      rescheduling: true,
+      loadSlots: base._loadSlots,
+      book: (slot) async {
+        final response = await appointments.rescheduleAppointment(
+          appointmentId: appointmentId,
+          newAppointmentTimeId: slot.id,
+          newSlotStartAt: slot.startAt,
+        );
+        return response.success ? null : response.message;
+      },
+    );
+  }
 
   factory BookingController.live(ProfessionalWithUserModel professional) {
     final appointments = AppointmentRepository();

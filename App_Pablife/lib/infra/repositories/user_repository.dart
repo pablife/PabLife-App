@@ -309,6 +309,7 @@ class UserRepository extends StrautilsTryThis {
     required String email,
     required String phone,
     String? description,
+    String? preferredName,
   }) {
     return tryThis(() async {
       // Update user data
@@ -318,6 +319,10 @@ class UserRepository extends StrautilsTryThis {
             'full_name': fullName,
             'email': email,
             'phone': phone,
+            if (preferredName != null)
+              'preferred_name': preferredName.trim().isEmpty
+                  ? null
+                  : preferredName.trim(),
             'updated_at': DateTime.now().toIso8601String(),
           })
           .eq('id', userId)

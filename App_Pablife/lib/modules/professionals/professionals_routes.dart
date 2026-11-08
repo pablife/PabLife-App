@@ -23,8 +23,14 @@ final professionalsRoutes = [
     page: () => const BookingPage(),
     bindings: [
       BindingsBuilder(() {
+        final args = Get.arguments;
         Get.put(
-          BookingController.live(Get.arguments as ProfessionalWithUserModel),
+          args is Map
+              ? BookingController.reschedule(
+                  args['professional'] as ProfessionalWithUserModel,
+                  args['rescheduleId'] as String,
+                )
+              : BookingController.live(args as ProfessionalWithUserModel),
         );
       }),
     ],
