@@ -7,11 +7,11 @@ import '../../../../shared/themes/app_palette.dart';
 
 /// Cores das telas de login.
 abstract final class AuthColors {
-  static const background = AppColor(0xFF00343D);
-  static const panel = AppColor.pair(0xFFC4CCFD, 0xFFF4EEE9);
-  static const text = AppColor.pair(0xFF052F33, 0xFF4A3560);
-  static const muted = AppColor.pair(0xFF33505A, 0xFF6B5A7B);
-  static const accent = AppColor.pair(0xFF13B8B2, 0xFF8F72E0);
+  static const background = AppColor.pair(0xFF00343D, 0xFF2A1238);
+  static const panel = AppColor.pair(0xFFC4CCFD, 0xFFF6D9EB);
+  static const text = AppColor.pair(0xFF052F33, 0xFF3A1D4F);
+  static const muted = AppColor.pair(0xFF33505A, 0xFF5E4A66);
+  static const accent = AppColor.pair(0xFF13B8B2, 0xFFD63A74);
   static const brandPink = AppColor.pair(0xFFF7C3DF, 0xFFEEC3D8);
   static const lilac = AppColor.pair(0xFFB9B3FF, 0xFFD6A6DB);
   static const pink = AppColor.pair(0xFFFF8ECF, 0xFFEEC3D8);

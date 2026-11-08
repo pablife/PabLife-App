@@ -94,9 +94,11 @@ class AppColor extends Color {
   final int _normal;
   final int? _rose;
 
+  // ignore: use_super_parameters
   const AppColor(int normal) : _normal = normal, _rose = null, super(normal);
 
   /// Para quando a cor rosé não é a da tabela (ex.: fundo claro do planner).
+  // ignore: use_super_parameters
   const AppColor.pair(int normal, int rose)
     : _normal = normal,
       _rose = rose,

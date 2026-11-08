@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/recovery_password_code_controller.dart';
-import '../../../widgets/design_system/edge_button_rounded.dart';
-import '../../../widgets/design_system/text_default.dart';
-import '../../../widgets/design_system/app_text_form_field.dart';
-import '../../../widgets/app_text_vector.dart';
-import '../../../shared/themes/app_colors.dart';
 
+import '../controllers/recovery_password_code_controller.dart';
+import 'widgets/auth_animated_background.dart';
+import 'widgets/auth_form_layout.dart';
+
+/// "Confira seu e-mail" (canvas "Onb7", segundo estado): o código que chegou
+/// por e-mail e a senha nova. Dá para pedir outro código.
 class RecoveryPasswordCodePage extends StatelessWidget {
   static const route = '/auth/recovery-password-code';
 
@@ -14,172 +14,95 @@ class RecoveryPasswordCodePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.aqua,
-      body: GetBuilder<RecoveryPasswordCodeController>(
-        builder: (controller) {
-          return SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: controller.goBack,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: AppColors.white.withAlpha(80),
-                              width: 1.5,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back,
-                            color: AppColors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      AppTextVector(width: 147, height: 45),
-                      const Spacer(),
-                      const SizedBox(width: 40),
-                    ],
-                  ),
+    return GetBuilder<RecoveryPasswordCodeController>(
+      builder: (controller) {
+        final busy = controller.isLoading;
+        final ready =
+            controller.codeController.text.trim().isNotEmpty &&
+            controller.passwordController.text.isNotEmpty &&
+            controller.confirmPasswordController.text.isNotEmpty;
+
+        void submit() {
+          if (busy) return;
+          FocusScope.of(context).unfocus();
+          controller.verifyCodeAndUpdatePassword();
+        }
+
+        Widget eye(bool hidden, VoidCallback onTap) => IconButton(
+          tooltip: hidden ? 'Mostrar senha' : 'Ocultar senha',
+          onPressed: onTap,
+          icon: Icon(
+            hidden ? Icons.visibility : Icons.visibility_off,
+            color: AuthColors.hint,
+          ),
+        );
+
+        return AuthFormLayout(
+          title: 'Confira seu e-mail',
+          subtitle: controller.email.isEmpty
+              ? 'Enviamos um código de 6 dígitos. Digite o código e a '
+                    'senha nova.'
+              : 'Enviamos um código de 6 dígitos para ${controller.email}. '
+                    'Digite o código e a senha nova.',
+          field: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AuthTextField(
+                label: 'Código',
+                hint: '6 dígitos',
+                controller: controller.codeController,
+                enabled: !busy,
+                keyboardType: TextInputType.number,
+                autofillHints: const [AutofillHints.oneTimeCode],
+                onChanged: (_) => controller.update(),
+                onSubmitted: (_) {},
+              ),
+              const SizedBox(height: 16),
+              AuthTextField(
+                label: 'Senha nova',
+                hint: 'Pelo menos 6 caracteres',
+                controller: controller.passwordController,
+                enabled: !busy,
+                obscureText: controller.obscurePassword,
+                autofillHints: const [AutofillHints.newPassword],
+                onChanged: (_) => controller.update(),
+                onSubmitted: (_) {},
+                suffix: eye(
+                  controller.obscurePassword,
+                  controller.toggleObscurePassword,
                 ),
-                Expanded(
-                  flex: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: Image.asset(
-                      'assets/pages/auth/auth_banner.png',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+              ),
+              const SizedBox(height: 16),
+              AuthTextField(
+                label: 'Repita a senha nova',
+                hint: 'Digite a senha de novo',
+                controller: controller.confirmPasswordController,
+                enabled: !busy,
+                obscureText: controller.obscureConfirmPassword,
+                autofillHints: const [AutofillHints.newPassword],
+                onChanged: (_) => controller.update(),
+                onSubmitted: (_) => submit(),
+                suffix: eye(
+                  controller.obscureConfirmPassword,
+                  controller.toggleObscureConfirmPassword,
                 ),
-                Expanded(
-                  flex: 5,
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: AppColors.second,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(32),
-                        topRight: Radius.circular(32),
-                      ),
-                    ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 32,
-                              right: 32,
-                              top: 32,
-                            ),
-                            child: const TextDefault(
-                              'Digite o código',
-                              fontSize: 32,
-                              textAlign: TextAlign.center,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.aquaText,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: Opacity(
-                              opacity: 0.56,
-                              child: TextDefault(
-                                'Enviamos um código de 6 dígitos para ${controller.email}',
-                                fontSize: 16,
-                                textAlign: TextAlign.center,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: AppTextFormField(
-                              labelText: 'Código de verificação',
-                              hintText: 'Digite o código de 6 dígitos',
-                              keyboardType: TextInputType.number,
-                              controller: controller.codeController,
-                              enabled: !controller.isLoading,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: AppTextFormField(
-                              labelText: 'Nova senha',
-                              hintText: 'Digite a nova senha',
-                              obscureText: controller.obscurePassword,
-                              controller: controller.passwordController,
-                              enabled: !controller.isLoading,
-                              suffixIcon: IconButton(
-                                onPressed: controller.toggleObscurePassword,
-                                icon: Icon(
-                                  controller.obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: AppColors.aquaText.withAlpha(150),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: AppTextFormField(
-                              labelText: 'Confirmar nova senha',
-                              hintText: 'Digite a senha novamente',
-                              obscureText: controller.obscureConfirmPassword,
-                              controller: controller.confirmPasswordController,
-                              enabled: !controller.isLoading,
-                              suffixIcon: IconButton(
-                                onPressed:
-                                    controller.toggleObscureConfirmPassword,
-                                icon: Icon(
-                                  controller.obscureConfirmPassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: AppColors.aquaText.withAlpha(150),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: 16,
-                              left: 32,
-                            ),
-                            child: EdgeButtonRounded(
-                              text: 'Redefinir senha',
-                              width: double.infinity,
-                              onTap: controller.verifyCodeAndUpdatePassword,
-                              isLoading: controller.isLoading,
-                              side: EdgeSide.left,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+            ],
+          ),
+          footerText: 'Não chegou?',
+          footerLink: controller.isResending
+              ? 'Reenviando…'
+              : 'Reenviar código',
+          onFooterLink: controller.resendCode,
+          button: AuthContinueButton(
+            label: 'Salvar senha',
+            enabled: ready && !busy,
+            loading: busy,
+            loadingLabel: 'Salvando…',
+            onTap: submit,
+          ),
+        );
+      },
     );
   }
 }

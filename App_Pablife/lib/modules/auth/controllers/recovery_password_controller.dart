@@ -38,7 +38,6 @@ class RecoveryPasswordController extends GetxController
       final success = await _authService.resetPassword(email);
 
       if (success) {
-        AppSnackbar.to.show('Código enviado! Verifique seu e-mail.');
         Get.toNamed(RecoveryPasswordCodePage.route, arguments: email);
       } else {
         AppSnackbar.to.show('Erro ao enviar código de recuperação');

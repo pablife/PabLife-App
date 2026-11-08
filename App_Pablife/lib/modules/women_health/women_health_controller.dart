@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../../infra/services/auth_service.dart';
 import '../../infra/repositories/user_preferences_repository.dart';
 import '../../shared/themes/app_palette.dart';
 import '../../shared/utils/app_snackbar.dart';
+import '../auth/entry_visual.dart';
 import 'women_health_data.dart';
 
 /// Modo Saúde da mulher. Os dados ficam na conta da usuária, em tabelas que
@@ -31,6 +33,11 @@ class WomenHealthController extends GetxController {
   bool showBand = true;
 
   bool get isActive => trail != null;
+
+  final _loaded = Completer<void>();
+
+  /// Completa quando a trilha da conta terminou de carregar.
+  Future<void> get ready => _loaded.future;
 
   String get _legacyStorageKey =>
       'women_health_${AuthService.instance.currentUser?.id ?? 'anon'}';
@@ -64,15 +71,24 @@ class WomenHealthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _load();
+    _load().whenComplete(() {
+      if (!_loaded.isCompleted) _loaded.complete();
+    });
   }
 
   Future<void> _load() async {
     final user = AuthService.instance.currentUser;
     if (user?.id == null) return;
-    // O modo é do lado usuário; o profissional fica com as cores normais.
+    // O modo é do lado usuário. O profissional só escolhe o visual, que
+    // fica guardado no cadastro.
     if (user!.role != UserRole.user) {
-      AppPalette.apply(false);
+      try {
+        AppPalette.apply(
+          await UserPreferencesRepository().loadRoseTheme() ?? false,
+        );
+      } catch (e) {
+        debugPrint('Erro ao carregar o visual: $e');
+      }
       return;
     }
 
@@ -88,7 +104,9 @@ class WomenHealthController extends GetxController {
       lastPeriod = period == null ? null : DateTime.parse(period);
       cycleLength = profile?['cycle_length'] as int? ?? 28;
       answers = Map<String, String>.from(profile?['answers'] as Map? ?? {});
-      AppPalette.apply(isActive);
+      // Conta nova que escolheu a Saúde da Mulher fica no visual rosé
+      // enquanto responde o questionário.
+      if (!EntryVisual.waitingWomenFlow) AppPalette.apply(isActive);
       update();
     } catch (e) {
       debugPrint('Erro ao carregar Saúde da mulher: $e');

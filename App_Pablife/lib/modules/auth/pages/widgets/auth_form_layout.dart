@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../shared/themes/app_palette.dart';
 import 'auth_animated_background.dart';
 
 /// Desenho das telas de login: fundo animado, marca, ilustração e cartão.
@@ -53,15 +54,28 @@ class AuthFormLayout extends StatelessWidget {
                         from: -30,
                         delay: 100,
                         child: SizedBox(
-                          width: math.min(400, constraints.maxWidth * .82),
-                          child: const AuthFloatingArt(
-                            asset: 'assets/pages/auth/login_art.png',
-                            aspectRatio: 915 / 753,
-                            description:
-                                'Ilustração: busto clássico lilás com coroa, '
-                                'jarro derramando carinhas sorridentes e vaso '
-                                'com flor',
-                          ),
+                          // A figura rosé é quadrada: um pouco menor, para o cartão
+                          // aparecer sem rolar.
+                          width:
+                              math.min(400, constraints.maxWidth * .82) *
+                              (AppPalette.isRose ? .82 : 1),
+                          child: AppPalette.isRose
+                              ? const AuthFloatingArt(
+                                  asset: 'assets/pages/auth/login_art_rose.png',
+                                  aspectRatio: 765 / 759,
+                                  description:
+                                      'Ilustração: busto rosa com coroa '
+                                      'amarela, jarro de carinhas e sol sobre '
+                                      'nuvem',
+                                )
+                              : const AuthFloatingArt(
+                                  asset: 'assets/pages/auth/login_art.png',
+                                  aspectRatio: 915 / 753,
+                                  description:
+                                      'Ilustração: busto clássico lilás com '
+                                      'coroa, jarro derramando carinhas '
+                                      'sorridentes e vaso com flor',
+                                ),
                         ),
                       ),
                       Transform.translate(
@@ -216,6 +230,7 @@ class AuthTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final List<String> autofillHints;
   final FocusNode? focusNode;
+  final TextEditingController? controller;
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
   final Color borderColor;
@@ -234,6 +249,7 @@ class AuthTextField extends StatelessWidget {
     this.keyboardType,
     this.autofillHints = const [],
     this.focusNode,
+    this.controller,
     this.borderColor = Colors.transparent,
     this.focusedBorderColor = AuthColors.accent,
     this.suffix,
@@ -262,6 +278,7 @@ class AuthTextField extends StatelessWidget {
           ),
         ),
         TextField(
+          controller: controller,
           focusNode: focusNode,
           enabled: enabled,
           obscureText: obscureText,
@@ -315,6 +332,7 @@ class AuthContinueButton extends StatelessWidget {
   final bool enabled;
   final bool loading;
   final String loadingLabel;
+  final String label;
   final VoidCallback onTap;
 
   const AuthContinueButton({
@@ -323,6 +341,7 @@ class AuthContinueButton extends StatelessWidget {
     required this.loading,
     required this.loadingLabel,
     required this.onTap,
+    this.label = 'Continuar',
   });
 
   @override
@@ -345,7 +364,7 @@ class AuthContinueButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    loading ? loadingLabel : 'Continuar',
+                    loading ? loadingLabel : label,
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
