@@ -219,6 +219,10 @@ class ProfileController extends GetxController with LoaderManagerMixin {
   /// Conta de profissional também entra como usuário.
   bool get canSwitchProfile => _authService.isProfessionalAccount;
 
+  /// Profissional na área dele (não entrando como usuário).
+  bool get isProfessionalView =>
+      _authService.isProfessionalAccount && !_authService.isActingAsUser;
+
   String get switchProfileLabel => _authService.isActingAsUser
       ? 'Entrar como profissional'
       : 'Entrar como usuário';

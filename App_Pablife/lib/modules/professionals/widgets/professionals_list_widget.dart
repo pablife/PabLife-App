@@ -11,6 +11,8 @@ class ProfessionalsListWidget extends StatelessWidget {
   final void Function(ProfessionalWithUserModel) onProfessionalTap;
   final void Function(ProfessionalWithUserModel) onCalendarTap;
   final ProfessionalWithUserModel? selected;
+  final List<String> Function(ProfessionalWithUserModel) topicsOf;
+  final DateTime? Function(ProfessionalWithUserModel) nextSlotOf;
 
   const ProfessionalsListWidget({
     super.key,
@@ -20,6 +22,8 @@ class ProfessionalsListWidget extends StatelessWidget {
     required this.onProfessionalTap,
     required this.onCalendarTap,
     this.selected,
+    required this.topicsOf,
+    required this.nextSlotOf,
   });
 
   @override
@@ -48,7 +52,7 @@ class ProfessionalsListWidget extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(15, 20, 15, 100),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       itemCount: professionals.length,
       itemBuilder: (context, index) {
         final professional = professionals[index];
@@ -56,6 +60,8 @@ class ProfessionalsListWidget extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 10),
           child: ProfessionalTile(
             professional: professional,
+            topics: topicsOf(professional),
+            nextSlot: nextSlotOf(professional),
             onTap: () => onProfessionalTap(professional),
             onCalendarTap: () => onCalendarTap(professional),
             isSelected:

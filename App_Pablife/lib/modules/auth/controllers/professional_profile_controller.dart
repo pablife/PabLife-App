@@ -12,6 +12,7 @@ import '../../../infra/models/user_role.dart';
 import '../../../infra/models/user_status.dart';
 import '../../../infra/repositories/user_repository.dart';
 import '../../../infra/services/auth_service.dart';
+import '../entry_visual.dart';
 
 class ProfessionalProfileController extends GetxController
     with LoaderManagerMixin {
@@ -194,6 +195,7 @@ class ProfessionalProfileController extends GetxController
         );
 
         if (signInSuccess) {
+          await EntryVisual.onAccountCreated(professional: true);
           AppSnackbar.to.show('Conta profissional criada com sucesso!');
           Get.offAllNamed(WaitingApprovalPage.route);
         } else {

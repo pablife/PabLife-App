@@ -367,6 +367,55 @@ class ProfessionalRepository extends StrautilsTryThis {
     }, action: 'buscar profissional por user ID.');
   }
 
+  /// Temas de cada profissional (id do profissional → temas). Lido à parte
+  /// para a lista continuar funcionando mesmo sem a coluna no banco.
+  Future<Map<String, List<String>>> getTopics() async {
+    try {
+      final rows = await _client
+          .from('tb_professionals')
+          .select('id, topics')
+          .eq('validation_status', 'approved')
+          .isFilter('deleted_at', null);
+      return {
+        for (final row in rows)
+          row['id'] as String: List<String>.from(
+            row['topics'] as List? ?? const [],
+          ),
+      };
+    } catch (e) {
+      debugPrint('Temas dos profissionais indisponíveis: $e');
+      return {};
+    }
+  }
+
+  /// Próximo horário livre de cada profissional nas próximas duas semanas
+  /// (id do profissional → início, no horário do aparelho).
+  Future<Map<String, DateTime>> getNextFreeSlots() async {
+    try {
+      final now = DateTime.now();
+      final day = DateFormat('yyyy-MM-dd');
+      final rows = await _client
+          .from('vw_professional_available_appointment_slots')
+          .select('professional_id, slot_start_at')
+          .gte('slot_date', day.format(now))
+          .lte('slot_date', day.format(now.add(const Duration(days: 14))))
+          .gt('slot_start_at', now.toUtc().toIso8601String())
+          .eq('is_my_appointment', false)
+          .order('slot_start_at', ascending: true);
+      final result = <String, DateTime>{};
+      for (final row in rows) {
+        final id = row['professional_id'] as String?;
+        final start = DateTime.tryParse('${row['slot_start_at']}');
+        if (id == null || start == null) continue;
+        result.putIfAbsent(id, () => start.toLocal());
+      }
+      return result;
+    } catch (e) {
+      debugPrint('Próximos horários indisponíveis: $e');
+      return {};
+    }
+  }
+
   FStrautilsResponse<List<ProfessionalWithUserModel>> getAllProfessionals() {
     return tryThis(() async {
       final responseData = await _client

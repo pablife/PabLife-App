@@ -42,7 +42,7 @@ class UserHomeTasksSectionWidget extends StatelessWidget {
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: AppColor(0xFF1A1A1A),
-              fontFamily: 'Instrument Sans',
+              fontFamily: 'PlusJakartaSans',
             ),
           ),
           const SizedBox(height: 16),

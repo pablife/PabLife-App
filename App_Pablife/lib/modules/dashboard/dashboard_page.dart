@@ -52,10 +52,7 @@ class DashboardPage extends StatelessWidget {
                       maxWidth: 1400,
                       child: pages[3],
                     ),
-                    1 => WideCenter(
-                      maxWidth: 1600,
-                      child: pages[1],
-                    ),
+                    1 => WideCenter(maxWidth: 1600, child: pages[1]),
                     final index => WideCenter(child: pages[index]),
                   },
                 ),
@@ -65,9 +62,11 @@ class DashboardPage extends StatelessWidget {
         }
 
         return Scaffold(
-          extendBody: true,
           body: pages[controller.currentIndex],
-          bottomNavigationBar: DashboardNavbar(controller: controller),
+          bottomNavigationBar: DashboardNavbar(
+            controller: controller,
+            isProfessional: isProfessional,
+          ),
         );
       },
     );

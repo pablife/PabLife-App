@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../infra/models/user_role.dart';
 import '../../infra/services/auth_service.dart';
+import '../auth/entry_visual.dart';
 import '../home/controllers/professional_home_controller.dart';
 import '../home/controllers/user_home_controller.dart';
 import '../profile/profile_controller.dart';
@@ -21,6 +22,13 @@ class DashboardController extends GetxController with LoaderManagerMixin {
     if (kIsWeb && role != UserRole.professional) {
       currentIndex = 3;
     }
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // Questionário da Saúde da Mulher (conta nova) ou o aviso único.
+    EntryVisual.onDashboardReady();
   }
 
   void changeTab(int index) {

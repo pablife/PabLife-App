@@ -324,7 +324,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
                   fontWeight: FontWeight.w500,
                   color: AppColor(0xFFC1CDFF),
                   height: 1.2,
-                  fontFamily: 'Instrument Sans',
+                  fontFamily: 'PlusJakartaSans',
                 ),
               ),
               const SizedBox(height: 8),
@@ -591,7 +591,7 @@ class _AgendaBaseLayoutState extends State<AgendaBaseLayout> {
                   decoration: data.strikeThrough
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
-                  fontFamily: 'Instrument Sans',
+                  fontFamily: 'PlusJakartaSans',
                 ),
               ),
             ),

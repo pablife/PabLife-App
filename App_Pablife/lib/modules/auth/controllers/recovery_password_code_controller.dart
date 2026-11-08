@@ -98,6 +98,23 @@ class RecoveryPasswordCodeController extends GetxController
     }
   }
 
+  bool isResending = false;
+
+  /// "Reenviar código": manda outro e-mail com um código novo.
+  Future<void> resendCode() async {
+    if (isResending || email.isEmpty) return;
+    isResending = true;
+    update();
+    final success = await _authService.resetPassword(email);
+    isResending = false;
+    update();
+    AppSnackbar.to.show(
+      success
+          ? 'Enviamos um código novo. Confira seu e-mail.'
+          : 'Não foi possível reenviar agora. Tente de novo em instantes.',
+    );
+  }
+
   void goBack() {
     Get.back();
   }

@@ -174,7 +174,7 @@ class GoalEditorPage extends StatelessWidget {
                   hintStyle: TextStyle(
                     fontSize: 16,
                     color: Colors.black.withAlpha(143),
-                    fontFamily: 'Instrument Sans',
+                    fontFamily: 'PlusJakartaSans',
                   ),
                   border: InputBorder.none,
                   isDense: true,
@@ -183,7 +183,7 @@ class GoalEditorPage extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.black,
-                  fontFamily: 'Instrument Sans',
+                  fontFamily: 'PlusJakartaSans',
                 ),
               ),
             ),
