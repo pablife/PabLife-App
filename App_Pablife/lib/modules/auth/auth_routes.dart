@@ -10,6 +10,8 @@ import 'pages/professional_profile_page.dart';
 import 'controllers/professional_profile_controller.dart';
 import 'pages/recovery_password_page.dart';
 import 'pages/visual_choice_page.dart';
+import 'pages/student_proof_page.dart';
+import 'pages/account_created_page.dart';
 import 'controllers/recovery_password_controller.dart';
 import 'pages/recovery_password_code_page.dart';
 import 'controllers/recovery_password_code_controller.dart';
@@ -17,6 +19,11 @@ import 'controllers/recovery_password_code_controller.dart';
 final authRoutes = [
   GetPage(name: ChooseProfilePage.route, page: () => const ChooseProfilePage()),
   GetPage(name: VisualChoicePage.route, page: () => const VisualChoicePage()),
+  GetPage(name: StudentProofPage.route, page: () => const StudentProofPage()),
+  GetPage(
+    name: AccountCreatedPage.route,
+    page: () => const AccountCreatedPage(),
+  ),
   GetPage(
     name: EmailInputPage.route,
     page: () => const EmailInputPage(),

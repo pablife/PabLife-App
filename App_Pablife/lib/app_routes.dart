@@ -5,6 +5,11 @@ import 'modules/auth/pages/password_page.dart';
 import 'modules/auth/pages/recovery_password_code_page.dart';
 import 'modules/auth/pages/recovery_password_page.dart';
 import 'modules/auth/pages/visual_choice_page.dart';
+import 'modules/auth/pages/account_created_page.dart';
+import 'modules/auth/pages/professional_profile_page.dart';
+import 'modules/auth/pages/sign_up_page.dart';
+import 'modules/auth/pages/student_proof_page.dart';
+import 'modules/waiting_approval/pages/waiting_approval_page.dart';
 import 'modules/dashboard/dashboard_page.dart';
 import 'modules/onboarding/onboarding_page.dart';
 import 'shared/utils/wide_layout.dart';
@@ -36,6 +41,11 @@ class AppRoutes {
     PasswordPage.route,
     RecoveryPasswordPage.route,
     RecoveryPasswordCodePage.route,
+    SignUpPage.route,
+    StudentProofPage.route,
+    AccountCreatedPage.route,
+    ProfessionalProfilePage.route,
+    WaitingApprovalPage.route,
     BookingPage.route,
   };
 
