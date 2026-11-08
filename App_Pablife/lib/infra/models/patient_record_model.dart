@@ -11,6 +11,11 @@ enum PatientRecordType {
   final String value;
   const PatientRecordType(this.value);
 
+  /// Plano alimentar, prescrição e prática nascem compartilhados com o
+  /// paciente; o resto nasce privado (só o profissional que escreveu vê).
+  bool get sharedByDefault =>
+      this == mealPlan || this == prescription || this == practice;
+
   static PatientRecordType fromString(String value) {
     return PatientRecordType.values.firstWhere(
       (e) => e.value == value,
@@ -25,6 +30,9 @@ class PatientRecordModel {
   final PatientRecordType type;
   final String title;
   final String description;
+
+  /// Compartilhada: o paciente vê. Privada: só o profissional que escreveu.
+  final bool isShared;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -35,6 +43,7 @@ class PatientRecordModel {
     required this.type,
     required this.title,
     required this.description,
+    this.isShared = false,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -49,6 +58,11 @@ class PatientRecordModel {
       type: PatientRecordType.fromString(map['type']?.toString() ?? ''),
       title: map['title']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
+      isShared: map['visibility'] == null
+          ? PatientRecordType.fromString(
+              map['type']?.toString() ?? '',
+            ).sharedByDefault
+          : map['visibility'] == 'shared',
       createdAt: DateTime.parse(map['created_at']?.toString() ?? ''),
       updatedAt: DateTime.parse(map['updated_at']?.toString() ?? ''),
       deletedAt: map['deleted_at'] != null
@@ -64,6 +78,7 @@ class PatientRecordModel {
       'type': type.value,
       'title': title,
       'description': description,
+      'visibility': isShared ? 'shared' : 'private',
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'deleted_at': deletedAt?.toIso8601String(),
@@ -76,6 +91,7 @@ class PatientRecordModel {
     PatientRecordType? type,
     String? title,
     String? description,
+    bool? isShared,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -86,6 +102,7 @@ class PatientRecordModel {
       type: type ?? this.type,
       title: title ?? this.title,
       description: description ?? this.description,
+      isShared: isShared ?? this.isShared,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,

@@ -86,6 +86,7 @@ class PatientRecordRepository extends StrautilsTryThis {
     required PatientRecordType type,
     required String title,
     required String description,
+    required bool isShared,
   }) {
     return tryThis(() async {
       final response = await _client
@@ -95,6 +96,7 @@ class PatientRecordRepository extends StrautilsTryThis {
             'type': type.value,
             'title': title,
             'description': description,
+            'visibility': isShared ? 'shared' : 'private',
           })
           .select()
           .single();
@@ -107,11 +109,15 @@ class PatientRecordRepository extends StrautilsTryThis {
     required String recordId,
     String? title,
     String? description,
+    bool? isShared,
   }) {
     return tryThis(() async {
       final Map<String, dynamic> updateData = {};
       if (title != null) updateData['title'] = title;
       if (description != null) updateData['description'] = description;
+      if (isShared != null) {
+        updateData['visibility'] = isShared ? 'shared' : 'private';
+      }
 
       final response = await _client
           .from('tb_patient_records')

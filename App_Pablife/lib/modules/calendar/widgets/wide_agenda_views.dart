@@ -285,6 +285,10 @@ class WideAgendaChip extends StatelessWidget {
     final (color, status) = switch (appointment.status) {
       AppointmentStatus.cancelled => (WideAgendaColors.cancelled, 'Cancelada'),
       AppointmentStatus.noShow => (WideAgendaColors.noShow, 'Não compareceu'),
+      AppointmentStatus.technicalIssue => (
+        WideAgendaColors.cancelled,
+        'Problema técnico',
+      ),
       AppointmentStatus.completed => (WideAgendaColors.completed, 'Realizada'),
       _ when appointment.isOngoing => (WideAgendaColors.ongoing, 'Agora'),
       _ => (WideAgendaColors.appointment, 'Agendada'),

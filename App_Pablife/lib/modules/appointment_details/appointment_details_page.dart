@@ -220,7 +220,9 @@ class AppointmentDetailsPage extends StatelessWidget {
                                       text: 'Cancelada/remarcada',
                                       onTap:
                                           controller.markCancelledRescheduled,
-                                      backgroundColor: const AppColor(0xFFDA879A),
+                                      backgroundColor: const AppColor(
+                                        0xFFDA879A,
+                                      ),
                                     ),
                                   ],
                                 ],
@@ -290,6 +292,8 @@ class AppointmentDetailsPage extends StatelessWidget {
         return Icons.check_circle_outline;
       case AppointmentStatus.noShow:
         return Icons.person_off_outlined;
+      case AppointmentStatus.technicalIssue:
+        return Icons.wifi_off;
       case AppointmentStatus.scheduled:
         return Icons.event_available;
     }
@@ -303,6 +307,8 @@ class AppointmentDetailsPage extends StatelessWidget {
         return 'Consulta Concluída';
       case AppointmentStatus.noShow:
         return 'Não Compareceu';
+      case AppointmentStatus.technicalIssue:
+        return 'Problema Técnico';
       case AppointmentStatus.scheduled:
         return 'Agendada';
     }
@@ -323,6 +329,12 @@ class AppointmentDetailsPage extends StatelessWidget {
         return controller.isPatient
             ? 'Você não compareceu a esta consulta.'
             : 'O paciente não compareceu a esta consulta.';
+      case AppointmentStatus.technicalIssue:
+        return controller.isPatient
+            ? 'A chamada não aconteceu por um problema técnico. A consulta '
+                  'voltou para o seu saldo.'
+            : 'A chamada não aconteceu por um problema técnico. A consulta '
+                  'voltou para o saldo do paciente.';
       case AppointmentStatus.scheduled:
         return 'Consulta agendada.';
     }

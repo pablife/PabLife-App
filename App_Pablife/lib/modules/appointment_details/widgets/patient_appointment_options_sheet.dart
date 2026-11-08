@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../infra/models/professional_appointment_model.dart';
 import '../../../infra/repositories/appointment_repository.dart';
 import '../../../shared/utils/app_snackbar.dart';
+import '../../../shared/utils/consultation_rules.dart';
 import '../../../widgets/design_system/app_dialog.dart';
 import '../../../widgets/design_system/app_image.dart';
 import '../../../widgets/design_system/text_default.dart';
@@ -63,12 +64,10 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
     return show(appointment);
   }
 
-  /// Remarcar e cancelar seguem a regra do app: até 24h antes.
+  /// Prazos em [ConsultationRules], os mesmos que o banco confere.
   static bool canChange(ProfessionalAppointmentModel appointment) =>
-      appointment.status == AppointmentStatus.scheduled &&
-      appointment.startAt.isAfter(
-        DateTime.now().add(const Duration(hours: 24)),
-      );
+      ConsultationRules.canReschedule(appointment) ||
+      ConsultationRules.canCancel(appointment);
 
   static Map<String, dynamic>? _professionalUser(
     ProfessionalAppointmentModel appointment,
@@ -109,10 +108,14 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
   }
 
   static Future<bool> _cancel(ProfessionalAppointmentModel appointment) async {
+    final returns = ConsultationRules.cancelReturnsToBalance(appointment);
     final confirmed = await _confirm(
       title: 'Cancelar consulta',
-      message:
-          'Tem certeza que deseja cancelar esta consulta? Esta ação não pode ser desfeita.',
+      message: returns
+          ? 'Tem certeza que deseja cancelar esta consulta? Ela volta para o '
+                'seu saldo.'
+          : 'Faltam menos de 24 horas para a consulta. Se cancelar agora, ela '
+                'não volta para o seu saldo.',
       confirmText: 'Cancelar consulta',
       confirmColor: const AppColor(0xFFFF5252),
     );
@@ -190,7 +193,8 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
       "EEE, d 'de' MMMM · HH:mm",
       'pt_BR',
     ).format(appointment.startAt.toLocal());
-    final changeable = canChange(appointment);
+    final canReschedule = ConsultationRules.canReschedule(appointment);
+    final canCancel = ConsultationRules.canCancel(appointment);
     final isScheduled = appointment.status == AppointmentStatus.scheduled;
     final hasPhone = (professional?['phone']?.toString() ?? '').isNotEmpty;
 
@@ -261,7 +265,7 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
                   label: 'Ver detalhes da consulta',
                   result: 'details',
                 ),
-                if (changeable)
+                if (canReschedule)
                   _option(
                     icon: const Icon(Icons.event_repeat),
                     label: 'Remarcar consulta',
@@ -275,7 +279,7 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
                     background: const AppColor(0xFF25D366),
                     foreground: Colors.white,
                   ),
-                if (changeable)
+                if (canCancel)
                   _option(
                     icon: const Icon(Icons.close),
                     label: 'Cancelar consulta',
@@ -283,11 +287,11 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
                     background: const AppColor(0xFFDA879A),
                     foreground: const AppColor(0xFF4A1B0C),
                   ),
-                if (isScheduled && !changeable)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 4),
+                if (isScheduled)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
                     child: TextDefault(
-                      'Remarcar e cancelar ficam disponíveis até 24h antes da consulta.',
+                      ConsultationRules.limitsText(appointment),
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
                       color: Colors.white70,
