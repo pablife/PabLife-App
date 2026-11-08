@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../infra/models/activity_model.dart';
+import '../../../shared/themes/pab_colors.dart';
 import '../../../shared/utils/wide_layout.dart';
-import '../../women_health/widgets/women_health_card.dart';
-import '../../women_health/widgets/women_health_summary.dart';
 import '../../women_health/women_health_controller.dart';
 import '../../women_health/women_health_data.dart';
 import '../controllers/professional_wide_calendar_controller.dart';
@@ -16,11 +15,11 @@ import '../widgets/wide_agenda_views.dart';
 /// Cores dos itens do planner (as mesmas do celular).
 abstract final class _PlannerColors {
   static const task = AppColor(0xFF00C2A8);
-  static const goal = AppColor(0xFF92CA4F);
-  static const note = AppColor(0xFFD2CC61);
-  static const noteText = AppColor(0xFF3D3A10);
-  static const appointment = AppColor(0xFF3065FF);
-  static const holiday = AppColor(0xFFE0567A);
+  static const goal = Color(0xFF8D84F0);
+  static const note = Color(0xFFE0A526);
+  static const noteText = Color(0xFF6B4A00);
+  static const appointment = PabColors.ink;
+  static const holiday = Color(0xFFD63A74);
   static const women = WomenColors.mauve;
 }
 
@@ -51,8 +50,6 @@ class UserWideCalendarPage extends StatelessWidget {
                   const SizedBox(width: 20),
                   Expanded(
                     child: _WithWomenHealth(
-                      women: women,
-                      panelHeight: 680,
                       panel: Container(
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                         decoration: BoxDecoration(
@@ -97,52 +94,16 @@ class UserWideCalendarPage extends StatelessWidget {
   }
 }
 
-/// Com o modo Saúde da mulher ativo, a agenda fica entre o resumo e o
-/// check-in, numa página com rolagem.
+/// A Saúde da Mulher não fica mais no planner (a escolha é no início e o
+/// resumo do ciclo está no Dashboard): aqui só aparece a agenda. A marcação
+/// do ciclo nos dias continua, para quem está no modo.
 class _WithWomenHealth extends StatelessWidget {
-  final WomenHealthController women;
   final Widget panel;
-  final double panelHeight;
 
-  /// Cartão do modo no celular, acima da agenda.
-  final Widget? header;
-
-  const _WithWomenHealth({
-    required this.women,
-    required this.panel,
-    required this.panelHeight,
-    this.header,
-  });
+  const _WithWomenHealth({required this.panel});
 
   @override
-  Widget build(BuildContext context) {
-    if (!women.isActive) {
-      if (header == null) return panel;
-      return Column(
-        children: [
-          Padding(padding: const EdgeInsets.all(8), child: header),
-          Expanded(child: panel),
-        ],
-      );
-    }
-
-    return ListView(
-      padding: EdgeInsets.fromLTRB(
-        header == null ? 0 : 8,
-        header == null ? 0 : 8,
-        header == null ? 0 : 8,
-        header == null ? 16 : 110,
-      ),
-      children: [
-        if (header != null) ...[header!, const SizedBox(height: 12)],
-        WomenHealthSummary(controller: women),
-        const SizedBox(height: 12),
-        SizedBox(height: panelHeight, child: panel),
-        const SizedBox(height: 12),
-        WomenHealthCareSection(controller: women),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => panel;
 }
 
 // ------------------------------------------------------------------ celular
@@ -162,156 +123,51 @@ class _PhoneCalendar extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: WideAgendaColors.background,
-      // Mais alto que o normal para não ficar em cima da barra de baixo.
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 90),
-        child: FloatingActionButton(
-          tooltip: 'Criar',
-          backgroundColor: WideAgendaColors.accent,
-          foregroundColor: Colors.white,
-          onPressed: () => _showCreateSheet(context),
-          child: const Icon(Icons.add),
-        ),
+      backgroundColor: PabColors.background,
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Criar',
+        backgroundColor: PabColors.accent,
+        foregroundColor: PabColors.ink,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        onPressed: () => _showCreateSheet(context),
+        child: const Icon(Icons.add),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: _WithWomenHealth(
-          women: women,
-          panelHeight: 620,
-          header: WomenHealthCard(controller: women),
-          panel: Container(
-            margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-            decoration: const BoxDecoration(
-              color: WideAgendaColors.panel,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            child: Column(
-              children: [
-                Row(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _PhoneHeader(
+            controller: controller,
+            onMore: () => _showFilterSheet(context),
+          ),
+          Expanded(
+            child: _WithWomenHealth(
+              panel: Container(
+                color: PabColors.background,
+                padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
+                child: Column(
                   children: [
-                    OutlinedButton(
-                      onPressed: controller.goToday,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: WideAgendaColors.text,
-                        side: const BorderSide(color: WideAgendaColors.text),
-                        shape: const StadiumBorder(),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      child: const Text('Hoje'),
-                    ),
-                    IconButton(
-                      tooltip: 'Anterior',
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () => controller.move(-1),
-                      icon: const Icon(
-                        Icons.chevron_left,
-                        color: WideAgendaColors.text,
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Próximo',
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () => controller.move(1),
-                      icon: const Icon(
-                        Icons.chevron_right,
-                        color: WideAgendaColors.text,
-                      ),
-                    ),
+                    _FilterChips(controller: controller, women: women),
+                    const SizedBox(height: 8),
                     Expanded(
-                      child: Text(
-                        controller.title,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: WideAgendaColors.text,
+                      child: switch (controller.view) {
+                        WideAgendaView.day || WideAgendaView.week =>
+                          _UserWeekView(controller: controller, compact: true),
+                        WideAgendaView.month => _UserMonthView(
+                          controller: controller,
+                          compact: true,
                         ),
-                      ),
-                    ),
-                    if (controller.isLoading)
-                      const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: WideAgendaColors.text,
+                        WideAgendaView.year => _UserYearView(
+                          controller: controller,
                         ),
-                      ),
-                    IconButton(
-                      tooltip: 'Mostrar',
-                      onPressed: () => _showFilterSheet(context),
-                      icon: const Icon(
-                        Icons.filter_list,
-                        color: WideAgendaColors.text,
-                      ),
+                      },
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                SizedBox(
-                  width: double.infinity,
-                  child: SegmentedButton<WideAgendaView>(
-                    showSelectedIcon: false,
-                    segments: const [
-                      ButtonSegment(
-                        value: WideAgendaView.day,
-                        label: Text('Dia'),
-                      ),
-                      ButtonSegment(
-                        value: WideAgendaView.week,
-                        label: Text('Semana'),
-                      ),
-                      ButtonSegment(
-                        value: WideAgendaView.month,
-                        label: Text('Mês'),
-                      ),
-                      ButtonSegment(
-                        value: WideAgendaView.year,
-                        label: Text('Ano'),
-                      ),
-                    ],
-                    selected: {controller.view},
-                    onSelectionChanged: (s) => controller.setView(s.first),
-                    style: ButtonStyle(
-                      visualDensity: VisualDensity.compact,
-                      foregroundColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.selected)
-                            ? WideAgendaColors.panel
-                            : WideAgendaColors.text,
-                      ),
-                      backgroundColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.selected)
-                            ? WideAgendaColors.text
-                            : Colors.transparent,
-                      ),
-                      side: const WidgetStatePropertyAll(
-                        BorderSide(color: WideAgendaColors.text),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: switch (controller.view) {
-                    WideAgendaView.day || WideAgendaView.week => _UserWeekView(
-                      controller: controller,
-                      compact: true,
-                    ),
-                    WideAgendaView.month => _UserMonthView(
-                      controller: controller,
-                      compact: true,
-                    ),
-                    WideAgendaView.year => _UserYearView(
-                      controller: controller,
-                    ),
-                  },
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -456,6 +312,281 @@ class _PhoneCalendar extends StatelessWidget {
   }
 }
 
+/// Topo da agenda no celular (canvas "Agenda — mobile"): título, período,
+/// Hoje, anterior e próximo, e as visões Dia, Semana, Mês e Ano.
+class _PhoneHeader extends StatelessWidget {
+  final UserWideCalendarController controller;
+  final VoidCallback onMore;
+
+  const _PhoneHeader({required this.controller, required this.onMore});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = controller;
+    Widget square(IconData icon, String tooltip, VoidCallback onTap) => Tooltip(
+      message: tooltip,
+      child: Material(
+        color: PabColors.onInk.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: SizedBox(
+            width: 40,
+            height: 40,
+            child: Icon(icon, size: 20, color: PabColors.onInk),
+          ),
+        ),
+      ),
+    );
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: PabColors.ink,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Agenda',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: PabColors.onInk,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          c.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: PabColors.onInkSoft,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (c.isLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: PabColors.onInk,
+                        ),
+                      ),
+                    ),
+                  OutlinedButton(
+                    onPressed: c.goToday,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 40),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      foregroundColor: PabColors.onInk,
+                      side: BorderSide(
+                        color: PabColors.onInk.withValues(alpha: 0.3),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Hoje',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  square(Icons.chevron_left, 'Anterior', () => c.move(-1)),
+                  const SizedBox(width: 6),
+                  square(Icons.chevron_right, 'Próximo', () => c.move(1)),
+                  const SizedBox(width: 6),
+                  square(Icons.more_horiz, 'Mais opções', onMore),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: PabColors.onInk.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    for (final (view, label) in const [
+                      (WideAgendaView.day, 'Dia'),
+                      (WideAgendaView.week, 'Semana'),
+                      (WideAgendaView.month, 'Mês'),
+                      (WideAgendaView.year, 'Ano'),
+                    ])
+                      Expanded(
+                        child: Semantics(
+                          button: true,
+                          selected: c.view == view,
+                          child: Material(
+                            color: c.view == view
+                                ? PabColors.accent
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(11),
+                            child: InkWell(
+                              onTap: () => c.setView(view),
+                              borderRadius: BorderRadius.circular(11),
+                              child: SizedBox(
+                                height: 40,
+                                child: Center(
+                                  child: Text(
+                                    label,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: c.view == view
+                                          ? PabColors.ink
+                                          : PabColors.onInk,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// O que aparece na agenda, em pílulas que ligam e desligam.
+class _FilterChips extends StatelessWidget {
+  final UserWideCalendarController controller;
+  final WomenHealthController women;
+
+  const _FilterChips({required this.controller, required this.women});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = controller;
+    final chips = [
+      (
+        'Tarefas',
+        _PlannerColors.task,
+        c.showTasks,
+        () => c.setFilter(tasks: !c.showTasks),
+      ),
+      (
+        'Metas',
+        _PlannerColors.goal,
+        c.showGoals,
+        () => c.setFilter(goals: !c.showGoals),
+      ),
+      (
+        'Anotações',
+        _PlannerColors.note,
+        c.showNotes,
+        () => c.setFilter(notes: !c.showNotes),
+      ),
+      (
+        'Consultas',
+        _PlannerColors.appointment,
+        c.showAppointments,
+        () => c.setFilter(appointments: !c.showAppointments),
+      ),
+      (
+        'Feriados',
+        _PlannerColors.holiday,
+        c.showHolidays,
+        () => c.setShowHolidays(!c.showHolidays),
+      ),
+      if (women.isActive)
+        (
+          women.trail!.title,
+          _PlannerColors.women,
+          women.showBand,
+          () {
+            women.setShowBand(!women.showBand);
+            c.update();
+          },
+        ),
+    ];
+
+    return SizedBox(
+      height: 44,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        itemCount: chips.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (_, index) {
+          final (label, color, on, toggle) = chips[index];
+          return Semantics(
+            button: true,
+            toggled: on,
+            child: Material(
+              color: on ? PabColors.card : Colors.transparent,
+              shape: StadiumBorder(
+                side: BorderSide(
+                  color: on ? PabColors.lineStrong : PabColors.line,
+                ),
+              ),
+              child: InkWell(
+                onTap: toggle,
+                customBorder: const StadiumBorder(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: on ? color : PabColors.track,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: on ? PabColors.ink : PabColors.muted,
+                          decoration: on ? null : TextDecoration.lineThrough,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 // ------------------------------------------------------------ coluna lateral
 
 class _SideColumn extends StatelessWidget {
@@ -593,8 +724,6 @@ class _SideColumn extends StatelessWidget {
           _DeleteDoneTasksButton(
             onPressed: () => controller.deleteDoneTasks(context),
           ),
-          const SizedBox(height: 16),
-          WomenHealthCard(controller: women),
           const SizedBox(height: 16),
           _card(
             child: const Text(

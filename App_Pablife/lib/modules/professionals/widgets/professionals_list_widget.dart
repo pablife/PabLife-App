@@ -48,7 +48,7 @@ class ProfessionalsListWidget extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(15, 20, 15, 100),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       itemCount: professionals.length,
       itemBuilder: (context, index) {
         final professional = professionals[index];

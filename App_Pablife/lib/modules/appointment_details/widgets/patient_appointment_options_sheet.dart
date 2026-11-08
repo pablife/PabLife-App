@@ -6,12 +6,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../infra/models/professional_appointment_model.dart';
 import '../../../infra/repositories/appointment_repository.dart';
+import '../../../shared/themes/pab_colors.dart';
 import '../../../shared/utils/app_snackbar.dart';
 import '../../../shared/utils/consultation_rules.dart';
 import '../../../widgets/design_system/app_dialog.dart';
 import '../../../widgets/design_system/app_image.dart';
 import '../../../widgets/design_system/text_default.dart';
 import '../../../widgets/design_system/whatsapp_icon.dart';
+import '../../calendar/widgets/calendar_connect_dialog.dart';
 import '../../calendar/widgets/interactive_calendar_base.dart';
 import '../appointment_details_routes.dart';
 import 'reschedule_time_picker_page.dart';
@@ -43,6 +45,12 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
         return _reschedule(appointment);
       case 'whatsapp':
         await _openWhatsApp(appointment);
+        return false;
+      case 'calendar':
+        final context = Get.context;
+        if (context != null && context.mounted) {
+          await CalendarConnectDialog.show(context);
+        }
         return false;
       case 'cancel':
         return _cancel(appointment);
@@ -189,116 +197,170 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
         : type == 'nutritionist'
         ? 'Nutricionista'
         : 'Profissional';
-    final when = DateFormat(
-      "EEE, d 'de' MMMM · HH:mm",
-      'pt_BR',
-    ).format(appointment.startAt.toLocal());
+    final start = appointment.startAt.toLocal();
+    final day = DateFormat("EEEE, d 'de' MMMM", 'pt_BR').format(start);
+    final time = DateFormat('HH:mm').format(start);
     final canReschedule = ConsultationRules.canReschedule(appointment);
     final canCancel = ConsultationRules.canCancel(appointment);
     final isScheduled = appointment.status == AppointmentStatus.scheduled;
     final hasPhone = (professional?['phone']?.toString() ?? '').isNotEmpty;
+    final name = professional?['full_name']?.toString() ?? 'Profissional';
 
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
           decoration: const BoxDecoration(
-            color: AppColor(0xFF00343C),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+            color: PabColors.background,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
+          clipBehavior: Clip.antiAlias,
           child: SafeArea(
             top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    ClipOval(
-                      child: AppImage(
-                        imageUrl: professional?['image_url']?.toString(),
-                        width: 56,
-                        height: 56,
-                        errorWidget: Container(
-                          width: 56,
-                          height: 56,
-                          color: const AppColor(0xFF89BEC6),
-                          child: const Icon(Icons.person, color: Colors.white),
-                        ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Topo escuro: dia, hora em destaque e modalidade.
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+                    decoration: const BoxDecoration(
+                      color: PabColors.ink,
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(24),
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextDefault(
-                            typeLabel,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white70,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Sua consulta',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: PabColors.onInk,
                           ),
-                          TextDefault(
-                            professional?['full_name']?.toString() ??
-                                'Profissional',
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          '${day[0].toUpperCase()}${day.substring(1)}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: PabColors.onInkSoft,
                           ),
-                          TextDefault(
-                            when,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          time,
+                          style: const TextStyle(
+                            fontSize: 40,
+                            height: 1,
+                            fontWeight: FontWeight.w800,
+                            color: PabColors.onInk,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Online por vídeo',
+                          style: TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: const AppColor(0xFF9FE1CB),
+                            color: PabColors.navIdle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _ProfessionalCard(
+                          name: name,
+                          role: typeLabel,
+                          imageUrl: professional?['image_url']?.toString(),
+                          onWhatsApp: hasPhone
+                              ? () => Get.back(result: 'whatsapp')
+                              : null,
+                        ),
+                        if (isScheduled) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: PabColors.soft,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              'Você recebe lembretes 3 dias, 1 dia e 1 hora '
+                              'antes. ${ConsultationRules.limitsText(appointment)}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                height: 1.5,
+                                color: PabColors.softText,
+                              ),
+                            ),
                           ),
                         ],
-                      ),
+                        const SizedBox(height: 12),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: PabColors.card,
+                            border: Border.all(color: PabColors.line),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Column(
+                            children: [
+                              _row('Ver detalhes da consulta', 'details'),
+                              if (isScheduled) ...[
+                                const Divider(height: 1, color: PabColors.line),
+                                _row(
+                                  'Adicionar ao calendário do celular',
+                                  'calendar',
+                                ),
+                              ],
+                              if (canReschedule) ...[
+                                const Divider(height: 1, color: PabColors.line),
+                                _row('Remarcar', 'reschedule'),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (canCancel) ...[
+                          const SizedBox(height: 12),
+                          OutlinedButton(
+                            onPressed: () => Get.back(result: 'cancel'),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(0, 52),
+                              backgroundColor: PabColors.card,
+                              foregroundColor: PabColors.error,
+                              side: const BorderSide(
+                                color: PabColors.errorLine,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: const Text(
+                              'Cancelar consulta',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                _option(
-                  icon: const Icon(Icons.description_outlined),
-                  label: 'Ver detalhes da consulta',
-                  result: 'details',
-                ),
-                if (canReschedule)
-                  _option(
-                    icon: const Icon(Icons.event_repeat),
-                    label: 'Remarcar consulta',
-                    result: 'reschedule',
                   ),
-                if (hasPhone)
-                  _option(
-                    icon: const WhatsAppIcon(size: 22),
-                    label: 'Conversar no WhatsApp',
-                    result: 'whatsapp',
-                    background: const AppColor(0xFF25D366),
-                    foreground: Colors.white,
-                  ),
-                if (canCancel)
-                  _option(
-                    icon: const Icon(Icons.close),
-                    label: 'Cancelar consulta',
-                    result: 'cancel',
-                    background: const AppColor(0xFFDA879A),
-                    foreground: const AppColor(0xFF4A1B0C),
-                  ),
-                if (isScheduled)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: TextDefault(
-                      ConsultationRules.limitsText(appointment),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white70,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -306,43 +368,129 @@ class PatientAppointmentOptionsSheet extends StatelessWidget {
     );
   }
 
-  Widget _option({
-    required Widget icon,
-    required String label,
-    required String result,
-    Color background = const AppColor(0xFFC1CDFF),
-    Color foreground = const AppColor(0xFF00343C),
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: background,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => Get.back(result: result),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: IconTheme(
-              data: IconThemeData(color: foreground, size: 22),
-              child: Row(
-                children: [
-                  icon,
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextDefault(
-                      label,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: foreground,
-                    ),
+  Widget _row(String label, String result) {
+    return InkWell(
+      onTap: () => Get.back(result: result),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: PabColors.ink,
                   ),
-                  Icon(Icons.chevron_right, color: foreground),
-                ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, size: 20, color: PabColors.muted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfessionalCard extends StatelessWidget {
+  final String name;
+  final String role;
+  final String? imageUrl;
+  final VoidCallback? onWhatsApp;
+
+  const _ProfessionalCard({
+    required this.name,
+    required this.role,
+    required this.imageUrl,
+    required this.onWhatsApp,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.length > 2)
+        .take(2)
+        .map((part) => part[0].toUpperCase())
+        .join();
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: PabColors.card,
+        border: Border.all(color: PabColors.line),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          ClipOval(
+            child: AppImage(
+              imageUrl: imageUrl,
+              width: 52,
+              height: 52,
+              errorWidget: Container(
+                width: 52,
+                height: 52,
+                color: PabColors.lilac,
+                alignment: Alignment.center,
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: PabColors.lilacText,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: PabColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  role,
+                  style: const TextStyle(fontSize: 13, color: PabColors.muted),
+                ),
+              ],
+            ),
+          ),
+          if (onWhatsApp != null)
+            Tooltip(
+              message: 'Conversar no WhatsApp',
+              child: Material(
+                color: PabColors.card,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: PabColors.lineStrong),
+                ),
+                child: InkWell(
+                  onTap: onWhatsApp,
+                  borderRadius: BorderRadius.circular(12),
+                  child: const SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Center(child: WhatsAppIcon(size: 20)),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

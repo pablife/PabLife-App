@@ -12,6 +12,7 @@ import '../../../infra/repositories/appointment_repository.dart';
 import '../../../infra/repositories/banner_repository.dart';
 import '../../../infra/services/activity_service.dart';
 import '../../../infra/services/auth_service.dart';
+import '../../../infra/services/subscription_service.dart';
 import '../../../shared/mixins/loader_manager.dart';
 import '../../../shared/utils/app_snackbar.dart';
 
@@ -49,6 +50,9 @@ class UserHomeController extends GetxController with LoaderManagerMixin {
   List<ProfessionalAppointmentModel> _appointments = [];
   List<ProfessionalAppointmentModel> _activeAppointments = [];
   List<BannerModel> banners = [];
+
+  /// Quando vencem as consultas disponíveis mais antigas (null sem saldo).
+  DateTime? consultationsExpireAt;
   WeeklyTaskActivitySummaryModel? _weeklySummary;
 
   List<ActivityModel> get _allActivities => _activityService.allActivities;
@@ -67,6 +71,7 @@ class UserHomeController extends GetxController with LoaderManagerMixin {
     loadActivities();
     loadWeeklyProgress();
     _loadAppointments();
+    _loadBalanceExpiry();
     _loadBanners();
   }
 
@@ -170,7 +175,17 @@ class UserHomeController extends GetxController with LoaderManagerMixin {
       loadWeeklyProgress(),
       _loadAppointments(),
       _loadBanners(),
+      _loadBalanceExpiry(),
     ]);
+  }
+
+  Future<void> _loadBalanceExpiry() async {
+    final balances = await SubscriptionService.instance
+        .getConsultationBalances();
+    final open = balances.where((b) => b.remaining > 0).toList()
+      ..sort((a, b) => a.expiresAt.compareTo(b.expiresAt));
+    consultationsExpireAt = open.isEmpty ? null : open.first.expiresAt;
+    update();
   }
 
   Future<void> refreshDataSilent() async {
@@ -179,6 +194,7 @@ class UserHomeController extends GetxController with LoaderManagerMixin {
       loadWeeklyProgress(),
       _loadAppointments(),
       _loadBanners(),
+      _loadBalanceExpiry(),
     ]);
   }
 
