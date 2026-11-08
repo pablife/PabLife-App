@@ -12,6 +12,8 @@ import 'booking/booking_page.dart';
 import 'widgets/cancel_appointment_dialog.dart';
 
 class ProfessionalsController extends GetxController with LoaderManagerMixin {
+  static ProfessionalsController get to => Get.find();
+
   final ProfessionalRepository _repository = ProfessionalRepository();
   final AuthService _authService = AuthService.instance;
 
@@ -33,6 +35,36 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
   final List<String> professionalTypes = ['Psicólogos', 'Nutricionistas'];
   String selectedType = 'Psicólogos';
   bool showOnlyScheduled = false;
+
+  /// Temas de cada profissional e o tema escolhido no filtro (null = Todos).
+  Map<String, List<String>> topics = {};
+  String? selectedTopic;
+
+  /// Próximo horário livre de cada profissional.
+  Map<String, DateTime> nextSlots = {};
+
+  List<String> topicsOf(ProfessionalWithUserModel p) =>
+      topics[p.professional.id] ?? const [];
+
+  DateTime? nextSlotOf(ProfessionalWithUserModel p) =>
+      nextSlots[p.professional.id];
+
+  /// Temas que aparecem entre os profissionais do tipo escolhido.
+  List<String> get availableTopics {
+    final typeKey = _getTypeKey(selectedType);
+    final seen = <String>{};
+    for (final p in professionals) {
+      if (p.professional.type != typeKey) continue;
+      seen.addAll(topicsOf(p));
+    }
+    return seen.toList()..sort();
+  }
+
+  void selectTopic(String? topic) {
+    selectedTopic = topic;
+    _applyFilters();
+    update();
+  }
 
   /// No computador o perfil abre ao lado da lista; este é o profissional
   /// mostrado no painel.
@@ -81,12 +113,22 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
         .toList();
     _applyFilters();
     update();
+
+    final extras = await Future.wait([
+      _repository.getTopics(),
+      _repository.getNextFreeSlots(),
+    ]);
+    topics = extras[0] as Map<String, List<String>>;
+    nextSlots = extras[1] as Map<String, DateTime>;
+    _applyFilters();
+    update();
   }
 
   Future<void> changeType(String type) async {
     if (selectedType == type) return;
 
     selectedType = type;
+    selectedTopic = null;
     _applyFilters();
     update();
   }
@@ -113,6 +155,13 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
         .where((p) => p.professional.type == typeKey)
         .toList();
 
+    final topic = selectedTopic;
+    if (topic != null) {
+      tempProfessionals = tempProfessionals
+          .where((p) => topicsOf(p).contains(topic))
+          .toList();
+    }
+
     if (showOnlyScheduled) {
       tempProfessionals = tempProfessionals
           .where((p) => p.hasAppointment)
@@ -126,7 +175,8 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
             (p) =>
                 p.user.fullName.toLowerCase().contains(query) ||
                 p.user.email.toLowerCase().contains(query) ||
-                p.typeFormatted.toLowerCase().contains(query),
+                p.typeFormatted.toLowerCase().contains(query) ||
+                topicsOf(p).any((topic) => topic.toLowerCase().contains(query)),
           )
           .toList();
     }

@@ -114,6 +114,23 @@ class UserWideCalendarController extends GetxController
     (i) => DateTime(rangeStart.year, rangeStart.month, rangeStart.day + i),
   );
 
+  /// Semana da faixa de dias da visão Dia no celular (segunda a domingo).
+  List<DateTime> get stripDays {
+    final start = ProfessionalWideCalendarController.weekStart(focusDate);
+    return List.generate(
+      7,
+      (i) => DateTime(start.year, start.month, start.day + i),
+    );
+  }
+
+  /// Abre o mês do dia escolhido (toque num mês da visão Ano).
+  void openMonth(DateTime month) {
+    focusDate = DateTime(month.year, month.month, 1);
+    view = WideAgendaView.month;
+    update();
+    load();
+  }
+
   String get title {
     const months = ProfessionalWideCalendarController.monthNames;
     switch (view) {
@@ -144,7 +161,9 @@ class UserWideCalendarController extends GetxController
     changeLoading(true);
     try {
       if (view == WideAgendaView.day || view == WideAgendaView.week) {
-        final days = weekDays;
+        // Na visão Dia a semana inteira vem junto, para os pontinhos da
+        // faixa de dias do celular.
+        final days = view == WideAgendaView.day ? stripDays : weekDays;
         // Uma busca por dia (a mesma do planner), todas ao mesmo tempo.
         final responses = await Future.wait(
           days.map(_activityRepository.loadActivitiesForDate),

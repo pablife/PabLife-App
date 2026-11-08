@@ -261,6 +261,82 @@ class WomenHealthController extends GetxController {
 
   String? get todayCheckIn => checkIns[_dayKey(_today)];
 
+  /// Humor registrado num dia (para a semana na tela "Como estou hoje").
+  String? checkInOn(DateTime day) => checkIns[_dayKey(_dateOnly(day))];
+
+  /// Sintomas que fazem sentido para a trilha.
+  List<String> get symptomOptions => switch (trail) {
+    WomenTrail.pregnancy => const [
+      'Enjoo',
+      'Azia',
+      'Inchaço',
+      'Dor nas costas',
+      'Sono',
+      'Movimentos do bebê',
+    ],
+    WomenTrail.menopause => const [
+      'Calorão',
+      'Suor noturno',
+      'Insônia',
+      'Dor nas articulações',
+      'Ressecamento',
+      'Irritabilidade',
+    ],
+    _ => const [
+      'Cólica',
+      'Inchaço',
+      'Dor de cabeça',
+      'Seios sensíveis',
+      'Fluxo leve',
+      'Fluxo médio',
+      'Fluxo intenso',
+    ],
+  };
+
+  /// Detalhes já guardados hoje (para abrir a tela preenchida).
+  Future<Map<String, dynamic>?> todayDetails() async {
+    final userId = _userId;
+    if (userId == null) return null;
+    return _repository.getCheckInDetails(userId, _dayKey(_today));
+  }
+
+  /// Salva o registro completo de hoje. Retorna false se nem o humor salvou.
+  Future<bool> saveTodayCheckIn({
+    required String mood,
+    required List<String> symptoms,
+    required int? energy,
+    required String? sleep,
+    required String? note,
+  }) async {
+    final key = _dayKey(_today);
+    final previous = checkIns[key];
+    checkIns[key] = mood;
+    update();
+    final userId = _userId;
+    if (userId == null) return true;
+    try {
+      await _repository.saveCheckIn(userId, key, mood);
+    } catch (e) {
+      debugPrint('Erro ao salvar humor: $e');
+      if (previous == null) {
+        checkIns.remove(key);
+      } else {
+        checkIns[key] = previous;
+      }
+      update();
+      return false;
+    }
+    await _repository.saveCheckInDetails(
+      userId,
+      key,
+      symptoms: symptoms,
+      energy: energy,
+      sleep: sleep,
+      note: note,
+    );
+    return true;
+  }
+
   /// Humor registrado no dia, para mostrar na agenda.
   WomenMood? moodOn(DateTime day) {
     if (!isActive || !showBand) return null;

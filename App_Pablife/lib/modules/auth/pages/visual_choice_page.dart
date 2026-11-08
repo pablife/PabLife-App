@@ -281,7 +281,7 @@ class _Form extends StatelessWidget {
             subtitle: professional
                 ? 'Figura verde, o visual clássico'
                 : 'Bem-estar, metas e consultas',
-            swatch: const [Color(0xFF052F33), Color(0xFF13B8B2)],
+            icon: 'assets/pages/auth/login_art.png',
             selected: rose == false,
             onTap: () => onPick(false),
           ),
@@ -294,7 +294,7 @@ class _Form extends StatelessWidget {
             subtitle: professional
                 ? 'Figura rosa, em tons de rosa e lilás'
                 : 'Ciclo, gestação e menopausa',
-            swatch: const [Color(0xFF3A1D4F), Color(0xFFD63A74)],
+            icon: 'assets/pages/auth/login_art_rose.png',
             selected: rose == true,
             onTap: () => onPick(true),
           ),
@@ -324,14 +324,14 @@ class _Form extends StatelessWidget {
 class _Option extends StatelessWidget {
   final String title;
   final String subtitle;
-  final List<Color> swatch;
+  final String icon;
   final bool selected;
   final VoidCallback onTap;
 
   const _Option({
     required this.title,
     required this.subtitle,
-    required this.swatch,
+    required this.icon,
     required this.selected,
     required this.onTap,
   });
@@ -362,19 +362,18 @@ class _Option extends StatelessWidget {
             ),
             child: Row(
               children: [
-                // Amostra das duas cores principais do visual.
-                SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: Stack(
-                    children: [
-                      Positioned(left: 0, top: 0, child: _dot(swatch[0], 30)),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: _dot(swatch[1], 26),
-                      ),
-                    ],
+                // A figura do visual, como no canvas.
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .8),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  alignment: Alignment.center,
+                  child: ExcludeSemantics(
+                    child: Image.asset(icon, width: 60, fit: BoxFit.contain),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -433,16 +432,6 @@ class _Option extends StatelessWidget {
       ),
     );
   }
-
-  Widget _dot(Color color, double size) => Container(
-    width: size,
-    height: size,
-    decoration: BoxDecoration(
-      color: color,
-      shape: BoxShape.circle,
-      border: Border.all(color: Colors.white, width: 2),
-    ),
-  );
 }
 
 class _ContinueButton extends StatelessWidget {

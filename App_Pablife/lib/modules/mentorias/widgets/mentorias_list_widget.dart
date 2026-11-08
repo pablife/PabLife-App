@@ -45,18 +45,33 @@ class MentoriasListWidget extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(15, 20, 15, 100),
-      itemCount: mentorias.length,
-      itemBuilder: (context, index) {
-        final mentoria = mentorias[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: MentoriaTile(
-            mentoria: mentoria,
-            onTap: () => onMentoriaTap(mentoria),
-            onBookmarkTap: () => onBookmarkTap(mentoria),
-          ),
+    Widget tile(MentoriaModel mentoria) => MentoriaTile(
+      mentoria: mentoria,
+      onTap: () => onMentoriaTap(mentoria),
+      onBookmarkTap: () => onBookmarkTap(mentoria),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Computador: cartões lado a lado.
+        if (constraints.maxWidth >= 720) {
+          return GridView.builder(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 400,
+              mainAxisExtent: 410,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: mentorias.length,
+            itemBuilder: (_, index) => tile(mentorias[index]),
+          );
+        }
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          itemCount: mentorias.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 14),
+          itemBuilder: (_, index) => tile(mentorias[index]),
         );
       },
     );

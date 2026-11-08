@@ -12,6 +12,7 @@ import '../../calendar/calendar_controller.dart';
 import '../../dashboard/dashboard_controller.dart';
 import '../../notifications/notifications_page.dart';
 import '../../profile/pages/subscription_page.dart';
+import '../../women_health/pages/mood_check_in_page.dart';
 import '../../women_health/women_health_controller.dart';
 import '../../women_health/women_health_data.dart';
 import '../controllers/user_home_controller.dart';
@@ -1190,72 +1191,6 @@ class _InfoRow extends StatelessWidget {
 }
 
 /// "Como estou hoje": a pessoa escolhe o humor do dia.
-Future<void> showMoodSheet(BuildContext context, WomenHealthController w) {
-  return showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: PabColors.card,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
-    builder: (sheetContext) => GetBuilder<WomenHealthController>(
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Pabi(
-                    mood: PabiMood.fromCheckIn(w.todayCheckIn),
-                    women: true,
-                    size: 56,
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Como você está hoje?',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: PabColors.ink,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final mood in w.checkInOptions)
-                    ChoiceChip(
-                      selected: w.todayCheckIn == mood.label,
-                      onSelected: (_) => w.toggleCheckIn(mood.label),
-                      showCheckmark: false,
-                      selectedColor: PabColors.accent,
-                      backgroundColor: PabColors.card,
-                      side: const BorderSide(color: PabColors.lineStrong),
-                      labelStyle: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: PabColors.ink,
-                      ),
-                      label: Text('${mood.emoji} ${mood.label}'),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _PrimaryButton(
-                label: 'Pronto',
-                onTap: () => Navigator.of(sheetContext).pop(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
+/// Abre "Como estou hoje" (tela inteira, como no canvas).
+Future<void> showMoodSheet(BuildContext context, WomenHealthController w) =>
+    MoodCheckInPage.open();

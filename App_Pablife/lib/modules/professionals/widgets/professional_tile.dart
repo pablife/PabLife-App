@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../infra/models/professional_with_user_model.dart';
 import '../../../shared/themes/pab_colors.dart';
+import '../../../shared/utils/next_slot_label.dart';
 import '../../../widgets/design_system/app_image.dart';
 
 /// Cartão do profissional na lista (canvas "Profissionais — mobile").
@@ -9,6 +10,12 @@ class ProfessionalTile extends StatelessWidget {
   final ProfessionalWithUserModel professional;
   final VoidCallback onTap;
   final VoidCallback onCalendarTap;
+
+  /// Temas que o profissional atende (os dois primeiros aparecem no card).
+  final List<String> topics;
+
+  /// Próximo horário livre, se houver nas próximas duas semanas.
+  final DateTime? nextSlot;
 
   /// Destaca o card do profissional aberto no painel ao lado (computador).
   final bool isSelected;
@@ -18,6 +25,8 @@ class ProfessionalTile extends StatelessWidget {
     required this.professional,
     required this.onTap,
     required this.onCalendarTap,
+    this.topics = const [],
+    this.nextSlot,
     this.isSelected = false,
   });
 
@@ -32,6 +41,16 @@ class ProfessionalTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasAppointment = professional.hasAppointment;
+    final role = [
+      professional.typeFormatted,
+      if (topics.isNotEmpty) topics.take(2).join(', '),
+    ].join(' · ');
+    final slot = nextSlot;
+    final status = hasAppointment
+        ? 'Consulta ${professional.appointmentFormatted}'
+        : slot != null
+        ? nextSlotLabel(slot)
+        : null;
 
     return Material(
       color: PabColors.card,
@@ -88,13 +107,15 @@ class ProfessionalTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      professional.typeFormatted,
+                      role,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 13,
                         color: PabColors.muted,
                       ),
                     ),
-                    if (hasAppointment) ...[
+                    if (status != null) ...[
                       const SizedBox(height: 3),
                       Row(
                         children: [
@@ -109,7 +130,7 @@ class ProfessionalTile extends StatelessWidget {
                           const SizedBox(width: 6),
                           Flexible(
                             child: Text(
-                              'Consulta ${professional.appointmentFormatted}',
+                              status,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(

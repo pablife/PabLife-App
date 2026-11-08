@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../shared/themes/pab_colors.dart';
+import '../../shared/utils/next_slot_label.dart';
 import '../../shared/utils/wide_layout.dart';
+import '../../widgets/pab_page_title.dart';
 import '../home/pages/user_home_page.dart';
 import 'professionals_controller.dart';
 import 'widgets/clock_filter_button_widget.dart';
@@ -69,6 +71,8 @@ class _ListColumn extends StatelessWidget {
                 : controller.openProfessional,
             onCalendarTap: controller.handleCalendarAction,
             selected: wide ? controller.selected : null,
+            topicsOf: controller.topicsOf,
+            nextSlotOf: controller.nextSlotOf,
           ),
         ),
       ],
@@ -102,16 +106,7 @@ class _Header extends StatelessWidget {
             children: [
               const Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      'Profissionais',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: PabColors.onInk,
-                      ),
-                    ),
-                  ),
+                  Expanded(child: PabPageTitle('Profissionais')),
                   PabNotificationBell(),
                 ],
               ),
@@ -176,9 +171,62 @@ class _Header extends StatelessWidget {
                   ],
                 ),
               ),
+              if (controller.availableTopics.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                _TopicChips(controller: controller),
+              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Filtro por tema: Todos, Ansiedade, Autoestima…
+class _TopicChips extends StatelessWidget {
+  final ProfessionalsController controller;
+
+  const _TopicChips({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final topics = <String?>[null, ...controller.availableTopics];
+    return SizedBox(
+      height: 36,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: topics.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 6),
+        itemBuilder: (_, index) {
+          final topic = topics[index];
+          final on = controller.selectedTopic == topic;
+          return Semantics(
+            button: true,
+            selected: on,
+            child: Material(
+              color: on ? PabColors.accent : PabColors.card,
+              shape: const StadiumBorder(),
+              child: InkWell(
+                customBorder: const StadiumBorder(),
+                onTap: () => controller.selectTopic(topic),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Center(
+                    child: Text(
+                      topic ?? 'Todos',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: PabColors.ink,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -277,9 +325,32 @@ class _ProfilePanel extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                ProfessionalTypeChip(
-                                  professional.typeFormatted,
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: [
+                                    ProfessionalTypeChip(
+                                      professional.typeFormatted,
+                                    ),
+                                    for (final topic
+                                        in controller
+                                            .topicsOf(professional)
+                                            .take(3))
+                                      ProfessionalTypeChip(topic, soft: true),
+                                  ],
                                 ),
+                                if (controller.nextSlotOf(professional)
+                                    case final next?) ...[
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    'Próximo horário: ${nextSlotLabel(next)}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: PabColors.accentText,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
