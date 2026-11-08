@@ -17,6 +17,7 @@ import '../../modules/finance/finance_report_page.dart';
 import '../../modules/mentorship/mentorship_page.dart';
 import '../../modules/notifications/notifications_page.dart';
 import '../../modules/professionals/professionals_page.dart';
+import '../../modules/students/students_page.dart';
 import '../../modules/users/users_page.dart';
 import '../../shared/controllers/layout_controller.dart';
 import '../../shared/themes/app_colors.dart';
@@ -178,6 +179,13 @@ class SidebarContent extends StatelessWidget {
                         currentRoute: currentRoute,
                       ),
                       SidebarItem(
+                        icon: Icons.workspace_premium_outlined,
+                        label: 'Estudantes',
+                        route: StudentsPage.route,
+                        isCollapsed: isCollapsed,
+                        currentRoute: currentRoute,
+                      ),
+                      SidebarItem(
                         icon: Icons.notifications_outlined,
                         label: 'Notificações',
                         route: NotificationsPage.route,
@@ -289,6 +297,7 @@ class SidebarContent extends StatelessWidget {
         'Consultas',
         CouponConsultationsPage.route,
       ),
+      item(Icons.school_outlined, 'Estudantes', StudentsPage.route),
     ];
   }
 

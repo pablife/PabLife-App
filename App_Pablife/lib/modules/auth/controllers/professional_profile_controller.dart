@@ -1,19 +1,27 @@
 import 'dart:convert';
-import 'package:get/get.dart';
+
 import 'package:file_picker/file_picker.dart';
-import 'package:pablife/modules/dashboard/dashboard_page.dart';
-import 'package:pablife/modules/waiting_approval/pages/waiting_approval_page.dart';
-import '../../../shared/mixins/loader_manager.dart';
-import '../../../shared/utils/app_snackbar.dart';
-import '../../../shared/utils/photo_resize.dart';
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../infra/models/professional_type.dart';
 import '../../../infra/models/user_model.dart';
 import '../../../infra/models/user_role.dart';
 import '../../../infra/models/user_status.dart';
 import '../../../infra/repositories/user_repository.dart';
 import '../../../infra/services/auth_service.dart';
+import '../../../shared/mixins/loader_manager.dart';
+import '../../dashboard/dashboard_page.dart';
+import '../../waiting_approval/pages/waiting_approval_page.dart';
 import '../entry_visual.dart';
 
+/// "Documento do conselho" (canvas PC2): carteira do conselho (obrigatória)
+/// e diploma ou certificado (opcional). Cria a conta de profissional e vai
+/// para "Cadastro em análise".
+///
+/// Quem já tem conta de usuário e quer virar profissional
+/// (`addToExisting`) preenche aqui também profissão e registro.
 class ProfessionalProfileController extends GetxController
     with LoaderManagerMixin {
   final UserRepository _userRepository = UserRepository();
@@ -23,15 +31,20 @@ class ProfessionalProfileController extends GetxController
   String fullName = '';
   String phone = '';
   String cpfDocument = '';
-  String description = '';
-  ProfessionalType professionalType = ProfessionalType.nutritionist;
+  ProfessionalType? professionalType;
+  String councilNumber = '';
+  String councilRegion = '';
+  bool termsAccepted = false;
 
-  /// Usuário já logado completando o cadastro de profissional.
   bool addToExistingAccount = false;
-  String? documentBase64;
-  String? documentFileName;
-  String? profileImageBase64;
-  String? profileImageFileName;
+
+  Uint8List? cardBytes;
+  String? cardName;
+  Uint8List? diplomaBytes;
+  String? diplomaName;
+
+  bool touched = false;
+  String? error;
 
   @override
   void onInit() {
@@ -42,195 +55,203 @@ class ProfessionalProfileController extends GetxController
     fullName = args['fullName'] ?? '';
     phone = args['phone'] ?? '';
     cpfDocument = args['cpfDocument'] ?? '';
+    final type = args['professionalType'] as String?;
+    professionalType = type == null ? null : ProfessionalType.fromString(type);
+    councilNumber = args['councilNumber'] ?? '';
+    councilRegion = args['councilRegion'] ?? '';
     addToExistingAccount = args['addToExisting'] == true;
+    termsAccepted = !addToExistingAccount;
   }
 
-  void updateProfessionalType(ProfessionalType value) {
-    professionalType = value;
+  void _set(VoidCallback change) {
+    change();
+    error = null;
     update();
   }
 
-  void updateDocumentBase64(String? base64, String? fileName) {
-    documentBase64 = base64;
-    documentFileName = fileName;
-    update();
-  }
+  void updateProfessionalType(ProfessionalType v) =>
+      _set(() => professionalType = v);
+  void updateCouncilNumber(String v) => _set(() => councilNumber = v.trim());
+  void updateCouncilRegion(String v) => _set(() => councilRegion = v.trim());
+  void updateTerms(bool v) => _set(() => termsAccepted = v);
 
-  void updateProfileImageBase64(String? base64, String? fileName) {
-    profileImageBase64 = base64;
-    profileImageFileName = fileName;
-    update();
-  }
+  List<String> get missing => [
+    if (professionalType == null) 'profissão',
+    if (councilNumber.length < 3) 'registro',
+    if (!termsAccepted) 'aceite dos termos',
+    if (cardBytes == null) 'carteira do conselho',
+  ];
 
-  Future<void> selectDocument() async {
+  Future<({Uint8List bytes, String name})?> _pick({bool image = false}) async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'],
-        allowMultiple: false,
+      final result = await FilePicker.platform.pickFiles(
+        type: image ? FileType.image : FileType.custom,
+        allowedExtensions: image ? null : const ['pdf', 'jpg', 'jpeg', 'png'],
         withData: true,
-        withReadStream: false,
       );
-
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        await _convertDocumentToBase64(file);
+      final file = result?.files.firstOrNull;
+      if (file == null || file.bytes == null) return null;
+      if (file.size > 10 * 1024 * 1024) {
+        _set(() => error = 'O arquivo passa de 10 MB. Escolha um menor.');
+        return null;
       }
-    } catch (e) {
-      AppSnackbar.to.show('Erro ao selecionar arquivo: ${e.toString()}');
+      return (bytes: file.bytes!, name: file.name);
+    } catch (_) {
+      _set(() => error = 'Não foi possível abrir o arquivo.');
+      return null;
     }
   }
 
-  Future<void> selectProfileImage() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-        withData: true,
-        withReadStream: false,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        await _convertProfileImageToBase64(file);
-      }
-    } catch (e) {
-      AppSnackbar.to.show('Erro ao selecionar imagem: ${e.toString()}');
-    }
+  Future<void> pickCard({bool image = false}) async {
+    final file = await _pick(image: image);
+    if (file == null) return;
+    _set(() {
+      cardBytes = file.bytes;
+      cardName = file.name;
+    });
   }
 
-  Future<void> _convertDocumentToBase64(PlatformFile file) async {
-    try {
-      changeLoading(true);
-
-      if (file.bytes == null || file.bytes!.isEmpty) {
-        AppSnackbar.to.show(
-          'Erro ao ler arquivo. Por favor, tente selecionar o arquivo novamente.',
-        );
-        return;
-      }
-
-      final base64String = base64Encode(file.bytes!);
-      final extension = file.extension ?? 'pdf';
-      final fileName =
-          'validation-document-${DateTime.now().millisecondsSinceEpoch}.$extension';
-
-      updateDocumentBase64(base64String, fileName);
-    } catch (e) {
-      AppSnackbar.to.show('Erro ao processar arquivo: ${e.toString()}');
-    } finally {
-      changeLoading(false);
-    }
+  Future<void> pickDiploma({bool image = false}) async {
+    final file = await _pick(image: image);
+    if (file == null) return;
+    _set(() {
+      diplomaBytes = file.bytes;
+      diplomaName = file.name;
+    });
   }
 
-  Future<void> _convertProfileImageToBase64(PlatformFile file) async {
-    try {
-      changeLoading(true);
+  void removeCard() => _set(() {
+    cardBytes = null;
+    cardName = null;
+  });
 
-      if (file.bytes == null || file.bytes!.isEmpty) {
-        AppSnackbar.to.show(
-          'Erro ao ler imagem. Por favor, tente selecionar a imagem novamente.',
-        );
-        return;
-      }
+  void removeDiploma() => _set(() {
+    diplomaBytes = null;
+    diplomaName = null;
+  });
 
-      final base64String = base64Encode(shrinkProfilePhoto(file.bytes!));
-      final fileName =
-          'profile-image-${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-      updateProfileImageBase64(base64String, fileName);
-    } catch (e) {
-      AppSnackbar.to.show('Erro ao processar imagem: ${e.toString()}');
-    } finally {
-      changeLoading(false);
-    }
-  }
+  String _ext(String name) =>
+      name.contains('.') ? name.split('.').last.toLowerCase() : 'pdf';
 
   Future<void> completeProfile() async {
-    if (documentBase64 == null ||
-        documentBase64!.isEmpty ||
-        documentFileName == null ||
-        documentFileName!.isEmpty) {
-      AppSnackbar.to.show('Por favor, selecione seu documento de validação');
+    if (isLoading) return;
+    if (missing.isNotEmpty) {
+      touched = true;
+      update();
       return;
     }
-
     changeLoading(true);
+    error = null;
+    update();
 
-    if (addToExistingAccount) {
-      await _addToExistingAccount();
-      changeLoading(false);
-      return;
-    }
+    final documentBase64 = base64Encode(cardBytes!);
+    final documentFileName =
+        'validation-document-${DateTime.now().millisecondsSinceEpoch}.${_ext(cardName!)}';
 
     try {
-      final userData = UserModel(
-        fullName: fullName,
-        email: email,
-        phone: phone,
-        cpfDocument: cpfDocument,
-        termsAccepted: true,
-        role: UserRole.professional,
-        status: UserStatus.active,
-        professionalType: professionalType,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      final response = await _userRepository.signUpWithEmailAndDocument(
-        userData,
-        password,
-        documentBase64!,
-        documentFileName!,
-        profileImageBase64: profileImageBase64,
-        profileImageFileName: profileImageFileName,
-        description: description,
-      );
-
-      if (response.success) {
-        final authService = AuthService.instance;
-        final signInSuccess = await authService.signInWithEmail(
+      if (addToExistingAccount) {
+        final response = await _userRepository.addProfessionalProfile(
+          professionalType: professionalType!.value,
+          documentBase64: documentBase64,
+          documentFileName: documentFileName,
+        );
+        if (!response.success) {
+          error = response.message;
+          return;
+        }
+        final auth = AuthService.instance;
+        await auth.reloadCurrentUser();
+        await auth.setActingAsUser(false);
+      } else {
+        final response = await _userRepository.signUpWithEmailAndDocument(
+          UserModel(
+            fullName: fullName,
+            email: email,
+            phone: phone,
+            cpfDocument: cpfDocument,
+            termsAccepted: true,
+            role: UserRole.professional,
+            status: UserStatus.active,
+            professionalType: professionalType,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          password,
+          documentBase64,
+          documentFileName,
+        );
+        if (!response.success) {
+          error = response.message;
+          return;
+        }
+        final signedIn = await AuthService.instance.signInWithEmail(
           email,
           password,
         );
-
-        if (signInSuccess) {
-          await EntryVisual.onAccountCreated(professional: true);
-          AppSnackbar.to.show('Conta profissional criada com sucesso!');
-          Get.offAllNamed(WaitingApprovalPage.route);
-        } else {
-          AppSnackbar.to.show(
-            'Conta criada, mas falha ao fazer login. Por favor, faça login manualmente.',
-          );
+        if (!signedIn) {
+          error =
+              'Conta criada, mas não conseguimos entrar. Entre com seu '
+              'e-mail e senha.';
           Get.offAllNamed('/auth/email');
+          return;
         }
-      } else {
-        AppSnackbar.to.show(response.message);
+        await EntryVisual.onAccountCreated(professional: true);
       }
+
+      await _saveCouncilAndDiploma();
+      Get.offAllNamed(WaitingApprovalPage.route);
     } catch (e) {
-      AppSnackbar.to.show('Erro ao criar conta: ${e.toString()}');
+      error = 'Não foi possível enviar seu cadastro. Tente de novo.';
     } finally {
       changeLoading(false);
+      update();
     }
   }
 
-  Future<void> _addToExistingAccount() async {
-    final response = await _userRepository.addProfessionalProfile(
-      professionalType: professionalType.value,
-      documentBase64: documentBase64!,
-      documentFileName: documentFileName!,
-      description: description,
-    );
-    if (!response.success) {
-      AppSnackbar.to.show(response.message);
-      return;
+  /// Registro do conselho e diploma: gravados depois da conta criada, pela
+  /// própria pessoa (as regras do banco só deixam mexer no próprio cadastro).
+  Future<void> _saveCouncilAndDiploma() async {
+    final client = Supabase.instance.client;
+    final uid = client.auth.currentUser?.id;
+    if (uid == null) return;
+
+    String? diplomaPath;
+    if (diplomaBytes != null) {
+      final ext = _ext(diplomaName!);
+      final path = '$uid/diploma-${DateTime.now().millisecondsSinceEpoch}.$ext';
+      try {
+        await client.storage
+            .from('professional-documents')
+            .uploadBinary(
+              path,
+              diplomaBytes!,
+              fileOptions: FileOptions(
+                contentType: ext == 'pdf'
+                    ? 'application/pdf'
+                    : ext == 'png'
+                    ? 'image/png'
+                    : 'image/jpeg',
+              ),
+            );
+        diplomaPath = path;
+      } catch (e) {
+        debugPrint('Diploma não enviado: $e');
+      }
     }
 
-    final authService = AuthService.instance;
-    await authService.reloadCurrentUser();
-    await authService.setActingAsUser(false);
-    AppSnackbar.to.show('Cadastro enviado para aprovação!');
-    Get.offAllNamed(WaitingApprovalPage.route);
+    try {
+      await client
+          .from('tb_professionals')
+          .update({
+            'council_number': councilNumber,
+            'council_region': councilRegion.isEmpty ? null : councilRegion,
+            if (diplomaPath != null)
+              'specialization_document_path': diplomaPath,
+          })
+          .eq('user_id', uid);
+    } catch (e) {
+      debugPrint('Registro do conselho não gravado: $e');
+    }
   }
 
   void goBack() {

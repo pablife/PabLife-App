@@ -1,16 +1,15 @@
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:brasil_fields/brasil_fields.dart';
-import '../controllers/sign_up_controller.dart';
-import '../../../widgets/design_system/edge_button_rounded.dart';
-import '../../../widgets/design_system/text_default.dart';
-import '../../../widgets/design_system/app_text_form_field.dart';
-import '../../../widgets/app_text_vector.dart';
-import '../../../shared/themes/app_colors.dart';
-import 'widgets/sign_up_account_type_selector_widget.dart';
-import 'widgets/sign_up_terms_checkbox_widget.dart';
 
+import '../../../infra/models/professional_type.dart';
+import '../../../shared/themes/pab_colors.dart';
+import '../controllers/sign_up_controller.dart';
+import 'widgets/registration_layout.dart';
+
+/// "Criar conta" (canvas E3) para o usuário; para o profissional, "Seus
+/// dados" (canvas PC1, passo 1 de 3).
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -21,279 +20,325 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final FocusNode _fullNameFocus = FocusNode();
-  final FocusNode _emailFocus = FocusNode();
-  final FocusNode _phoneFocus = FocusNode();
-  final FocusNode _cpfFocus = FocusNode();
-  final FocusNode _passwordFocus = FocusNode();
-
-  @override
-  void dispose() {
-    _fullNameFocus.dispose();
-    _emailFocus.dispose();
-    _phoneFocus.dispose();
-    _cpfFocus.dispose();
-    _passwordFocus.dispose();
-    super.dispose();
-  }
+  bool _showPassword = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.aqua,
-      body: GetBuilder<SignUpController>(
-        builder: (controller) {
-          return SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: AppTextVector(width: 234, height: 71)),
+    return GetBuilder<SignUpController>(
+      builder: (c) {
+        final pro = c.isProfessional;
+        final showErr = c.touched && c.missing.isNotEmpty;
+
+        final passwordSuffix = IconButton(
+          tooltip: _showPassword ? 'Ocultar senha' : 'Mostrar senha',
+          onPressed: () => setState(() => _showPassword = !_showPassword),
+          icon: Icon(
+            _showPassword ? Icons.visibility_off : Icons.visibility,
+            color: PabColors.muted,
+          ),
+        );
+
+        return RegistrationLayout(
+          title: pro ? 'Seus dados' : 'Criar conta',
+          step: pro
+              ? 'Cadastro do profissional · passo 1 de 3'
+              : c.isStudent
+              ? 'Passo 1 de 2 · seus dados'
+              : 'Seus dados',
+          progress: pro ? 1 : null,
+          maxWidth: pro ? 560 : 520,
+          onBack: () => Get.back<void>(),
+          fields: [
+            RegField(
+              label: 'Nome completo',
+              hint: pro
+                  ? 'Como está no registro do conselho'
+                  : 'Como está no seu documento',
+              initialValue: c.fullName,
+              onChanged: c.updateFullName,
+              autofillHints: const [AutofillHints.name],
+              capitalization: TextCapitalization.words,
+            ),
+            RegField(
+              label: 'E-mail',
+              hint: pro ? 'nome@exemplo.com' : 'seu@email.com',
+              initialValue: c.email,
+              onChanged: c.updateEmail,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+            ),
+            RegField(
+              label: 'WhatsApp',
+              hint: '(85) 9 0000-0000',
+              onChanged: c.updatePhone,
+              keyboardType: TextInputType.phone,
+              autofillHints: const [AutofillHints.telephoneNumber],
+              formatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                TelefoneInputFormatter(),
+              ],
+              helper: pro
+                  ? null
+                  : 'Sua profissional usa para falar com você sobre a consulta.',
+            ),
+            RegField(
+              label: 'CPF',
+              hint: '000.000.000-00',
+              onChanged: c.updateCpfDocument,
+              keyboardType: TextInputType.number,
+              formatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                CpfInputFormatter(),
+              ],
+              helper: 'Usado no pagamento e para proteger sua conta.',
+            ),
+            RegField(
+              label: 'Senha',
+              hint: pro ? 'Pelo menos 8 caracteres' : 'Mínimo de 8 caracteres',
+              onChanged: c.updatePassword,
+              obscure: !_showPassword,
+              autofillHints: const [AutofillHints.newPassword],
+              suffix: passwordSuffix,
+            ),
+            if (pro) ..._professionalFields(c) else _StudentCard(controller: c),
+            RegCheckbox(
+              value: c.termsAccepted,
+              onChanged: c.updateTerms,
+              boxed: pro,
+              text: pro
+                  ? 'Li e aceito os termos de uso para profissionais e a '
+                        'política de privacidade. Atendimentos são online, '
+                        'pela sala Pablife.'
+                  : 'Li e aceito os Termos de uso e a Política de '
+                        'privacidade da Pablife.',
+            ),
+          ],
+          footer: [
+            RegPrimaryButton(
+              label: pro
+                  ? 'Continuar'
+                  : c.isStudent
+                  ? 'Continuar para o comprovante'
+                  : 'Criar minha conta',
+              loading: c.isLoading,
+              dim: c.missing.isNotEmpty,
+              onTap: c.continueFirstStep,
+            ),
+            if (showErr) RegError(c.missingText),
+            if (c.error != null) RegError(c.error!),
+          ],
+        );
+      },
+    );
+  }
+
+  List<Widget> _professionalFields(SignUpController c) {
+    final regLabel = switch (c.profession) {
+      ProfessionalType.nutritionist => 'CRN',
+      ProfessionalType.psychologist => 'CRP',
+      null => 'Registro (CRP ou CRN)',
+    };
+    final regHint = c.profession == ProfessionalType.nutritionist
+        ? 'Conselho Regional de Nutricionistas · ex.: CRN 6, número 12345'
+        : 'Conselho Regional de Psicologia · ex.: CRP 11, número 12345';
+
+    Widget option(ProfessionalType type, String label) {
+      final on = c.profession == type;
+      return Expanded(
+        child: Semantics(
+          button: true,
+          selected: on,
+          child: Material(
+            color: on ? PabColors.ink : PabColors.card,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: BorderSide(
+                color: on ? PabColors.ink : PabColors.line,
+                width: on ? 2 : 1,
+              ),
+            ),
+            child: InkWell(
+              onTap: () => c.updateProfession(type),
+              borderRadius: BorderRadius.circular(14),
+              child: SizedBox(
+                height: 48,
+                child: Center(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: on ? Colors.white : PabColors.ink,
+                    ),
                   ),
                 ),
-                Expanded(
-                  flex: 6,
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: AppColors.second,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(32),
-                        topRight: Radius.circular(32),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Profissão',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: PabColors.ink,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              option(ProfessionalType.psychologist, 'Psicóloga(o)'),
+              const SizedBox(width: 8),
+              option(ProfessionalType.nutritionist, 'Nutricionista'),
+            ],
+          ),
+        ],
+      ),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: RegField(
+                  label: regLabel,
+                  hint: 'Número do registro',
+                  initialValue: c.councilNumber,
+                  onChanged: c.updateCouncilNumber,
+                  formatters: [LengthLimitingTextInputFormatter(30)],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: RegField(
+                  label: 'Região',
+                  hint: '11',
+                  initialValue: c.councilRegion,
+                  onChanged: c.updateCouncilRegion,
+                  formatters: [LengthLimitingTextInputFormatter(10)],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            regHint,
+            style: const TextStyle(fontSize: 12, color: PabColors.muted),
+          ),
+        ],
+      ),
+    ];
+  }
+}
+
+/// "Sou estudante": liga o desconto de 10% e o passo do comprovante.
+class _StudentCard extends StatelessWidget {
+  final SignUpController controller;
+
+  const _StudentCard({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final on = controller.isStudent;
+    return Semantics(
+      toggled: on,
+      button: true,
+      label: 'Sou estudante. Ganhe 10% de desconto em qualquer plano.',
+      excludeSemantics: true,
+      child: Material(
+        color: on ? PabColors.soft : PabColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: on ? PabColors.accent : PabColors.line,
+            width: on ? 2 : 1,
+          ),
+        ),
+        child: InkWell(
+          onTap: controller.toggleStudent,
+          borderRadius: BorderRadius.circular(18),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: PabColors.card,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.school_outlined,
+                    size: 22,
+                    color: PabColors.accentText,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sou estudante',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: PabColors.ink,
+                        ),
                       ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Ganhe 10% de desconto em qualquer plano. Você envia '
+                        'o comprovante no próximo passo.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.45,
+                          color: Color(0xFF2E4446),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: 44,
+                    height: 26,
+                    padding: const EdgeInsets.all(3),
+                    alignment: on
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    decoration: BoxDecoration(
+                      color: on ? PabColors.accent : const Color(0xFFC9D3D4),
+                      borderRadius: BorderRadius.circular(999),
                     ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 32,
-                              right: 32,
-                              top: 32,
-                            ),
-                            child: const TextDefault(
-                              'Crie sua conta em poucos passos',
-                              fontSize: 24,
-                              textAlign: TextAlign.start,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.aquaText,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: Opacity(
-                              opacity: 0.56,
-                              child: const TextDefault(
-                                'Preencha as informações abaixo para começar a organizar tudo em um só lugar.',
-                                fontSize: 16,
-                                textAlign: TextAlign.start,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: SignUpAccountTypeSelectorWidget(
-                              controller: controller,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: AppTextFormField(
-                              labelText: 'Nome Completo',
-                              hintText: 'Seu nome completo',
-                              textInputAction: TextInputAction.next,
-                              onChanged: controller.updateFullName,
-                              focusNode: _fullNameFocus,
-                              onFieldSubmitted: (_) {
-                                if (controller.isLoading) {
-                                  FocusScope.of(context).unfocus();
-                                  return;
-                                }
-                                if (_emailFocus.canRequestFocus) {
-                                  _emailFocus.requestFocus();
-                                } else {
-                                  FocusScope.of(context).unfocus();
-                                }
-                              },
-                              enabled: !controller.isLoading,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: AppTextFormField(
-                              labelText: 'E-mail',
-                              hintText: 'seu@email.com',
-                              keyboardType: TextInputType.emailAddress,
-                              initialValue: controller.email,
-                              textInputAction: TextInputAction.next,
-                              onChanged: controller.updateEmail,
-                              focusNode: _emailFocus,
-                              onFieldSubmitted: (_) {
-                                if (controller.isLoading) {
-                                  FocusScope.of(context).unfocus();
-                                  return;
-                                }
-                                if (_phoneFocus.canRequestFocus) {
-                                  _phoneFocus.requestFocus();
-                                } else {
-                                  FocusScope.of(context).unfocus();
-                                }
-                              },
-                              enabled: !controller.isLoading,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: AppTextFormField(
-                              labelText: 'Telefone',
-                              hintText: '(11) 99999-9999',
-                              keyboardType: TextInputType.number,
-                              controller: controller.phoneController,
-                              textInputAction: TextInputAction.next,
-                              onChanged: controller.updatePhone,
-                              focusNode: _phoneFocus,
-                              onFieldSubmitted: (_) {
-                                if (controller.isLoading) {
-                                  FocusScope.of(context).unfocus();
-                                  return;
-                                }
-                                if (_cpfFocus.canRequestFocus) {
-                                  _cpfFocus.requestFocus();
-                                } else {
-                                  FocusScope.of(context).unfocus();
-                                }
-                              },
-                              enabled: !controller.isLoading,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                TelefoneInputFormatter(),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: AppTextFormField(
-                              labelText: 'CPF',
-                              hintText: '000.000.000-00',
-                              keyboardType: TextInputType.number,
-                              controller: controller.cpfController,
-                              textInputAction: TextInputAction.next,
-                              onChanged: controller.updateCpfDocument,
-                              focusNode: _cpfFocus,
-                              onFieldSubmitted: (_) {
-                                if (controller.isLoading) {
-                                  FocusScope.of(context).unfocus();
-                                  return;
-                                }
-                                if (_passwordFocus.canRequestFocus) {
-                                  _passwordFocus.requestFocus();
-                                } else {
-                                  FocusScope.of(context).unfocus();
-                                }
-                              },
-                              enabled: !controller.isLoading,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                CpfInputFormatter(),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: AppTextFormField(
-                              labelText: 'Senha',
-                              hintText: 'Mínimo 6 caracteres',
-                              obscureText: true,
-                              textInputAction: TextInputAction.done,
-                              onChanged: controller.updatePassword,
-                              focusNode: _passwordFocus,
-                              onFieldSubmitted: (_) {
-                                FocusScope.of(context).unfocus();
-                              },
-                              enabled: !controller.isLoading,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: SignUpTermsCheckboxWidget(
-                              controller: controller,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  child: Opacity(
-                                    opacity: 0.56,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const TextDefault(
-                                          'Já tem uma conta?',
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                        TextButton(
-                                          onPressed: () =>
-                                              Get.toNamed('/auth/email'),
-                                          style: TextButton.styleFrom(
-                                            padding: EdgeInsets.zero,
-                                            minimumSize: const Size(50, 30),
-                                            tapTargetSize: MaterialTapTargetSize
-                                                .shrinkWrap,
-                                          ),
-                                          child: const TextDefault(
-                                            'Entrar agora',
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                child: EdgeButtonRounded(
-                                  text: 'Continuar',
-                                  width: 190,
-                                  onTap: () {
-                                    FocusScope.of(context).unfocus();
-                                    controller.signUp();
-                                  },
-                                  isLoading: controller.isLoading,
-                                  side: EdgeSide.left,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

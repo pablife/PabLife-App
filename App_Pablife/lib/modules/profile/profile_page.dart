@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../infra/repositories/student_repository.dart';
 import '../../infra/repositories/user_preferences_repository.dart';
 import '../../shared/themes/app_palette.dart';
 import '../../shared/themes/pab_colors.dart';
 import '../../widgets/design_system/profile_avatar_widget.dart';
 import '../../widgets/pabi/pabi.dart';
+import '../auth/pages/student_proof_page.dart';
 import '../home/pages/user_home_page.dart';
 import '../women_health/pages/women_health_flow_page.dart';
 import '../women_health/widgets/women_health_card.dart';
@@ -61,6 +63,10 @@ class ProfilePage extends StatelessWidget {
                           professional: controller.isProfessionalView,
                         ),
                         const SizedBox(height: 12),
+                        if (!controller.isProfessionalView) ...[
+                          const _StudentDiscountCard(),
+                          const SizedBox(height: 12),
+                        ],
                         _Menu(controller: controller),
                         const SizedBox(height: 12),
                         TextButton.icon(
@@ -83,6 +89,136 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
               ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Desconto de estudante: situação do comprovante e envio pelo Perfil.
+class _StudentDiscountCard extends StatefulWidget {
+  const _StudentDiscountCard();
+
+  @override
+  State<_StudentDiscountCard> createState() => _StudentDiscountCardState();
+}
+
+class _StudentDiscountCardState extends State<_StudentDiscountCard> {
+  late Future<StudentStatus> _status = StudentRepository().myStatus();
+
+  Future<void> _send() async {
+    await StudentProofPage.openFromProfile();
+    if (mounted) setState(() => _status = StudentRepository().myStatus());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<StudentStatus>(
+      future: _status,
+      builder: (context, snapshot) {
+        final status = snapshot.data;
+        if (status == null) return const SizedBox.shrink();
+        final (title, text, action) = switch (status) {
+          StudentStatus.approved => (
+            'Desconto de estudante ativo',
+            'Você tem 10% de desconto em qualquer plano.',
+            null,
+          ),
+          StudentStatus.pending => (
+            'Comprovante em análise',
+            'Respondemos em até 24 horas. Avisamos por notificação.',
+            null,
+          ),
+          StudentStatus.rejected => (
+            'Comprovante não aprovado',
+            'Envie outro comprovante para ganhar 10% de desconto.',
+            'Enviar de novo',
+          ),
+          StudentStatus.none => (
+            'Sou estudante',
+            'Ganhe 10% de desconto em qualquer plano.',
+            'Enviar comprovante',
+          ),
+        };
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: status == StudentStatus.approved
+                ? PabColors.soft
+                : PabColors.card,
+            border: Border.all(color: PabColors.line),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: status == StudentStatus.approved
+                      ? PabColors.card
+                      : PabColors.lilac,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  status == StudentStatus.pending
+                      ? Icons.schedule
+                      : Icons.school_outlined,
+                  size: 22,
+                  color: status == StudentStatus.approved
+                      ? PabColors.accentText
+                      : PabColors.lilacText,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: PabColors.ink,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      text,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        height: 1.4,
+                        color: PabColors.muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (action != null) ...[
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: _send,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    backgroundColor: PabColors.accent,
+                    foregroundColor: PabColors.ink,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    action,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         );
