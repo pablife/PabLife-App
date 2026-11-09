@@ -4,6 +4,16 @@ import '../../infra/models/professional_appointment_model.dart';
 import '../../shared/themes/pab_colors.dart';
 import '../../widgets/design_system/app_dialog.dart';
 
+/// Duração mínima da sessão: "Concluída" só a partir de 50 min do início.
+const minSessionMinutes = 50;
+
+/// Hora a partir da qual a consulta pode ser registrada como concluída.
+DateTime completableAt(ProfessionalAppointmentModel a) =>
+    a.startAt.add(const Duration(minutes: minSessionMinutes));
+
+bool canComplete(ProfessionalAppointmentModel a) =>
+    !DateTime.now().isBefore(completableAt(a));
+
 /// Como foi a consulta: os cinco registros do profissional (canvas PD e PS).
 enum AppointmentOutcome {
   completed(

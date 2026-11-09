@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../infra/models/professional_appointment_model.dart';
 import '../../infra/services/notification_service.dart';
 import '../../shared/themes/pab_colors.dart';
+import '../../shared/utils/app_snackbar.dart';
 import '../../shared/utils/wide_layout.dart';
 import '../../widgets/pab_logo.dart';
 import '../dashboard/dashboard_controller.dart';
@@ -364,9 +365,6 @@ class _NextCard extends StatelessWidget {
         : isToday
         ? 'HOJE'
         : '${start.day.toString().padLeft(2, '0')}/${start.month.toString().padLeft(2, '0')}';
-    final duration = next.endOfScheduledWindow
-        .difference(next.startOfScheduledWindow)
-        .inMinutes;
 
     return _Card(
       child: Column(
@@ -425,7 +423,7 @@ class _NextCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${duration > 0 ? duration : 50} min · '
+                      '$minSessionMinutes min · '
                       '${controller.sessionNumber(next)}ª sessão',
                       style: const TextStyle(
                         fontSize: 13,
@@ -743,7 +741,13 @@ class _AppointmentRowState extends State<AppointmentRow> {
                   else if (pending) ...[
                     pill(
                       'Concluída',
-                      () => reg(AppointmentOutcome.completed),
+                      () => canComplete(a)
+                          ? reg(AppointmentOutcome.completed)
+                          : AppSnackbar.to.show(
+                              'A sessão tem no mínimo $minSessionMinutes min: '
+                              'dá para concluir a partir das '
+                              '${hhmm(completableAt(a))}.',
+                            ),
                       dark: true,
                       icon: Icons.check_rounded,
                     ),

@@ -150,10 +150,7 @@ class _ProfessionalRoomPageState extends State<ProfessionalRoomPage> {
       builder: (c) {
         final a = _a;
         final outcome = AppointmentOutcome.of(a);
-        final duration = a.endOfScheduledWindow
-            .difference(a.startOfScheduledWindow)
-            .inMinutes;
-        final minutes = duration > 0 ? duration : 50;
+        const minutes = minSessionMinutes;
 
         Widget body;
         if (outcome != null && !_correcting) {
@@ -754,7 +751,7 @@ class _OutcomeChoice extends StatelessWidget {
           const SizedBox(height: 14),
           if (started) ...[
             FilledButton.icon(
-              onPressed: busy
+              onPressed: busy || !canComplete(a)
                   ? null
                   : () => onPick(AppointmentOutcome.completed),
               style: FilledButton.styleFrom(
@@ -766,11 +763,25 @@ class _OutcomeChoice extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.check_rounded),
-              label: const Text(
-                'Consulta concluída',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              label: Text(
+                canComplete(a)
+                    ? 'Consulta concluída'
+                    : 'Concluída a partir das ${hhmm(completableAt(a))}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
+            if (!canComplete(a))
+              const Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Text(
+                  'A sessão tem no mínimo $minSessionMinutes minutos.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: PabColors.muted),
+                ),
+              ),
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: busy ? null : () => onPick(AppointmentOutcome.noShow),
