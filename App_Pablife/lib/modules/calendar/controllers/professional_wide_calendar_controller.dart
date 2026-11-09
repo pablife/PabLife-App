@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../infra/models/professional_appointment_model.dart';
@@ -9,6 +9,7 @@ import '../../../shared/mixins/loader_manager.dart';
 import '../../appointment_details/appointment_details_routes.dart';
 import '../repositories/calendar_repository.dart';
 import '../../../shared/utils/app_snackbar.dart';
+import '../../../widgets/design_system/app_dialog.dart';
 import '../../professional_area/agenda_service.dart';
 import 'professional_calendar_controller.dart';
 
@@ -355,6 +356,37 @@ class ProfessionalWideCalendarController extends GetxController
     final error = await agenda.release(blocked);
     if (error != null) AppSnackbar.to.show(error);
     await load();
+  }
+
+  /// "Apagar todos os horários": pergunta antes e apaga os livres.
+  Future<bool> clearAllSlots(BuildContext context) async {
+    final id = _professionalId;
+    if (id == null) return false;
+    final ok = await AppDialog.showConfirmation(
+      context: context,
+      title: 'Apagar todos os horários?',
+      message:
+          'Todos os seus horários livres somem da agenda: os que repetem '
+          'deixam de abrir a partir de agora e os avulsos futuros são '
+          'removidos. Consultas já marcadas continuam valendo. Não dá para '
+          'desfazer, mas você pode criar os horários de novo.',
+      confirmText: 'Apagar todos',
+      cancelText: 'Voltar',
+      destructive: true,
+    );
+    if (ok != true) return false;
+    changeLoading(true);
+    update();
+    final (removed, errors) = await agenda.clearAll(id);
+    await load();
+    AppSnackbar.to.show(
+      errors.isEmpty
+          ? (removed == 1
+                ? '1 horário apagado.'
+                : '$removed horários apagados.')
+          : 'Parte dos horários não foi apagada: ${errors.first}',
+    );
+    return true;
   }
 
   /// Cria um horário no dia e hora escolhidos. Devolve true se criou.

@@ -9,6 +9,7 @@ import '../calendar/controllers/professional_wide_calendar_controller.dart';
 import 'agenda_service.dart';
 import 'professional_dashboard_page.dart' show firstNameAndInitial, hhmm;
 import 'professional_room_page.dart';
+import 'professional_wide_agenda_page.dart' show ClearAllSlotsButton;
 import 'week_pattern_sheet.dart';
 
 /// Agenda do profissional no celular (canvas PA): faixa da semana, Semana
@@ -246,6 +247,8 @@ class _ProfessionalAgendaPageState extends State<ProfessionalAgendaPage> {
                         const SizedBox(height: 8),
                         _slotGrid(c, free, blocked),
                       ],
+                      const SizedBox(height: 24),
+                      ClearAllSlotsButton(controller: c),
                     ],
                   ),
                 ),
