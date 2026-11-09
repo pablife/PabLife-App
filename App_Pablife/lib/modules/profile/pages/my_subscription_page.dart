@@ -210,6 +210,8 @@ class _MySubscriptionPageState extends State<MySubscriptionPage> {
           ..sort((a, b) => a.expiresAt.compareTo(b.expiresAt));
         final remaining = open.fold<int>(0, (s, b) => s + b.remaining);
         final cancelled = c.isSubscriptionCancelled;
+        // Pix: pago à vista por 30 dias, sem renovação para cancelar.
+        final prepaid = sub?.mpPreapprovalId.startsWith('TEMP-PIX-') ?? false;
 
         Widget line(String label, String value) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -359,12 +361,12 @@ class _MySubscriptionPageState extends State<MySubscriptionPage> {
                         'Válidas até',
                         _date.format(open.first.expiresAt.toLocal()),
                       ),
-                    if (!cancelled && sub.nextPaymentDate != null)
+                    if (!cancelled && !prepaid && sub.nextPaymentDate != null)
                       line(
                         'Próxima cobrança',
                         _date.format(sub.nextPaymentDate!.toLocal()),
                       ),
-                    if (cancelled && sub.endDate != null)
+                    if ((cancelled || prepaid) && sub.endDate != null)
                       line('Acesso até', _date.format(sub.endDate!.toLocal())),
                     line('Forma de pagamento', _paymentLabel(c)),
                   ],
@@ -399,7 +401,7 @@ class _MySubscriptionPageState extends State<MySubscriptionPage> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
               ),
-              if (!cancelled)
+              if (!cancelled && !prepaid)
                 TextButton(
                   onPressed: c.isLoadingCancelSubscription
                       ? null

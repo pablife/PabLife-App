@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../pages/payment_result_page.dart';
+import '../pages/pix_payment_page.dart';
 import '../../../infra/models/subscription_plan_model.dart';
 import '../../../infra/models/user_model.dart';
 import '../../../infra/models/user_subscription_model.dart';
@@ -140,6 +141,75 @@ class CheckoutController extends GetxController {
     }
   }
 
+  /// Forma de pagamento escolhida em "Finalizar compra": Pix ou cartão.
+  bool payWithPix = true;
+
+  void setPayWithPix(bool value) {
+    payWithPix = value;
+    update();
+  }
+
+  /// Gera o Pix e abre "Pague com Pix" (P3). Quando o pagamento cai, o
+  /// webhook ativa a assinatura e a tela segue para "Pagamento aprovado".
+  Future<void> generatePix() async {
+    final plan = _selectedPlan;
+    if (plan == null) return;
+    _isProcessingPayment = true;
+    update();
+    try {
+      final response = await _paymentRepository.createPix(
+        planId: plan.id,
+        idempotencyKey: _generateIdempotencyKey(),
+      );
+      final data = response.data;
+      if (!response.success || data == null) {
+        AppSnackbar.to.show(response.message);
+        return;
+      }
+      final subscriptionId = data['user_subscription_id'] as String;
+      final paid = (data['amount'] as num?)?.toDouble() ?? amount;
+      final expires =
+          DateTime.tryParse(data['expires_at']?.toString() ?? '')?.toLocal() ??
+          DateTime.now().add(const Duration(minutes: 30));
+
+      await Get.to<void>(
+        () => PixPaymentPage(
+          planLabel: hasStudentDiscount
+              ? 'Plano ${plan.reason} · estudante'
+              : 'Plano ${plan.reason}',
+          amount: paid,
+          qrCodeBase64: data['qr_code_base64'] as String?,
+          copyCode: data['qr_code'] as String,
+          expiresAt: expires,
+          isPaid: () async {
+            final sub = await _fetchSubscriptionById(subscriptionId);
+            return sub?.status == 'active';
+          },
+          onPaid: () async {
+            final sub = await _fetchSubscriptionById(subscriptionId);
+            if (Get.isRegistered<SubscriptionController>()) {
+              Get.find<SubscriptionController>().reload();
+            }
+            await AuthService.instance.reloadUserAccessInfo();
+            Get.off<void>(
+              () => PaymentResultPage(
+                approved: true,
+                planName: plan.reason,
+                consultations: plan.consultations,
+                amount: paid,
+                method: 'Pix',
+                validUntil: sub?.endDate,
+              ),
+            );
+          },
+        ),
+      );
+    } finally {
+      _isProcessingPayment = false;
+      update();
+    }
+  }
+
   /// Valor cobrado (com o desconto de estudante, se aprovado).
   double get amount {
     final plan = _selectedPlan;
@@ -180,6 +250,10 @@ class CheckoutController extends GetxController {
         consultations: plan.consultations,
         amount: amount,
         reason: reason,
+        onPayWithPix: () {
+          setPayWithPix(true);
+          Get.back<void>();
+        },
       ),
     );
   }

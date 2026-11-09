@@ -61,58 +61,51 @@ class CheckoutPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: PabColors.soft,
-                            border: Border.all(
-                              color: PabColors.accent,
-                              width: 2,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _MethodButton(
+                                label: 'Pix',
+                                sub: 'Aprovação na hora',
+                                icon: Icons.pix_rounded,
+                                selected: c.payWithPix,
+                                onTap: () => c.setPayWithPix(true),
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.credit_card_rounded,
-                                size: 22,
-                                color: PabColors.ink,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _MethodButton(
+                                label: 'Cartão',
+                                sub: 'Crédito, renova todo mês',
+                                icon: Icons.credit_card_rounded,
+                                selected: !c.payWithPix,
+                                onTap: () => c.setPayWithPix(false),
                               ),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: 'Cartão de crédito\n',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text:
-                                            'Renova todo mês, cancele quando '
-                                            'quiser',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: PabColors.muted,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  style: TextStyle(color: PabColors.ink),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 12),
-                        _CardForm(controller: c),
+                        if (c.payWithPix)
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: PabColors.card,
+                              border: Border.all(color: PabColors.line),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'O Pix libera o plano por 30 dias assim que o '
+                              'pagamento cai. Não renova sozinho: no mês '
+                              'seguinte, é só pagar de novo.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                height: 1.5,
+                                color: PabColors.muted,
+                              ),
+                            ),
+                          )
+                        else
+                          _CardForm(controller: c),
                         const SizedBox(height: 14),
                         const Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,9 +140,15 @@ class CheckoutPage extends StatelessWidget {
                       border: Border(top: BorderSide(color: PabColors.line)),
                     ),
                     child: RegPrimaryButton(
-                      label: 'Pagar ${brl(c.amount)}',
+                      label: c.payWithPix
+                          ? 'Gerar Pix de ${brl(c.amount)}'
+                          : 'Pagar ${brl(c.amount)}',
                       loading: c.isProcessingPayment,
-                      onTap: plan == null ? null : c.processPayment,
+                      onTap: plan == null
+                          ? null
+                          : c.payWithPix
+                          ? c.generatePix
+                          : c.processPayment,
                     ),
                   ),
                 ],
@@ -158,6 +157,77 @@ class CheckoutPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Botão de forma de pagamento (Pix ou Cartão).
+class _MethodButton extends StatelessWidget {
+  final String label;
+  final String sub;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _MethodButton({
+    required this.label,
+    required this.sub,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: selected ? PabColors.soft : PabColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(
+            color: selected ? PabColors.accent : PabColors.line,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: SizedBox(
+            height: 64,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 18, color: PabColors.ink),
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: PabColors.ink,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  sub,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: PabColors.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -273,7 +343,11 @@ class _Summary extends StatelessWidget {
               color: PabColors.accentText,
             ),
           const SizedBox(height: 4),
-          line('Total por mês', brl(total), bold: true),
+          line(
+            c.payWithPix ? 'Total (30 dias)' : 'Total por mês',
+            brl(total),
+            bold: true,
+          ),
         ],
       ),
     );
