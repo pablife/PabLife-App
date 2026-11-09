@@ -1,4 +1,3 @@
-import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:get/get.dart';
 import '../../../infra/models/activity_model.dart';
 import '../../../infra/repositories/activity_repository.dart';
@@ -83,7 +82,7 @@ class ActivityDetailsController extends GetxController with LoaderManagerMixin {
           'Tem certeza que deseja excluir esta atividade? Esta ação não pode ser desfeita.',
       confirmText: 'Excluir',
       cancelText: 'Cancelar',
-      confirmButtonColor: const AppColor(0xFFFF5252),
+      destructive: true,
     );
 
     if (confirmed == true) {
@@ -157,10 +156,7 @@ class ActivityDetailsController extends GetxController with LoaderManagerMixin {
         route = '/calendar/task-editor';
     }
 
-    final result = await Get.toNamed(
-      route,
-      arguments: {'activity': activity},
-    );
+    final result = await Get.toNamed(route, arguments: {'activity': activity});
 
     if (result is Map<String, dynamic> && result['dueAt'] is DateTime) {
       final updatedDueAt = result['dueAt'] as DateTime;

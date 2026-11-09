@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../infra/models/activity_model.dart';
+import '../../../infra/services/notification_service.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../../../shared/utils/wide_layout.dart';
 import '../../../widgets/pab_page_title.dart';
 import '../widgets/phone_agenda_views.dart';
 import '../../women_health/women_health_controller.dart';
 import '../../women_health/women_health_data.dart';
+import '../../women_health/pages/mood_check_in_page.dart';
+import '../../notifications/notifications_page.dart';
 import '../controllers/professional_wide_calendar_controller.dart';
 import '../controllers/user_wide_calendar_controller.dart';
 import '../widgets/calendar_connect_dialog.dart';
@@ -41,49 +44,84 @@ class UserWideCalendarPage extends StatelessWidget {
           return Scaffold(
             backgroundColor: WideAgendaColors.background,
             body: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(28, 22, 28, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(
-                    width: 240,
-                    child: _SideColumn(controller: controller, women: women),
-                  ),
-                  const SizedBox(width: 20),
+                  const _WideTitle(),
+                  const SizedBox(height: 18),
                   Expanded(
-                    child: _WithWomenHealth(
-                      panel: Container(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                        decoration: BoxDecoration(
-                          color: WideAgendaColors.panel,
-                          borderRadius: BorderRadius.circular(32),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 240,
+                          child: _SideColumn(
+                            controller: controller,
+                            women: women,
+                          ),
                         ),
-                        child: Column(
-                          children: [
-                            WideAgendaHeader(
-                              title: controller.title,
-                              isLoading: controller.isLoading,
-                              view: controller.view,
-                              onToday: controller.goToday,
-                              onMove: controller.move,
-                              onViewChanged: controller.setView,
-                            ),
-                            const SizedBox(height: 12),
-                            Expanded(
-                              child: switch (controller.view) {
-                                WideAgendaView.day || WideAgendaView.week =>
-                                  _UserWeekView(controller: controller),
-                                WideAgendaView.month => _UserMonthView(
-                                  controller: controller,
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: _WithWomenHealth(
+                            panel: Container(
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                16,
+                                20,
+                                14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: WideAgendaColors.panel,
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: WideAgendaColors.border,
                                 ),
-                                WideAgendaView.year => _UserYearView(
-                                  controller: controller,
-                                ),
-                              },
+                              ),
+                              child: Column(
+                                children: [
+                                  WideAgendaHeader(
+                                    title: controller.title,
+                                    isLoading: controller.isLoading,
+                                    view: controller.view,
+                                    onToday: controller.goToday,
+                                    onMove: controller.move,
+                                    onViewChanged: controller.setView,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Expanded(
+                                    child: switch (controller.view) {
+                                      WideAgendaView.day ||
+                                      WideAgendaView.week => _UserWeekView(
+                                        controller: controller,
+                                      ),
+                                      WideAgendaView.month => _UserMonthView(
+                                        controller: controller,
+                                      ),
+                                      WideAgendaView.year => _UserYearView(
+                                        controller: controller,
+                                      ),
+                                    },
+                                  ),
+                                  if (tracksCycle(women)) ...[
+                                    const SizedBox(height: 10),
+                                    const Text(
+                                      'As fases do ciclo são estimativas e podem '
+                                      'variar. Não substituem o acompanhamento com '
+                                      'ginecologista.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: WideAgendaColors.muted,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ],
@@ -655,6 +693,7 @@ class _SideColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final totals = controller.totals;
+    final cycle = tracksCycle(women);
 
     return SingleChildScrollView(
       child: Column(
@@ -664,6 +703,9 @@ class _SideColumn extends StatelessWidget {
             tooltip: 'Criar',
             position: PopupMenuPosition.under,
             color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             onSelected: (value) => switch (value) {
               'task' => controller.createTask(),
               'goal' => controller.createGoal(),
@@ -675,31 +717,30 @@ class _SideColumn extends StatelessWidget {
               _menuItem('note', 'Anotação', _PlannerColors.note),
             ],
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              height: 52,
               decoration: BoxDecoration(
                 color: WideAgendaColors.accent,
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.add, color: Colors.white),
+                  Icon(Icons.add_rounded, color: PabColors.ink, size: 22),
                   SizedBox(width: 6),
                   Text(
                     'Criar',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: PabColors.ink,
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(width: 4),
-                  Icon(Icons.arrow_drop_down, color: Colors.white),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          if (cycle) ...[const SizedBox(height: 14), _CycleCard(women: women)],
+          const SizedBox(height: 14),
           _card(
             child: WideMiniMonth(
               key: ValueKey(
@@ -708,9 +749,16 @@ class _SideColumn extends StatelessWidget {
               initialMonth: controller.focusDate,
               selectedDay: controller.focusDate,
               onDayTap: controller.openDay,
+              dayTint: cycle ? (day) => cycleTintOn(women, day) : null,
+              legend: cycle && women.showBand
+                  ? const [
+                      (CycleColors.menstruationFill, 'Menstruação'),
+                      (CycleColors.fertileFill, 'Fértil (previsto)'),
+                    ]
+                  : const [],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -719,11 +767,19 @@ class _SideColumn extends StatelessWidget {
                   'Mostrar',
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w800,
                     color: WideAgendaColors.text,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
+                if (women.isActive)
+                  WideFilterRow(
+                    label: cycle ? 'Meu ciclo' : women.trail!.title,
+                    color: PabColors.menstruation,
+                    value: women.showBand,
+                    count: controller.weekDays.length,
+                    onChanged: women.setShowBand,
+                  ),
                 WideFilterRow(
                   label: 'Tarefas',
                   color: _PlannerColors.task,
@@ -759,18 +815,10 @@ class _SideColumn extends StatelessWidget {
                   count: controller.holidaysInRange,
                   onChanged: controller.setShowHolidays,
                 ),
-                if (women.isActive)
-                  WideFilterRow(
-                    label: women.trail!.title,
-                    color: _PlannerColors.women,
-                    value: women.showBand,
-                    count: controller.weekDays.length,
-                    onChanged: women.setShowBand,
-                  ),
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 14),
           _ConnectCalendarButton(
             onPressed: () => CalendarConnectDialog.show(
               context,
@@ -780,19 +828,6 @@ class _SideColumn extends StatelessWidget {
           const SizedBox(height: 8),
           _DeleteDoneTasksButton(
             onPressed: () => controller.deleteDoneTasks(context),
-          ),
-          const SizedBox(height: 16),
-          _card(
-            child: const Text(
-              'Clique numa tarefa, meta ou anotação para ver os detalhes. '
-              'Clique numa consulta para remarcar, cancelar ou falar com o '
-              'profissional.',
-              style: TextStyle(
-                fontSize: 12,
-                height: 1.4,
-                color: WideAgendaColors.text,
-              ),
-            ),
           ),
         ],
       ),
@@ -810,7 +845,13 @@ class _SideColumn extends StatelessWidget {
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 10),
-          Text(label, style: const TextStyle(color: WideAgendaColors.text)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: WideAgendaColors.text,
+            ),
+          ),
         ],
       ),
     );
@@ -818,12 +859,169 @@ class _SideColumn extends StatelessWidget {
 
   Widget _card({required Widget child}) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: WideAgendaColors.panel,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: WideAgendaColors.border),
       ),
       child: child,
+    );
+  }
+}
+
+/// Título "Agenda" com o sino de notificações (computador).
+class _WideTitle extends StatelessWidget {
+  const _WideTitle();
+
+  @override
+  Widget build(BuildContext context) {
+    final service = Get.find<NotificationService>();
+    final square = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+      side: const BorderSide(color: PabColors.lineStrong),
+    );
+    return Row(
+      children: [
+        const Expanded(
+          child: Text(
+            'Agenda',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: PabColors.ink,
+            ),
+          ),
+        ),
+        GetBuilder<NotificationService>(
+          id: 'notification_count',
+          builder: (_) {
+            final count = service.unreadCount;
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Tooltip(
+                  message: 'Notificações',
+                  child: Material(
+                    color: Colors.white,
+                    shape: square,
+                    child: InkWell(
+                      customBorder: square,
+                      onTap: () => Get.toNamed(NotificationsPage.route),
+                      child: const SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: Icon(
+                          Icons.notifications_none,
+                          size: 21,
+                          color: PabColors.ink,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                if (count > 0)
+                  Positioned(
+                    top: -5,
+                    right: -5,
+                    child: IgnorePointer(
+                      child: Container(
+                        constraints: const BoxConstraints(minWidth: 20),
+                        height: 20,
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: PabColors.pink,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          count > 99 ? '99+' : '$count',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: PabColors.ink,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+/// Cartão escuro do ciclo, no topo da coluna (Saúde da Mulher).
+class _CycleCard extends StatelessWidget {
+  final WomenHealthController women;
+
+  const _CycleCard({required this.women});
+
+  @override
+  Widget build(BuildContext context) {
+    final today = DateTime.now();
+    final day = women.cycleDay(today);
+    final phase = women.cyclePhaseOn(today);
+    final phaseLabel = switch (phase?.kind) {
+      WomenCycleKind.menstruation => 'Menstruação',
+      WomenCycleKind.fertile =>
+        phase!.label.contains('ovulação') ? 'Ovulação' : 'Período fértil',
+      _ => phase?.label.replaceAll(' (estimativa)', '') ?? '',
+    };
+    final next = women.nextPeriod;
+    final nextLabel =
+        '${next.day} de ${ProfessionalWideCalendarController.monthNames[next.month - 1].toLowerCase()}';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: PabColors.ink,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Dia $day do ciclo',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: PabColors.onInk,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$phaseLabel · próxima prevista em $nextLabel',
+            style: const TextStyle(
+              fontSize: 12.5,
+              height: 1.45,
+              color: PabColors.onInkSoft,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: MoodCheckInPage.open,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, 42),
+                backgroundColor: PabColors.pink,
+                foregroundColor: PabColors.ink,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Registrar como estou hoje',
+                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -876,9 +1074,10 @@ class _UserWeekViewState extends State<_UserWeekView> {
                     Text(
                       wideWeekdayShort[day.weekday % 7],
                       style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: WideAgendaColors.text,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.6,
+                        color: WideAgendaColors.muted,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -890,18 +1089,6 @@ class _UserWeekViewState extends State<_UserWeekView> {
               ),
           ],
         ),
-        // Fase do ciclo, semana da gestação ou sintoma (Saúde da mulher).
-        if (days.any((day) => women.bandOn(day) != null))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                SizedBox(width: _gutter),
-                for (final day in days)
-                  Expanded(child: _bandCell(women.bandOn(day))),
-              ],
-            ),
-          ),
         // Faixa "dia todo" (metas).
         IntrinsicHeight(
           child: Row(
@@ -916,7 +1103,8 @@ class _UserWeekViewState extends State<_UserWeekView> {
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       fontSize: 10,
-                      color: WideAgendaColors.text,
+                      fontWeight: FontWeight.w600,
+                      color: WideAgendaColors.muted,
                     ),
                   ),
                 ),
@@ -936,6 +1124,8 @@ class _UserWeekViewState extends State<_UserWeekView> {
                     ),
                     child: Column(
                       children: [
+                        if (women.bandOn(day) case final band?)
+                          _BandChip(band: band),
                         if (controller.holidayOn(day) case final holiday?)
                           _HolidayChip(name: holiday),
                         for (final item in eventsByDay[day]!.where(_isAllDay))
@@ -980,7 +1170,7 @@ class _UserWeekViewState extends State<_UserWeekView> {
                                 '${wideTwo(hour)}:00',
                                 style: const TextStyle(
                                   fontSize: 11,
-                                  color: WideAgendaColors.text,
+                                  color: WideAgendaColors.muted,
                                 ),
                               ),
                             ),
@@ -1004,40 +1194,47 @@ class _UserWeekViewState extends State<_UserWeekView> {
     );
   }
 
-  Widget _bandCell(WomenBand? band) {
-    return Container(
-      height: 24,
-      margin: const EdgeInsets.symmetric(horizontal: 1),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: band?.color,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: band == null
-          ? null
-          : Text(
-              band.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: band.textColor,
-              ),
-            ),
-    );
-  }
-
   Widget _dayColumn(DateTime day, List<ActivityModel> items) {
-    final isToday = wideSameDay(day, DateTime.now());
-    return Container(
-      color: isToday ? Colors.white.withValues(alpha: 0.25) : null,
+    final now = DateTime.now();
+    final isToday = wideSameDay(day, now);
+    final column = Container(
+      color: isToday ? WideAgendaColors.todayColumn : null,
       child: Column(
         children: [
           for (var hour = 0; hour < 24; hour++)
             _hourCell(day, items.where((a) => a.dueAt!.hour == hour).toList()),
         ],
       ),
+    );
+    if (!isToday) return column;
+
+    // Linha rosa no horário de agora.
+    final top = (now.hour + now.minute / 60) * _hourHeight;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        column,
+        Positioned(
+          top: top - 4,
+          left: -4,
+          right: 0,
+          child: IgnorePointer(
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: PabColors.pink,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                Expanded(child: Container(height: 2, color: PabColors.pink)),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1069,9 +1266,93 @@ class _UserWeekViewState extends State<_UserWeekView> {
               '+${items.length - 2}',
               style: const TextStyle(
                 fontSize: 10,
-                color: WideAgendaColors.text,
+                fontWeight: FontWeight.w700,
+                color: WideAgendaColors.muted,
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fase do ciclo (ou semana da gestação) na faixa "dia todo".
+class _BandChip extends StatelessWidget {
+  final WomenBand band;
+
+  const _BandChip({required this.band});
+
+  @override
+  Widget build(BuildContext context) {
+    final (fill, text, dot) = switch (band.label) {
+      'Menstruação' => (
+        CycleColors.menstruationFill,
+        CycleColors.menstruationText,
+        PabColors.menstruation,
+      ),
+      'Fértil' || 'Ovulação' => (
+        CycleColors.fertileFill,
+        CycleColors.fertileText,
+        PabColors.fertile,
+      ),
+      _ => (PabColors.track, PabColors.muted, const Color(0xFFAE9FB3)),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: _LightChip(
+        fill: fill,
+        dot: dot,
+        textColor: text,
+        text: band.label,
+      ),
+    );
+  }
+}
+
+/// Chip claro da faixa "dia todo": bolinha da cor e texto.
+class _LightChip extends StatelessWidget {
+  final Color fill;
+  final Color dot;
+  final Color textColor;
+  final String text;
+
+  const _LightChip({
+    required this.fill,
+    required this.dot,
+    required this.textColor,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 24,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 7),
+      decoration: BoxDecoration(
+        color: fill,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 5),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1096,43 +1377,31 @@ class _PlannerChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final done = item.isCompleted;
-    final (color, textColor, icon, label) = switch (item.type) {
-      'goal' => (
-        _PlannerColors.goal,
-        Colors.white,
-        Icons.flag_outlined,
-        'Meta',
-      ),
-      'note' => (
-        _PlannerColors.note,
-        _PlannerColors.noteText,
-        Icons.note_outlined,
-        'Anotação',
-      ),
-      'appointment' => (
-        _PlannerColors.appointment,
-        Colors.white,
-        Icons.person,
-        'Consulta',
-      ),
-      _ => (
-        // Tarefa feita fica mais escura, como no celular.
-        done ? const AppColor(0xFF0C8DA1) : _PlannerColors.task,
-        Colors.white,
-        Icons.check_circle_outline,
-        'Tarefa',
-      ),
+    final (color, icon, label) = switch (item.type) {
+      'goal' => (_PlannerColors.goal, Icons.flag_outlined, 'Meta'),
+      'note' => (_PlannerColors.note, Icons.note_outlined, 'Anotação'),
+      'appointment' => (_PlannerColors.appointment, Icons.person, 'Consulta'),
+      _ => (_PlannerColors.task, Icons.check_circle_outline, 'Tarefa'),
     };
-    final checkable = item.type != 'appointment';
+    final appointment = item.type == 'appointment';
+    final checkable = !appointment;
+    final fill = appointment
+        ? PabColors.ink
+        : Color.alphaBlend(color.withValues(alpha: 0.16), Colors.white);
+    final textColor = appointment
+        ? Colors.white
+        : done
+        ? PabColors.muted
+        : PabColors.ink;
     final time = item.dueAt == null
         ? ''
         : '${wideTwo(item.dueAt!.hour)}:${wideTwo(item.dueAt!.minute)} ';
-    final title = item.type == 'appointment' ? 'Consulta' : item.name;
+    final title = appointment ? 'Consulta' : item.name;
 
     return Tooltip(
       message: '$label: ${item.name}',
       child: Material(
-        color: color,
+        color: fill,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
@@ -1149,13 +1418,17 @@ class _PlannerChip extends StatelessWidget {
                       onTap: () => controller.toggleDone(item, day),
                       child: Padding(
                         padding: const EdgeInsets.all(2),
-                        child: Icon(
-                          done
-                              ? Icons.check_circle
-                              : Icons.radio_button_unchecked,
-                          size: 16,
-                          color: textColor,
-                        ),
+                        child: done
+                            ? Icon(Icons.check_circle, size: 15, color: color)
+                            : Container(
+                                width: 9,
+                                height: 9,
+                                margin: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
                       ),
                     ),
                   )
@@ -1169,7 +1442,7 @@ class _PlannerChip extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: textColor,
                       decoration: checkable && done
                           ? TextDecoration.lineThrough
@@ -1219,25 +1492,13 @@ class _HolidayChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: 'Feriado: $name',
-      child: Container(
-        height: 24,
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        alignment: Alignment.centerLeft,
-        decoration: BoxDecoration(
-          color: _PlannerColors.holiday,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 2),
+        child: _LightChip(
+          fill: const Color(0xFFFFF1D6),
+          dot: _PlannerColors.note,
+          textColor: _PlannerColors.noteText,
+          text: name,
         ),
       ),
     );
@@ -1255,17 +1516,21 @@ class _ConnectCalendarButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: FilledButton.icon(
+      child: OutlinedButton.icon(
         onPressed: onPressed,
-        style: FilledButton.styleFrom(
-          backgroundColor: WideAgendaColors.accent,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          backgroundColor: Colors.white,
+          foregroundColor: PabColors.ink,
+          side: const BorderSide(color: PabColors.lineStrong),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
-        icon: const Icon(Icons.event_available, size: 20),
+        icon: const Icon(Icons.link_rounded, size: 20),
         label: const Text(
           'Conectar ao calendário',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -1283,17 +1548,21 @@ class _DeleteDoneTasksButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: FilledButton.icon(
+      child: OutlinedButton.icon(
         onPressed: onPressed,
-        style: FilledButton.styleFrom(
-          backgroundColor: const AppColor(0xFFD32F2F),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          backgroundColor: Colors.white,
+          foregroundColor: PabColors.error,
+          side: const BorderSide(color: PabColors.errorLine),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
-        icon: const Icon(Icons.delete_outline, size: 20),
+        icon: const Icon(Icons.delete_outline_rounded, size: 20),
         label: const Text(
           'Apagar tarefas feitas',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -1587,6 +1856,9 @@ class _UserYearView extends StatelessWidget {
         ? _PlannerColors.goal
         : null;
     final isToday = wideSameDay(day, DateTime.now());
+    final tint = fill == null
+        ? cycleTintOn(WomenHealthController.to, day)
+        : null;
 
     return InkWell(
       onTap: () => controller.openDay(day),
@@ -1595,7 +1867,7 @@ class _UserYearView extends StatelessWidget {
         margin: const EdgeInsets.all(1.5),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: fill,
+          color: fill ?? tint,
           shape: BoxShape.circle,
           border: isToday
               ? Border.all(color: WideAgendaColors.text, width: 2)
@@ -1605,7 +1877,7 @@ class _UserYearView extends StatelessWidget {
           '${day.day}',
           style: TextStyle(
             fontSize: 11,
-            fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
+            fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
             color: fill == null
                 ? WideAgendaColors.text
                 : fill == _PlannerColors.note

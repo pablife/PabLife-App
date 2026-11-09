@@ -1,19 +1,25 @@
 import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 
+import '../../../shared/themes/pab_colors.dart';
+
 import '../../../infra/models/professional_appointment_model.dart';
 import '../../../infra/models/professional_schedule_slot.dart';
 import '../controllers/professional_wide_calendar_controller.dart';
 
-/// Cores da agenda do computador (as mesmas da agenda do celular).
+/// Cores da agenda do computador (canvas da repaginação).
 abstract final class WideAgendaColors {
-  // No modo Saúde da mulher o planner é claro, sobre fundo rosé.
-  static const background = AppColor.pair(0xFF00343C, 0xFFF7F1EF);
-  static const panel = AppColor.pair(0xFFC1CDFF, 0xFFFFFFFF);
-  static const text = AppColor(0xFF00343C);
-  static const grid = AppColor.pair(0xFFA9B6EA, 0xFFEADFEA);
-  static const appointment = AppColor(0xFF3065FF);
-  static const accent = AppColor.pair(0xFF3065FF, 0xFF4A3560);
+  static const background = PabColors.background;
+  static const panel = PabColors.card;
+  static const text = PabColors.ink;
+  static const muted = PabColors.muted;
+  static const grid = AppColor.pair(0xFFE4ECEC, 0xFFF0E4EC);
+  static const border = PabColors.line;
+
+  /// Coluna de hoje na grade.
+  static const todayColumn = AppColor.pair(0xFFF1FAF9, 0xFFFDF4F9);
+  static const appointment = PabColors.accentText;
+  static const accent = PabColors.accent;
   static const free = AppColor(0xFF0C8DA1);
   static const freeFill = AppColor(0xFFE7F6F7);
   static const freeText = AppColor(0xFF0C6B7A);
@@ -23,15 +29,7 @@ abstract final class WideAgendaColors {
   static const noShow = AppColor(0xFFB3A57F);
 }
 
-const wideWeekdayShort = [
-  'DOM.',
-  'SEG.',
-  'TER.',
-  'QUA.',
-  'QUI.',
-  'SEX.',
-  'SÁB.',
-];
+const wideWeekdayShort = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 const wideWeekdayInitials = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
 bool wideSameDay(DateTime a, DateTime b) =>
@@ -39,7 +37,7 @@ bool wideSameDay(DateTime a, DateTime b) =>
 
 String wideTwo(int n) => n.toString().padLeft(2, '0');
 
-/// Número do dia; hoje fica num círculo azul.
+/// Número do dia; hoje fica num círculo de destaque.
 class WideDayNumber extends StatelessWidget {
   final DateTime day;
   final double size;
@@ -61,18 +59,16 @@ class WideDayNumber extends StatelessWidget {
       alignment: Alignment.center,
       decoration: isToday
           ? const BoxDecoration(
-              color: WideAgendaColors.appointment,
+              color: WideAgendaColors.accent,
               shape: BoxShape.circle,
             )
           : null,
       child: Text(
         '${day.day}',
         style: TextStyle(
-          fontSize: size * 0.5,
-          fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
-          color: isToday
-              ? Colors.white
-              : WideAgendaColors.text.withValues(alpha: faded ? 0.4 : 1),
+          fontSize: size * 0.48,
+          fontWeight: isToday ? FontWeight.w800 : FontWeight.w700,
+          color: WideAgendaColors.text.withValues(alpha: faded ? 0.35 : 1),
         ),
       ),
     );
@@ -185,7 +181,7 @@ class _WideWeekViewState extends State<WideWeekView> {
     final isToday = wideSameDay(day, DateTime.now());
 
     return Container(
-      color: isToday ? Colors.white.withValues(alpha: 0.25) : null,
+      color: isToday ? WideAgendaColors.todayColumn : null,
       child: Column(
         children: [
           for (var hour = 0; hour < 24; hour++)
@@ -635,16 +631,22 @@ class WideYearView extends StatelessWidget {
 // ------------------------------------------------------------- minicalendário
 
 /// Minicalendário da coluna da esquerda: clicar num dia abre a semana dele.
+/// [dayTint] pinta o círculo de dias especiais (fases do ciclo) e [legend]
+/// mostra a legenda dessas cores embaixo.
 class WideMiniMonth extends StatefulWidget {
   final DateTime initialMonth;
   final DateTime selectedDay;
   final ValueChanged<DateTime> onDayTap;
+  final Color? Function(DateTime day)? dayTint;
+  final List<(Color, String)> legend;
 
   const WideMiniMonth({
     super.key,
     required this.initialMonth,
     required this.selectedDay,
     required this.onDayTap,
+    this.dayTint,
+    this.legend = const [],
   });
 
   @override
@@ -662,6 +664,7 @@ class _WideMiniMonthState extends State<WideMiniMonth> {
     final start = ProfessionalWideCalendarController.weekStart(_month);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
@@ -669,8 +672,8 @@ class _WideMiniMonthState extends State<WideMiniMonth> {
               child: Text(
                 '${ProfessionalWideCalendarController.monthNames[_month.month - 1]} de ${_month.year}',
                 style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
                   color: WideAgendaColors.text,
                 ),
               ),
@@ -679,7 +682,7 @@ class _WideMiniMonthState extends State<WideMiniMonth> {
             _arrow(Icons.chevron_right, 1),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         GridView.count(
           crossAxisCount: 7,
           shrinkWrap: true,
@@ -691,14 +694,46 @@ class _WideMiniMonthState extends State<WideMiniMonth> {
                   label,
                   style: const TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: WideAgendaColors.text,
+                    fontWeight: FontWeight.w700,
+                    color: WideAgendaColors.muted,
                   ),
                 ),
               ),
             for (var i = 0; i < 42; i++) _day(start, i),
           ],
         ),
+        if (widget.legend.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 14,
+            runSpacing: 4,
+            children: [
+              for (final (color, label) in widget.legend)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: WideAgendaColors.muted,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -709,8 +744,8 @@ class _WideMiniMonthState extends State<WideMiniMonth> {
       onTap: () =>
           setState(() => _month = DateTime(_month.year, _month.month + delta)),
       child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Icon(icon, size: 20, color: WideAgendaColors.text),
+        padding: const EdgeInsets.all(3),
+        child: Icon(icon, size: 20, color: WideAgendaColors.muted),
       ),
     );
   }
@@ -720,6 +755,16 @@ class _WideMiniMonthState extends State<WideMiniMonth> {
     final isToday = wideSameDay(day, DateTime.now());
     final isSelected = wideSameDay(day, widget.selectedDay);
     final faded = day.month != _month.month;
+    final tint = faded ? null : widget.dayTint?.call(day);
+
+    final Color? fill = isToday && tint == null
+        ? WideAgendaColors.accent
+        : tint;
+    final BoxBorder? border = isToday && tint != null
+        ? Border.all(color: WideAgendaColors.text, width: 1.6)
+        : isSelected && !isToday
+        ? Border.all(color: WideAgendaColors.accent, width: 1.6)
+        : null;
 
     return InkWell(
       customBorder: const CircleBorder(),
@@ -729,19 +774,15 @@ class _WideMiniMonthState extends State<WideMiniMonth> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isToday ? WideAgendaColors.appointment : null,
-          border: isSelected && !isToday
-              ? Border.all(color: WideAgendaColors.appointment, width: 1.5)
-              : null,
+          color: fill,
+          border: border,
         ),
         child: Text(
           '${day.day}',
           style: TextStyle(
-            fontSize: 11,
-            fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
-            color: isToday
-                ? Colors.white
-                : WideAgendaColors.text.withValues(alpha: faded ? 0.4 : 1),
+            fontSize: 12,
+            fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
+            color: WideAgendaColors.text.withValues(alpha: faded ? 0.3 : 1),
           ),
         ),
       ),
@@ -771,33 +812,48 @@ class WideFilterRow extends StatelessWidget {
     return InkWell(
       onTap: () => onChanged(!value),
       borderRadius: BorderRadius.circular(8),
-      child: Row(
-        children: [
-          Checkbox(
-            value: value,
-            onChanged: (v) => onChanged(v ?? false),
-            activeColor: color,
-            side: BorderSide(color: color, width: 2),
-          ),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                color: WideAgendaColors.text,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 2),
+        child: Row(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                color: value ? color : Colors.transparent,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: color, width: 2),
+              ),
+              child: value
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 13,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: WideAgendaColors.text,
+                ),
               ),
             ),
-          ),
-          Text(
-            '$count',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: WideAgendaColors.text,
+            Text(
+              '$count',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: WideAgendaColors.muted,
+              ),
             ),
-          ),
-          const SizedBox(width: 4),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -825,36 +881,57 @@ class WideAgendaHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final square = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+      side: const BorderSide(color: PabColors.lineStrong),
+    );
+    Widget arrow(IconData icon, String tip, int delta) => Tooltip(
+      message: tip,
+      child: Material(
+        color: Colors.white,
+        shape: square,
+        child: InkWell(
+          customBorder: square,
+          onTap: () => onMove(delta),
+          child: SizedBox(
+            width: 36,
+            height: 36,
+            child: Icon(icon, size: 20, color: WideAgendaColors.text),
+          ),
+        ),
+      ),
+    );
+
     return Row(
       children: [
         OutlinedButton(
           onPressed: onToday,
           style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 36),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             foregroundColor: WideAgendaColors.text,
-            side: const BorderSide(color: WideAgendaColors.text),
-            shape: const StadiumBorder(),
+            side: const BorderSide(color: PabColors.lineStrong),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
-          child: const Text('Hoje'),
+          child: const Text(
+            'Hoje',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
         ),
-        const SizedBox(width: 8),
-        IconButton(
-          tooltip: 'Anterior',
-          onPressed: () => onMove(-1),
-          icon: const Icon(Icons.chevron_left, color: WideAgendaColors.text),
-        ),
-        IconButton(
-          tooltip: 'Próximo',
-          onPressed: () => onMove(1),
-          icon: const Icon(Icons.chevron_right, color: WideAgendaColors.text),
-        ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
+        arrow(Icons.chevron_left, 'Anterior', -1),
+        const SizedBox(width: 6),
+        arrow(Icons.chevron_right, 'Próximo', 1),
+        const SizedBox(width: 14),
         Flexible(
           child: Text(
             title,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w500,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
               color: WideAgendaColors.text,
             ),
           ),
@@ -871,30 +948,51 @@ class WideAgendaHeader extends StatelessWidget {
           ),
         ],
         const Spacer(),
-        SegmentedButton<WideAgendaView>(
-          showSelectedIcon: false,
-          segments: const [
-            ButtonSegment(value: WideAgendaView.day, label: Text('Dia')),
-            ButtonSegment(value: WideAgendaView.week, label: Text('Semana')),
-            ButtonSegment(value: WideAgendaView.month, label: Text('Mês')),
-            ButtonSegment(value: WideAgendaView.year, label: Text('Ano')),
-          ],
-          selected: {view},
-          onSelectionChanged: (s) => onViewChanged(s.first),
-          style: ButtonStyle(
-            foregroundColor: WidgetStateProperty.resolveWith(
-              (states) => states.contains(WidgetState.selected)
-                  ? WideAgendaColors.panel
-                  : WideAgendaColors.text,
-            ),
-            backgroundColor: WidgetStateProperty.resolveWith(
-              (states) => states.contains(WidgetState.selected)
-                  ? WideAgendaColors.text
-                  : Colors.transparent,
-            ),
-            side: const WidgetStatePropertyAll(
-              BorderSide(color: WideAgendaColors.text),
-            ),
+        Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: PabColors.track,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final (option, label) in const [
+                (WideAgendaView.day, 'Dia'),
+                (WideAgendaView.week, 'Semana'),
+                (WideAgendaView.month, 'Mês'),
+                (WideAgendaView.year, 'Ano'),
+              ])
+                GestureDetector(
+                  onTap: () => onViewChanged(option),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: option == view
+                            ? WideAgendaColors.text
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: option == view
+                              ? Colors.white
+                              : WideAgendaColors.muted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ],

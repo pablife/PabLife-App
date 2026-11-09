@@ -132,7 +132,7 @@ class RecordEditorController extends GetxController with LoaderManagerMixin {
           'Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.',
       confirmText: 'Excluir',
       cancelText: 'Cancelar',
-      confirmButtonColor: Colors.redAccent,
+      destructive: true,
     );
 
     if (confirmed != true) return;

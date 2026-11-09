@@ -6,6 +6,7 @@ import '../../../shared/themes/app_palette.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../../auth/pages/widgets/registration_layout.dart';
 import '../../onboarding/onboarding_page.dart';
+import '../../../widgets/design_system/whatsapp_icon.dart';
 import '../controllers/waiting_approval_controller.dart';
 
 /// "Cadastro em análise" (canvas PC3, passo 3 de 3). Aparece logo depois do
@@ -164,6 +165,7 @@ class WaitingApprovalPage extends StatelessWidget {
           footer: [
             RegPrimaryButton(
               label: 'Falar com a equipe no WhatsApp',
+              icon: const WhatsAppIcon(size: 20, color: PabColors.ink),
               onTap: controller.openWhatsApp,
             ),
             const SizedBox(height: 4),

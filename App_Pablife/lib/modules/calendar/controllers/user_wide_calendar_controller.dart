@@ -9,6 +9,7 @@ import '../../../infra/services/auth_service.dart';
 import '../../../shared/mixins/loader_manager.dart';
 import '../../../shared/utils/app_snackbar.dart';
 import '../../../shared/utils/brazil_holidays.dart';
+import '../../../shared/themes/pab_colors.dart';
 import '../../../widgets/design_system/app_dialog.dart';
 import '../../home/controllers/user_home_controller.dart';
 import '../../appointment_details/widgets/patient_appointment_options_sheet.dart';
@@ -456,11 +457,41 @@ class UserWideCalendarController extends GetxController
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) {
           final extra = withRecurring ? recurring.length : 0;
-          return AlertDialog(
-            title: const Text('Apagar tarefas feitas'),
+          Widget option(
+            String label,
+            int count,
+            _DeleteScope value, {
+            bool danger = false,
+          }) => Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: OutlinedButton(
+              onPressed: count == 0
+                  ? null
+                  : () => Navigator.of(dialogContext).pop(value),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+                foregroundColor: danger ? PabColors.error : PabColors.ink,
+                side: BorderSide(
+                  color: danger ? PabColors.errorLine : PabColors.lineStrong,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Text(
+                '$label ($count)',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          );
+          return AppDialog(
+            title: 'Apagar tarefas feitas',
+            destructive: true,
             content: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Quais tarefas feitas você quer apagar?'),
                 if (recurring.isNotEmpty) ...[
@@ -468,41 +499,48 @@ class UserWideCalendarController extends GetxController
                   CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
                     controlAffinity: ListTileControlAffinity.leading,
+                    activeColor: PabColors.error,
                     value: withRecurring,
                     onChanged: (value) =>
                         setDialogState(() => withRecurring = value ?? false),
                     title: Text(
                       'Apagar também a recorrência '
                       '(${recurring.length} ${recurring.length == 1 ? 'tarefa que se repete' : 'tarefas que se repetem'})',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: PabColors.ink,
+                      ),
                     ),
                     subtitle: const Text(
                       'Elas somem dos próximos dias também.',
+                      style: TextStyle(fontSize: 13, color: PabColors.muted),
                     ),
                   ),
                 ],
+                const SizedBox(height: 6),
+                option(
+                  'De hoje em diante',
+                  fromToday.length + extra,
+                  _DeleteScope.fromToday,
+                ),
+                option(
+                  'Todas, inclusive as passadas',
+                  all.length + extra,
+                  _DeleteScope.all,
+                  danger: true,
+                ),
+                const SizedBox(height: 4),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  style: TextButton.styleFrom(foregroundColor: PabColors.muted),
+                  child: const Text(
+                    'Voltar',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Voltar'),
-              ),
-              TextButton(
-                onPressed: fromToday.length + extra == 0
-                    ? null
-                    : () => Navigator.of(
-                        dialogContext,
-                      ).pop(_DeleteScope.fromToday),
-                child: Text('De hoje em diante (${fromToday.length + extra})'),
-              ),
-              TextButton(
-                onPressed: all.length + extra == 0
-                    ? null
-                    : () => Navigator.of(dialogContext).pop(_DeleteScope.all),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: Text('Todas (${all.length + extra})'),
-              ),
-            ],
           );
         },
       ),
@@ -536,7 +574,7 @@ class UserWideCalendarController extends GetxController
                 'dos dias passados continuam no planner.$recurringText',
       confirmText: 'Apagar',
       cancelText: 'Voltar',
-      confirmButtonColor: Colors.redAccent,
+      destructive: true,
     );
     if (confirmed != true) return;
 

@@ -215,7 +215,12 @@ class ConsultationDetailPage extends StatelessWidget {
                               child: const SizedBox(
                                 width: 44,
                                 height: 44,
-                                child: Center(child: WhatsAppIcon(size: 20)),
+                                child: Center(
+                                  child: WhatsAppIcon(
+                                    size: 22,
+                                    color: WhatsAppIcon.green,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

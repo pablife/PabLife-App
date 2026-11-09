@@ -211,7 +211,7 @@ class ProfessionalProfileBody extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 14),
                   child: Row(
                     children: [
-                      WhatsAppIcon(size: 20),
+                      WhatsAppIcon(size: 22, color: WhatsAppIcon.green),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(

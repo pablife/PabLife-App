@@ -5,7 +5,9 @@ import '../consultations/my_consultations_page.dart';
 import 'controllers/checkout_controller.dart';
 import 'controllers/subscription_controller.dart';
 import 'pages/checkout_page.dart';
+import 'pages/delete_account_page.dart';
 import 'pages/edit_profile_page.dart';
+import 'pages/my_subscription_page.dart';
 import 'pages/payment_method_page.dart';
 import 'pages/subscription_page.dart';
 import 'profile_controller.dart';
@@ -23,6 +25,15 @@ final profileRoutes = [
     page: () => const MyConsultationsPage(),
   ),
   GetPage(name: PaymentMethodPage.route, page: () => const PaymentMethodPage()),
+  GetPage(
+    name: MySubscriptionPage.route,
+    page: () => const MySubscriptionPage(),
+    bindings: [
+      BindingsBuilder.put(SubscriptionController.new),
+      BindingsBuilder.put(PaymentRepository.new),
+    ],
+  ),
+  GetPage(name: DeleteAccountPage.route, page: () => const DeleteAccountPage()),
   GetPage(
     name: SubscriptionPage.route,
     page: () => const SubscriptionPage(),

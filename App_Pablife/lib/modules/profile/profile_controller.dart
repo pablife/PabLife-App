@@ -1,4 +1,3 @@
-import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:pablife/modules/auth/pages/choose_profile_page.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -21,7 +20,8 @@ import '../auth/pages/recovery_password_page.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import '../../widgets/design_system/app_dialog.dart';
 import 'pages/edit_profile_page.dart';
-import 'pages/subscription_page.dart';
+import 'pages/delete_account_page.dart';
+import 'pages/my_subscription_page.dart';
 
 class ProfileController extends GetxController with LoaderManagerMixin {
   final UserRepository _userRepository = UserRepository();
@@ -273,7 +273,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
   }
 
   Future<void> navigateToSubscription() async {
-    await Get.toNamed(SubscriptionPage.route);
+    await Get.toNamed(MySubscriptionPage.route);
     await reloadProfile();
   }
 
@@ -297,7 +297,6 @@ class ProfileController extends GetxController with LoaderManagerMixin {
       message: 'Tem certeza de que deseja sair da sua conta?',
       confirmText: 'Sair',
       cancelText: 'Cancelar',
-      confirmButtonColor: const AppColor(0xFF00343C),
     );
 
     if (confirmed == true) {
@@ -306,23 +305,12 @@ class ProfileController extends GetxController with LoaderManagerMixin {
     }
   }
 
+  /// "Excluir conta" (canvas S3): confirma digitando EXCLUIR.
   Future<void> showDeleteAccountDialog() async {
-    final confirmed = await AppDialog.showConfirmation(
-      context: Get.context!,
-      title: 'Excluir Conta',
-      message:
-          'Tem certeza que deseja excluir sua conta? Esta ação é irreversível e todos os seus dados serão perdidos.',
-      confirmText: 'Excluir',
-      cancelText: 'Cancelar',
-      confirmButtonColor: const AppColor(0xFFFF3395),
-    );
-
-    if (confirmed == true) {
-      await _deleteAccount();
-    }
+    await Get.toNamed(DeleteAccountPage.route);
   }
 
-  Future<void> _deleteAccount() async {
+  Future<void> deleteAccount() async {
     if (currentUser?.id == null) {
       AppSnackbar.to.show('Erro: ID do usuário não encontrado');
       return;
