@@ -17,6 +17,7 @@ import '../women_health/pages/women_health_flow_page.dart';
 import '../women_health/widgets/women_health_card.dart';
 import '../women_health/women_health_controller.dart';
 import 'profile_controller.dart';
+import '../professional_area/professional_profile_card.dart';
 
 String _two(int value) => value.toString().padLeft(2, '0');
 
@@ -61,6 +62,10 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         if (controller.shouldShowConsultationCard) ...[
                           _BalanceCard(controller: controller),
+                          const SizedBox(height: 12),
+                        ],
+                        if (controller.isProfessionalView) ...[
+                          const ProfessionalProfileCard(),
                           const SizedBox(height: 12),
                         ],
                         _VisualSection(

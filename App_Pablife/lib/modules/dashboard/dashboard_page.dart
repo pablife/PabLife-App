@@ -7,12 +7,12 @@ import 'package:pablife/modules/dashboard/widgets/dashboard_side_menu.dart';
 import 'package:pablife/modules/home/home_page.dart';
 import 'package:pablife/modules/calendar/calendar_page.dart';
 import 'package:pablife/modules/mentorias/mentorias_page.dart';
-import 'package:pablife/modules/patients/patients_page.dart';
 import 'package:pablife/modules/professionals/professionals_page.dart';
 import 'package:pablife/modules/profile/profile_page.dart';
 import 'package:pablife/shared/utils/wide_layout.dart';
 import 'dashboard_controller.dart';
 import '../professional_area/professional_history_page.dart';
+import '../professional_area/professional_patients_page.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -29,7 +29,9 @@ class DashboardPage extends StatelessWidget {
       const HomePage(),
       const CalendarPage(),
       isProfessional ? const ProfessionalHistoryPage() : const MentoriasPage(),
-      isProfessional ? const PatientsPage() : const ProfessionalsPage(),
+      isProfessional
+          ? const ProfessionalPatientsPage()
+          : const ProfessionalsPage(),
       const ProfilePage(),
     ];
 

@@ -106,10 +106,15 @@ class ProfessionalsController extends GetxController with LoaderManagerMixin {
       return;
     }
 
-    // Profissional no lado usuário não agenda consigo mesmo.
+    // Profissional no lado usuário não agenda consigo mesmo. Quem ocultou o
+    // perfil só aparece para quem já tem consulta marcada com ele.
     final myId = _authService.currentUser?.id;
+    final hidden = await _repository.getHiddenProfessionalIds();
     professionals = (response.data ?? [])
         .where((p) => p.user.id != myId)
+        .where(
+          (p) => !hidden.contains(p.professional.id) || p.appointmentId != null,
+        )
         .toList();
     _applyFilters();
     update();

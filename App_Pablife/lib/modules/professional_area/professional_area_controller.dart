@@ -28,6 +28,11 @@ class ProfessionalAreaController extends GetxController {
   ProfessionalModel? professional;
   String? council;
   String? meetingUrl;
+
+  /// Perfil público (canvas PF): "Sobre você", temas e visibilidade.
+  String description = '';
+  List<String> topics = [];
+  bool visible = true;
   List<ProfessionalAppointmentModel> appointments = [];
   int freeToday = 0;
   bool loading = true;
@@ -102,9 +107,14 @@ class ProfessionalAreaController extends GetxController {
     try {
       final row = await Supabase.instance.client
           .from('tb_professionals')
-          .select('council_number, council_region')
+          .select(
+            'council_number, council_region, description, topics, visibility_status',
+          )
           .eq('id', professionalId)
           .maybeSingle();
+      description = row?['description']?.toString() ?? '';
+      topics = List<String>.from(row?['topics'] as List? ?? const []);
+      visible = row?['visibility_status']?.toString() != 'low_profile';
       final number = row?['council_number']?.toString().trim() ?? '';
       if (number.isEmpty) return null;
       final region = row?['council_region']?.toString().trim() ?? '';
@@ -112,6 +122,33 @@ class ProfessionalAreaController extends GetxController {
       return region.isEmpty ? '$kind $number' : '$kind $region/$number';
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Salva "Sobre você", temas e visibilidade. Devolve erro ou null.
+  Future<String?> saveProfile({
+    required String description,
+    required List<String> topics,
+    required bool visible,
+  }) async {
+    final id = professional?.id;
+    if (id == null) return 'Perfil de profissional não encontrado.';
+    try {
+      await Supabase.instance.client
+          .from('tb_professionals')
+          .update({
+            'description': description.trim(),
+            'topics': topics,
+            'visibility_status': visible ? 'high_profile' : 'low_profile',
+          })
+          .eq('id', id);
+      this.description = description.trim();
+      this.topics = List.of(topics);
+      this.visible = visible;
+      update();
+      return null;
+    } on PostgrestException catch (e) {
+      return 'Não foi possível salvar: ${e.message}';
     }
   }
 
