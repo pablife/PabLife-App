@@ -8,6 +8,8 @@ import '../../../infra/services/auth_service.dart';
 import '../../../shared/mixins/loader_manager.dart';
 import '../../appointment_details/appointment_details_routes.dart';
 import '../repositories/calendar_repository.dart';
+import '../../../shared/utils/app_snackbar.dart';
+import '../../professional_area/agenda_service.dart';
 import 'professional_calendar_controller.dart';
 
 enum WideAgendaView { day, week, month, year }
@@ -44,7 +46,28 @@ class ProfessionalWideCalendarController extends GetxController
   bool showFree = true;
 
   String? _professionalId;
+  String? get professionalId => _professionalId;
   Map<DateTime, List<ProfessionalScheduleSlot>> _slotsByDay = {};
+
+  /// Horários que repetem e foram bloqueados num dia (tocar libera).
+  final agenda = AgendaService();
+  Map<DateTime, List<BlockedSlot>> _blockedByDay = {};
+
+  List<BlockedSlot> blockedOn(DateTime day) =>
+      _blockedByDay[_dateOnly(day)] ?? const [];
+
+  /// Dia escolhido na agenda do celular (faixa da semana).
+  DateTime selectedDay = _dateOnly(DateTime.now());
+
+  void selectDay(DateTime day) {
+    selectedDay = _dateOnly(day);
+    focusDate = selectedDay;
+    final inRange =
+        !selectedDay.isBefore(rangeStart) && selectedDay.isBefore(rangeEnd);
+    update();
+    if (!inRange) load();
+  }
+
   int _loadToken = 0;
 
   static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -164,8 +187,14 @@ class ProfessionalWideCalendarController extends GetxController
             startAt: start,
             endAt: end,
           );
+      final blockedFuture = agenda.blocked(
+        professionalId: professionalId,
+        start: start,
+        end: end,
+      );
       final slots = await slotsFuture;
       final appointmentsResponse = await appointmentsFuture;
+      final blocked = await blockedFuture;
       // Se o usuário trocou de período durante a busca, descarta.
       if (token != _loadToken) return;
 
@@ -174,6 +203,7 @@ class ProfessionalWideCalendarController extends GetxController
           : <ProfessionalAppointmentModel>[];
 
       _slotsByDay = _groupByDay(slots, appointments);
+      _blockedByDay = blocked;
     } catch (e) {
       debugPrint('❌ [WideCalendar] Erro ao carregar agenda: $e');
       if (token == _loadToken) _slotsByDay = {};
@@ -310,6 +340,41 @@ class ProfessionalWideCalendarController extends GetxController
   Future<void> removeSlot(ProfessionalScheduleSlot slot) async {
     final removed = await _slotActions.promptRemoveSlot(slot);
     if (removed) await load();
+  }
+
+  /// Bloqueia um horário livre: só o dia, se ele repete; se é avulso,
+  /// pergunta e remove.
+  Future<void> blockSlot(ProfessionalScheduleSlot slot) async {
+    if (!slot.isRecurring) return removeSlot(slot);
+    final error = await agenda.blockDay(slot);
+    if (error != null) AppSnackbar.to.show(error);
+    await load();
+  }
+
+  Future<void> releaseBlocked(BlockedSlot blocked) async {
+    final error = await agenda.release(blocked);
+    if (error != null) AppSnackbar.to.show(error);
+    await load();
+  }
+
+  /// Cria um horário no dia e hora escolhidos. Devolve true se criou.
+  Future<bool> addSlot(DateTime at, {required bool everyWeek}) async {
+    final id = _professionalId;
+    if (id == null) return false;
+    final error = await agenda.createSlot(
+      professionalId: id,
+      startAt: at,
+      everyWeek: everyWeek,
+    );
+    if (error != null) {
+      AppSnackbar.to.show(error);
+      return false;
+    }
+    AppSnackbar.to.show(
+      everyWeek ? 'Horário criado para toda semana.' : 'Horário criado.',
+    );
+    await load();
+    return true;
   }
 
   void openAppointment(ProfessionalAppointmentModel appointment) {
