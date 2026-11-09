@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../pages/payment_result_page.dart';
 import '../../../infra/models/subscription_plan_model.dart';
 import '../../../infra/models/user_model.dart';
 import '../../../infra/models/user_subscription_model.dart';
@@ -137,6 +138,50 @@ class CheckoutController extends GetxController {
       _isProcessingPayment = false;
       update();
     }
+  }
+
+  /// Valor cobrado (com o desconto de estudante, se aprovado).
+  double get amount {
+    final plan = _selectedPlan;
+    if (plan == null) return 0;
+    return Get.isRegistered<SubscriptionController>()
+        ? Get.find<SubscriptionController>().priceOf(plan)
+        : plan.transactionAmount;
+  }
+
+  bool get hasStudentDiscount =>
+      Get.isRegistered<SubscriptionController>() &&
+      Get.find<SubscriptionController>().hasStudentDiscount;
+
+  /// Tela "Pagamento aprovado" (P4), no lugar da de pagamento.
+  Future<void> _showApproved(String? subscriptionId) async {
+    final plan = _selectedPlan;
+    if (plan == null) return;
+    final subscription = await _fetchSubscriptionById(subscriptionId);
+    Get.off<void>(
+      () => PaymentResultPage(
+        approved: true,
+        planName: plan.reason,
+        consultations: plan.consultations,
+        amount: amount,
+        validUntil: subscription?.endDate,
+      ),
+    );
+  }
+
+  /// Tela "Pagamento não aprovado" (P5); "Tentar novamente" volta para cá.
+  void _showRefused(String? reason) {
+    final plan = _selectedPlan;
+    if (plan == null) return;
+    Get.to<void>(
+      () => PaymentResultPage(
+        approved: false,
+        planName: plan.reason,
+        consultations: plan.consultations,
+        amount: amount,
+        reason: reason,
+      ),
+    );
   }
 
   // Getters
@@ -354,11 +399,10 @@ class CheckoutController extends GetxController {
           subscriptionController.reload();
           await AuthService.instance.reloadUserAccessInfo();
 
-          Get.back();
-          AppSnackbar.to.show('Assinatura criada com sucesso!');
+          await _showApproved(subscriptionId);
         } else if (result == _SubscriptionPollingResult.cancelled) {
-          AppSnackbar.to.show('Pagamento não aprovado. Tente novamente.');
           _resetIdempotencyKey();
+          _showRefused(null);
         } else {
           final subscription = subscriptionId != null
               ? await _fetchSubscriptionById(subscriptionId)
@@ -398,7 +442,7 @@ class CheckoutController extends GetxController {
             if (subscription?.status == 'cancelled') {
               _resetIdempotencyKey();
             }
-            AppSnackbar.to.show(userMessage);
+            _showRefused(userMessage);
             return;
           }
 
@@ -416,12 +460,11 @@ class CheckoutController extends GetxController {
               final subscriptionController = Get.find<SubscriptionController>();
               subscriptionController.reload();
               await AuthService.instance.reloadUserAccessInfo();
-              Get.back();
-              AppSnackbar.to.show('Assinatura criada com sucesso!');
+              await _showApproved(subscriptionId);
             } else if (subscriptionResult ==
                 _SubscriptionPollingResult.cancelled) {
-              AppSnackbar.to.show('Pagamento não aprovado. Tente novamente.');
               _resetIdempotencyKey();
+              _showRefused(null);
             } else {
               AppSnackbar.to.show(
                 'Não foi possível confirmar o pagamento. Tente novamente.',
@@ -432,7 +475,7 @@ class CheckoutController extends GetxController {
             if (subscription?.status == 'cancelled') {
               _resetIdempotencyKey();
             }
-            AppSnackbar.to.show(userMessage);
+            _showRefused(userMessage);
           } else if (transactionResult.type == 'processing') {
             final message = _buildProcessingMessage(
               status: transactionResult.status,

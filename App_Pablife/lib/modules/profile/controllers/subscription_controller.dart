@@ -1,8 +1,11 @@
 import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pablife/shared/themes/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../infra/repositories/student_repository.dart';
+import '../../../infra/services/auth_service.dart';
+import '../../../widgets/design_system/app_dialog.dart';
 
 import '../../../infra/models/subscription_plan_model.dart';
 import '../../../infra/models/subscription_transaction_model.dart';
@@ -29,11 +32,82 @@ class SubscriptionController extends GetxController {
   bool isLoading = false;
   bool isLoadingCancelSubscription = false;
 
+  /// Desconto de estudante (10%): o servidor confere de novo na cobrança.
+  StudentStatus studentStatus = StudentStatus.none;
+  bool get hasStudentDiscount => studentStatus == StudentStatus.approved;
+
+  static const studentDiscount = 0.10;
+
+  /// Valor cobrado do plano para esta pessoa (mesma conta do servidor).
+  double priceOf(SubscriptionPlanModel plan) => hasStudentDiscount
+      ? (plan.transactionAmount * (1 - studentDiscount) * 100).round() / 100
+      : plan.transactionAmount;
+
+  // Cupom resgatado na tela de planos (P1).
+  bool isRedeemingCoupon = false;
+  String? redeemedCoupon;
+  int? redeemedCouponDays;
+  String? couponError;
+
+  static const _couponReasons = {
+    'not_found': 'Cupom não encontrado.',
+    'inactive': 'Cupom inativo.',
+    'not_started': 'Este cupom ainda não está valendo.',
+    'expired': 'Cupom expirado.',
+    'exhausted': 'Cupom esgotado.',
+    'already_used': 'Você já usou este cupom.',
+    'not_authenticated': 'Entre na sua conta para usar o cupom.',
+  };
+
   @override
   void onInit() {
     super.onInit();
     _loadActiveSubscription();
     _loadPlans();
+    _loadStudentStatus();
+  }
+
+  Future<void> _loadStudentStatus() async {
+    studentStatus = await StudentRepository().myStatus();
+    update();
+  }
+
+  /// Resgata o cupom para o plano escolhido: libera por N dias, sem cobrança.
+  Future<void> redeemCoupon(String rawCode) async {
+    final code = rawCode.trim().toUpperCase();
+    couponError = null;
+    if (code.isEmpty) {
+      couponError = 'Digite o código do cupom.';
+      update();
+      return;
+    }
+    final planId = selectedPlanId ?? plans.firstOrNull?.id;
+    if (planId == null) return;
+
+    isRedeemingCoupon = true;
+    update();
+    try {
+      final response = await _paymentRepository.redeemCoupon(
+        code: code,
+        planId: planId,
+      );
+      final data = response.data;
+      if (!response.success || data == null) {
+        couponError = 'Não foi possível usar o cupom. Tente de novo.';
+        return;
+      }
+      if (data['valid'] != true) {
+        couponError = _couponReasons[data['reason']] ?? 'Cupom inválido.';
+        return;
+      }
+      redeemedCoupon = code;
+      redeemedCouponDays = (data['free_days'] as num?)?.toInt() ?? 30;
+      await AuthService.instance.reloadUserAccessInfo();
+      reload();
+    } finally {
+      isRedeemingCoupon = false;
+      update();
+    }
   }
 
   Future<void> _loadActiveSubscription() async {
@@ -211,7 +285,9 @@ class SubscriptionController extends GetxController {
         isSelected: isSelected || isActive,
         backgroundColor: isActive
             ? const AppColor(0xFF90EE90)
-            : (isSelected ? const AppColor(0xFFFF80BD) : const AppColor(0xFFAEBEEC)),
+            : (isSelected
+                  ? const AppColor(0xFFFF80BD)
+                  : const AppColor(0xFFAEBEEC)),
       );
     }).toList();
     update();
@@ -234,6 +310,7 @@ class SubscriptionController extends GetxController {
 
   void reload() {
     _loadActiveSubscription().then((_) => _loadPlans());
+    _loadStudentStatus();
   }
 
   Future<void> choosePlan() async {
@@ -258,31 +335,17 @@ class SubscriptionController extends GetxController {
       return;
     }
 
-    if (activeSubscription?.isInPeriod() == true) {
-      var result = await Get.dialog(
-        AlertDialog(
-          title: Text('Deseja continuar?'),
-          content: Text(
-            'Embora sua assinatura esteja cancelada, ainda restam ${getDaysUntilRenewal()} até o fim do período.',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: AppColors.white.withAlpha(204),
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Get.back(), child: Text('Cancelar')),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              child: Text('Continuar'),
-            ),
-          ],
-        ),
+    if (activeSubscription?.isInPeriod() == true && Get.context != null) {
+      final result = await AppDialog.showConfirmation(
+        context: Get.context!,
+        title: 'Deseja continuar?',
+        message:
+            'Sua assinatura está cancelada, mas ainda restam '
+            '${getDaysUntilRenewal()} de acesso. O novo plano começa agora.',
+        confirmText: 'Continuar',
+        cancelText: 'Voltar',
       );
-
-      if (result != true) {
-        return;
-      }
+      if (result != true) return;
     }
 
     isLoading = true;
