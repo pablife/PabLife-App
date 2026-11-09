@@ -61,6 +61,7 @@ flutter:
     - assets/pages/consultations/
     - assets/pages/waiting_approval/
     - assets/pages/premium/
+    - assets/pages/payment/
     - assets/icons/
   # Na web o Flutter baixa todas as fontes declaradas antes da primeira tela,
   # então aqui fica só a fonte da repaginação, Plus Jakarta Sans (licença OFL

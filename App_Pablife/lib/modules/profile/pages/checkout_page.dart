@@ -1,15 +1,16 @@
-import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../../shared/themes/app_colors.dart';
-import '../../../widgets/design_system/app_bar_default.dart';
-import '../../../widgets/design_system/app_text_form_field.dart';
-import '../../../widgets/design_system/edge_button_rounded.dart';
+import '../../../shared/themes/pab_colors.dart';
+import '../../../widgets/design_system/app_image.dart';
+import '../../auth/pages/widgets/registration_layout.dart';
 import '../controllers/checkout_controller.dart';
+import 'subscription_page.dart' show brl;
 
+/// "Finalizar compra" (canvas P2): resumo do plano com o desconto de
+/// estudante, os dados do cartão e o botão de pagar.
 class CheckoutPage extends StatelessWidget {
   const CheckoutPage({super.key});
 
@@ -19,628 +20,391 @@ class CheckoutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<CheckoutController>(
       init: CheckoutController(),
-      builder: (controller) {
-        return Scaffold(
-          backgroundColor: const AppColor(0xFF00343C),
-          appBar: const AppBarDefault(title: 'Pagamento'),
-          body: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: AppColor(0xFFC1CDFF),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(39),
-                      topRight: Radius.circular(39),
+      builder: (c) {
+        final plan = c.selectedPlan;
+        return PabCardFrame(
+          child: SafeArea(
+            child: Form(
+              key: c.formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: Row(
+                      children: [
+                        RegBackButton(onTap: () => Get.back<void>()),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Finalizar compra',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: PabColors.ink,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Form(
-                    key: controller.formKey,
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(
-                        top: 20,
-                        bottom: 100,
-                        left: 20,
-                        right: 20,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Cupom: libera o plano por N dias sem cartão, então
-                          // fica no topo e esconde o formulário do cartão.
-                          _CouponField(controller: controller),
-                          const SizedBox(height: 20),
-
-                          if (!controller.hasCoupon) ...[
-                            // Preview do Cartão
-                            _buildCardPreview(controller),
-                            const SizedBox(height: 30),
-
-                            // Número do Cartão
-                            _buildTextField(
-                              controller: controller.cardNumberController,
-                              label: 'Número do Cartão',
-                              hint: '0000 0000 0000 0000',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(16),
-                                _CardNumberInputFormatter(),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Número do cartão é obrigatório';
-                                }
-                                if (value.replaceAll(' ', '').length < 13) {
-                                  return 'Número do cartão inválido';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Nome do Titular
-                            _buildTextField(
-                              controller: controller.cardHolderNameController,
-                              label: 'Nome do Titular',
-                              hint: 'Nome como está no cartão',
-                              textCapitalization: TextCapitalization.characters,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Nome do titular é obrigatório';
-                                }
-                                if (value.length < 3) {
-                                  return 'Nome muito curto';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-
-                            // CPF/CNPJ do Titular
-                            _buildTextField(
-                              controller: controller.cardHolderCpfController,
-                              label: 'CPF/CNPJ do Titular',
-                              hint: '000.000.000-00 / 00.000.000/0000-00',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(14),
-                                CpfOuCnpjFormatter(),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'CPF/CNPJ do titular é obrigatório';
-                                }
-                                final digits = value.replaceAll(
-                                  RegExp(r'\D'),
-                                  '',
-                                );
-                                if (digits.length == 11) {
-                                  if (!UtilBrasilFields.isCPFValido(digits)) {
-                                    return 'CPF/CNPJ inválido';
-                                  }
-                                  return null;
-                                }
-                                if (digits.length == 14) {
-                                  if (!UtilBrasilFields.isCNPJValido(digits)) {
-                                    return 'CPF/CNPJ inválido';
-                                  }
-                                  return null;
-                                }
-                                return 'CPF/CNPJ inválido';
-                              },
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Data de Validade
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildTextField(
-                                    controller:
-                                        controller.expirationMonthController,
-                                    label: 'Mês',
-                                    hint: 'MM',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                      LengthLimitingTextInputFormatter(2),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final month = int.tryParse(value);
-                                      if (month == null ||
-                                          month < 1 ||
-                                          month > 12) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildTextField(
-                                    controller:
-                                        controller.expirationYearController,
-                                    label: 'Ano',
-                                    hint: 'AAAA',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                      LengthLimitingTextInputFormatter(4),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final year = int.tryParse(value);
-                                      if (year == null ||
-                                          year < DateTime.now().year) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-
-                            // CVV
-                            _buildTextField(
-                              controller: controller.securityCodeController,
-                              label: 'Código de Segurança (CVV)',
-                              hint: '123',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(4),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'CVV é obrigatório';
-                                }
-                                if (value.length < 3) {
-                                  return 'CVV inválido';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-
-                          // Resumo do Pagamento
-                          _buildPaymentSummary(controller),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Botões de Ação
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: EdgeButtonRounded(
-                          text: 'Voltar',
-                          onTap: () => Get.back(),
-                          backgroundColor: const AppColor(0xFF00343C),
-                          side: EdgeSide.right,
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+                      children: [
+                        if (plan != null) _Summary(controller: c),
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Forma de pagamento',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: PabColors.ink,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: EdgeButtonRounded(
-                          text: controller.isLoading
-                              ? 'Processando...'
-                              : controller.hasCoupon
-                              ? 'Ativar grátis'
-                              : 'Pagar',
-                          onTap: controller.isLoading
-                              ? () {}
-                              : () {
-                                  FocusScope.of(context).unfocus();
-                                  if (controller.hasCoupon) {
-                                    controller.redeemCoupon();
-                                  } else {
-                                    controller.processPayment();
-                                  }
-                                },
-                          backgroundColor: const AppColor(0xFF0C8DA1),
-                          side: EdgeSide.left,
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: PabColors.soft,
+                            border: Border.all(
+                              color: PabColors.accent,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.credit_card_rounded,
+                                size: 22,
+                                color: PabColors.ink,
+                              ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: 'Cartão de crédito\n',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text:
+                                            'Renova todo mês, cancele quando '
+                                            'quiser',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: PabColors.muted,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  style: TextStyle(color: PabColors.ink),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              if (controller.isProcessingPayment)
-                Positioned.fill(
-                  child: AbsorbPointer(
-                    absorbing: true,
-                    child: Container(
-                      color: Colors.black.withValues(alpha: 0.6),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                        const SizedBox(height: 12),
+                        _CardForm(controller: c),
+                        const SizedBox(height: 14),
+                        const Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
+                            Icon(
+                              Icons.lock_outline_rounded,
+                              size: 16,
+                              color: PabColors.muted,
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              controller.hasCoupon
-                                  ? 'Ativando seu plano...'
-                                  : 'Pagamento sendo processado...',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Pagamento processado com segurança pelo '
+                                'Mercado Pago. A Pablife não guarda os dados '
+                                'do seu cartão.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  height: 1.5,
+                                  color: PabColors.muted,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                ),
-            ],
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                    decoration: const BoxDecoration(
+                      color: PabColors.card,
+                      border: Border(top: BorderSide(color: PabColors.line)),
+                    ),
+                    child: RegPrimaryButton(
+                      label: 'Pagar ${brl(c.amount)}',
+                      loading: c.isProcessingPayment,
+                      onTap: plan == null ? null : c.processPayment,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
     );
   }
+}
 
-  Widget _buildCardPreview(CheckoutController controller) {
-    return Container(
-      height: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColor(0xFF1A1F71), AppColor(0xFF0F4C75)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+class _Summary extends StatelessWidget {
+  final CheckoutController controller;
+
+  const _Summary({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = controller;
+    final plan = c.selectedPlan!;
+    final full = plan.transactionAmount;
+    final total = c.amount;
+    final consultations = plan.consultations;
+
+    Widget line(String label, String value, {Color? color, bool bold = false}) {
+      final style = TextStyle(
+        fontSize: bold ? 17 : 14,
+        fontWeight: bold
+            ? FontWeight.w800
+            : color != null
+            ? FontWeight.w700
+            : FontWeight.w500,
+        color: color ?? PabColors.ink,
+      );
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Row(
           children: [
-            const Text(
-              'Crédito',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              controller.cardBrandDisplayName,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              controller.maskedCardNumber,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 2,
-              ),
-            ),
-            const Spacer(),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'TITULAR',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        controller.displayCardHolderName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
+            Expanded(
+              child: Text(
+                label,
+                style: style.copyWith(
+                  color: color ?? (bold ? PabColors.ink : PabColors.muted),
                 ),
-                Column(
+              ),
+            ),
+            Text(value, style: style),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: PabColors.card,
+        border: Border.all(color: PabColors.line),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: AppImage(
+                  imageUrl: plan.imagePath,
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'VÁLIDO ATÉ',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
+                      'Plano ${plan.reason}',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: PabColors.ink,
                       ),
                     ),
-                    const SizedBox(height: 4),
                     Text(
-                      controller.formattedExpirationDate,
+                      consultations == 1
+                          ? 'App completo + 1 consulta'
+                          : 'App completo + $consultations consultas',
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: PabColors.muted,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    TextInputType? keyboardType,
-    List<TextInputFormatter>? inputFormatters,
-    String? Function(String?)? validator,
-    TextCapitalization textCapitalization = TextCapitalization.none,
-  }) {
-    return AppTextFormField(
-      controller: controller,
-      labelText: label,
-      hintText: hint,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      validator: validator,
-      textCapitalization: textCapitalization,
-    );
-  }
-
-  Widget _buildPaymentSummary(CheckoutController controller) {
-    final plan = controller.selectedPlan;
-    if (plan == null) return const SizedBox.shrink();
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Resumo do Pagamento',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColor(0xFF00343C),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                plan.reason,
-                style: TextStyle(fontSize: 14, color: AppColors.aqua),
               ),
-              Text(
-                'R\$ ${plan.transactionAmount.toStringAsFixed(2)} por mês',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.aqua,
+              TextButton(
+                onPressed: () => Get.back<void>(),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 44),
+                  foregroundColor: PabColors.accentText,
+                ),
+                child: const Text(
+                  'Trocar',
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
           ),
-          if (controller.hasCoupon) ...[
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Cupom ${controller.couponCode}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColor(0xFF0F6E56),
-                  ),
-                ),
-                Text(
-                  '${controller.couponFreeDays} dias grátis',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColor(0xFF0F6E56),
-                  ),
-                ),
-              ],
+          const SizedBox(height: 10),
+          const Divider(height: 1, color: PabColors.line),
+          const SizedBox(height: 4),
+          line('Plano ${plan.reason}', brl(full)),
+          if (c.hasStudentDiscount)
+            line(
+              'Desconto estudante (10%)',
+              '− ${brl(full - total)}',
+              color: PabColors.accentText,
             ),
-          ],
-          const Divider(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                controller.hasCoupon ? 'Total hoje' : 'Total',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.aqua,
-                ),
-              ),
-              Text(
-                controller.hasCoupon
-                    ? 'R\$ 0.00'
-                    : 'R\$ ${plan.transactionAmount.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColor(0xFF0C8DA1),
-                ),
-              ),
-            ],
-          ),
-          if (controller.hasCoupon) ...[
-            const SizedBox(height: 8),
-            const Text(
-              'Sem cartão e sem cobrança automática. Ao fim do período, '
-              'é só assinar para continuar.',
-              style: TextStyle(fontSize: 13, color: AppColor(0xFF5F6B7A)),
-            ),
-          ],
+          const SizedBox(height: 4),
+          line('Total por mês', brl(total), bold: true),
         ],
       ),
     );
   }
 }
 
-// Campo de cupom: confere o código (validate_coupon) e, se valer, o botão
-// passa a ativar o plano pelos dias do cupom (redeem_coupon), sem cartão.
-class _CouponField extends StatefulWidget {
+class _CardForm extends StatelessWidget {
   final CheckoutController controller;
 
-  const _CouponField({required this.controller});
-
-  @override
-  State<_CouponField> createState() => _CouponFieldState();
-}
-
-class _CouponFieldState extends State<_CouponField> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _apply() {
-    if (widget.controller.isCheckingCoupon) return;
-    widget.controller.applyCoupon(_controller.text);
-  }
+  const _CardForm({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    final checkout = widget.controller;
-    if (checkout.hasCoupon) return _buildApplied(checkout);
-
+    final c = controller;
     return Container(
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: PabColors.card,
+        border: Border.all(color: PabColors.line),
+        borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Cupom de desconto',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColor(0xFF00343C),
-            ),
+          _CardField(
+            label: 'Número do cartão',
+            hint: '0000 0000 0000 0000',
+            controller: c.cardNumberController,
+            keyboardType: TextInputType.number,
+            autofill: const [AutofillHints.creditCardNumber],
+            formatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(16),
+              _CardNumberInputFormatter(),
+            ],
+            validator: (v) {
+              if (v == null || v.isEmpty) return 'Digite o número do cartão.';
+              if (v.replaceAll(' ', '').length < 13) {
+                return 'Número do cartão inválido.';
+              }
+              return null;
+            },
           ),
-          const SizedBox(height: 12),
+          _CardField(
+            label: 'Nome no cartão',
+            hint: 'Como está impresso',
+            controller: c.cardHolderNameController,
+            capitalization: TextCapitalization.characters,
+            autofill: const [AutofillHints.creditCardName],
+            validator: (v) {
+              if (v == null || v.trim().length < 3) {
+                return 'Digite o nome como está no cartão.';
+              }
+              return null;
+            },
+          ),
+          _CardField(
+            label: 'CPF ou CNPJ do titular',
+            hint: '000.000.000-00',
+            controller: c.cardHolderCpfController,
+            keyboardType: TextInputType.number,
+            formatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(14),
+              CpfOuCnpjFormatter(),
+            ],
+            validator: (v) {
+              final digits = (v ?? '').replaceAll(RegExp(r'\D'), '');
+              if (digits.isEmpty) return 'Digite o CPF ou CNPJ do titular.';
+              final ok = digits.length == 11
+                  ? UtilBrasilFields.isCPFValido(digits)
+                  : digits.length == 14 &&
+                        UtilBrasilFields.isCNPJValido(digits);
+              return ok ? null : 'CPF ou CNPJ inválido.';
+            },
+          ),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: TextField(
-                  controller: _controller,
-                  textCapitalization: TextCapitalization.characters,
-                  style: const TextStyle(color: AppColor(0xFF00343C)),
-                  decoration: InputDecoration(
-                    hintText: 'Digite seu cupom',
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 14,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: AppColor(0xFFD0D7F5)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: AppColor(0xFFD0D7F5)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: AppColor(0xFF0C8DA1)),
-                    ),
-                  ),
-                  onSubmitted: (_) => _apply(),
+                child: _CardField(
+                  label: 'Mês',
+                  hint: 'MM',
+                  controller: c.expirationMonthController,
+                  keyboardType: TextInputType.number,
+                  autofill: const [AutofillHints.creditCardExpirationMonth],
+                  formatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(2),
+                  ],
+                  validator: (v) {
+                    final m = int.tryParse(v ?? '');
+                    return m == null || m < 1 || m > 12 ? 'Inválido' : null;
+                  },
                 ),
               ),
-              const SizedBox(width: 12),
-              FilledButton(
-                onPressed: _apply,
-                style: FilledButton.styleFrom(
-                  backgroundColor: const AppColor(0xFF0C8DA1),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _CardField(
+                  label: 'Ano',
+                  hint: 'AAAA',
+                  controller: c.expirationYearController,
+                  keyboardType: TextInputType.number,
+                  autofill: const [AutofillHints.creditCardExpirationYear],
+                  formatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(4),
+                  ],
+                  validator: (v) {
+                    final y = int.tryParse(v ?? '');
+                    return y == null || y < DateTime.now().year
+                        ? 'Inválido'
+                        : null;
+                  },
                 ),
-                child: checkout.isCheckingCoupon
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Aplicar',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _CardField(
+                  label: 'CVV',
+                  hint: '123',
+                  controller: c.securityCodeController,
+                  keyboardType: TextInputType.number,
+                  obscure: true,
+                  autofill: const [AutofillHints.creditCardSecurityCode],
+                  formatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(4),
+                  ],
+                  validator: (v) => (v ?? '').length < 3 ? 'Inválido' : null,
+                ),
               ),
             ],
           ),
@@ -648,50 +412,76 @@ class _CouponFieldState extends State<_CouponField> {
       ),
     );
   }
+}
 
-  Widget _buildApplied(CheckoutController checkout) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const AppColor(0xFFE6F7F1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const AppColor(0xFF1D9E75)),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
+class _CardField extends StatelessWidget {
+  final String label;
+  final String hint;
+  final TextEditingController controller;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter> formatters;
+  final List<String> autofill;
+  final TextCapitalization capitalization;
+  final bool obscure;
+  final String? Function(String?) validator;
+
+  const _CardField({
+    required this.label,
+    required this.hint,
+    required this.controller,
+    required this.validator,
+    this.keyboardType,
+    this.formatters = const [],
+    this.autofill = const [],
+    this.capitalization = TextCapitalization.none,
+    this.obscure = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: color, width: width),
+        );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.local_offer_outlined, color: AppColor(0xFF0F6E56)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Cupom ${checkout.couponCode} aplicado',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColor(0xFF085041),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${checkout.couponFreeDays} dias grátis, sem precisar de cartão',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColor(0xFF0F6E56),
-                  ),
-                ),
-              ],
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: PabColors.ink,
             ),
           ),
-          TextButton(
-            onPressed: () {
-              _controller.clear();
-              checkout.removeCoupon();
-            },
-            child: const Text(
-              'Remover',
-              style: TextStyle(color: AppColor(0xFF0F6E56)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            inputFormatters: formatters,
+            autofillHints: autofill,
+            textCapitalization: capitalization,
+            obscureText: obscure,
+            validator: validator,
+            style: const TextStyle(fontSize: 15, color: PabColors.ink),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(color: PabColors.muted),
+              isDense: true,
+              filled: true,
+              fillColor: PabColors.card,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 15,
+              ),
+              enabledBorder: border(PabColors.lineStrong),
+              focusedBorder: border(PabColors.accent, 2),
+              errorBorder: border(PabColors.error),
+              focusedErrorBorder: border(PabColors.error, 2),
+              errorStyle: const TextStyle(color: PabColors.error),
             ),
           ),
         ],
@@ -700,7 +490,7 @@ class _CouponFieldState extends State<_CouponField> {
   }
 }
 
-// Formatador para número do cartão
+/// Número do cartão em grupos de quatro.
 class _CardNumberInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -709,14 +499,10 @@ class _CardNumberInputFormatter extends TextInputFormatter {
   ) {
     final text = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
-
     for (int i = 0; i < text.length; i++) {
-      if (i > 0 && i % 4 == 0) {
-        buffer.write(' ');
-      }
+      if (i > 0 && i % 4 == 0) buffer.write(' ');
       buffer.write(text[i]);
     }
-
     return TextEditingValue(
       text: buffer.toString(),
       selection: TextSelection.collapsed(offset: buffer.length),
