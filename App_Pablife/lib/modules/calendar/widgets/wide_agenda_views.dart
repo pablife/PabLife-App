@@ -200,8 +200,13 @@ class _WideWeekViewState extends State<WideWeekView> {
     DateTime start,
     List<ProfessionalScheduleSlot> items,
   ) {
+    final blocked = controller
+        .blockedOn(start)
+        .where((b) => b.startAt.hour == start.hour)
+        .toList();
     // Só dá para liberar horário no futuro, como na janela de novo horário.
-    final canCreate = items.isEmpty && start.isAfter(DateTime.now());
+    final canCreate =
+        items.isEmpty && blocked.isEmpty && start.isAfter(DateTime.now());
 
     final cell = Container(
       height: _hourHeight,
@@ -221,6 +226,34 @@ class _WideWeekViewState extends State<WideWeekView> {
                 child: WideAgendaChip(slot: slot, controller: controller),
               ),
             ),
+          if (items.isEmpty)
+            for (final b in blocked.take(1))
+              Expanded(
+                child: Tooltip(
+                  message: 'Bloqueado — clique para liberar',
+                  child: Material(
+                    color: PabColors.track,
+                    borderRadius: BorderRadius.circular(8),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => controller.releaseBlocked(b),
+                      child: Center(
+                        child: Text(
+                          '${wideTwo(b.startAt.hour)}:${wideTwo(b.startAt.minute)} bloqueado',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF7D8C8D),
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           if (items.length > 2)
             Text(
               '+${items.length - 2}',
@@ -263,17 +296,21 @@ class WideAgendaChip extends StatelessWidget {
     final appointment = slot.appointment;
 
     if (appointment == null) {
+      final single = !slot.isRecurring;
       return Tooltip(
-        message: slot.isRecurring
-            ? 'Horário livre (repete toda semana) — clique para remover'
-            : 'Horário livre — clique para remover',
+        message: single
+            ? 'Horário avulso — clique para remover'
+            : 'Horário livre (repete toda semana) — clique para bloquear este dia',
         child: _box(
-          onTap: () => controller.removeSlot(slot),
-          color: WideAgendaColors.freeFill,
-          border: Border.all(color: WideAgendaColors.free, width: 1.5),
-          icon: slot.isRecurring ? Icons.repeat : Icons.schedule,
+          onTap: () => controller.blockSlot(slot),
+          color: single ? PabColors.lilac : PabColors.soft,
+          border: Border.all(
+            color: single ? PabColors.lilacText : PabColors.accentText,
+            width: 1.2,
+          ),
+          icon: single ? Icons.schedule : Icons.repeat,
           text: '$time livre',
-          textColor: WideAgendaColors.freeText,
+          textColor: single ? PabColors.lilacText : PabColors.softText,
         ),
       );
     }

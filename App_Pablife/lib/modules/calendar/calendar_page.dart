@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../infra/models/user_role.dart';
 import '../../infra/services/auth_service.dart';
 import '../../shared/utils/wide_layout.dart';
-import 'controllers/calendar_switcher_controller.dart';
 import 'pages/professional_wide_calendar_page.dart';
 import 'pages/user_wide_calendar_page.dart';
+import '../professional_area/professional_agenda_page.dart';
 
 class CalendarPage extends StatelessWidget {
   const CalendarPage({super.key});
@@ -21,11 +20,6 @@ class CalendarPage extends StatelessWidget {
         AuthService.instance.currentUser?.role == UserRole.professional;
     if (!isProfessional) return const UserWideCalendarPage();
     if (isWideLayout(context)) return const ProfessionalWideCalendarPage();
-
-    return GetBuilder<CalendarSwitcherController>(
-      builder: (controller) {
-        return controller.calendarPage;
-      },
-    );
+    return const ProfessionalAgendaPage();
   }
 }
