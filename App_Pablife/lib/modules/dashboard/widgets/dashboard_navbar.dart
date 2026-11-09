@@ -8,17 +8,23 @@ import '../dashboard_controller.dart';
 /// lista de telas do DashboardPage.
 List<({int index, IconData icon, String label})> dashboardTabs({
   required bool isProfessional,
-}) => [
-  (
-    index: 3,
-    icon: Icons.work_outline,
-    label: isProfessional ? 'Pacientes' : 'Profissionais',
-  ),
-  (index: 0, icon: Icons.home_outlined, label: 'Dashboard'),
-  (index: 1, icon: Icons.calendar_today_outlined, label: 'Agenda'),
-  (index: 2, icon: Icons.menu_book_outlined, label: 'Mentorias'),
-  (index: 4, icon: Icons.person_outline, label: 'Perfil'),
-];
+}) => isProfessional
+    // Profissional (canvas PD): Dashboard, Agenda, Pacientes, Histórico e
+    // Perfil. O índice 2 mostra o Histórico no lugar das Mentorias.
+    ? [
+        (index: 0, icon: Icons.home_outlined, label: 'Dashboard'),
+        (index: 1, icon: Icons.calendar_today_outlined, label: 'Agenda'),
+        (index: 3, icon: Icons.groups_outlined, label: 'Pacientes'),
+        (index: 2, icon: Icons.history_rounded, label: 'Histórico'),
+        (index: 4, icon: Icons.person_outline, label: 'Perfil'),
+      ]
+    : [
+        (index: 3, icon: Icons.work_outline, label: 'Profissionais'),
+        (index: 0, icon: Icons.home_outlined, label: 'Dashboard'),
+        (index: 1, icon: Icons.calendar_today_outlined, label: 'Agenda'),
+        (index: 2, icon: Icons.menu_book_outlined, label: 'Mentorias'),
+        (index: 4, icon: Icons.person_outline, label: 'Perfil'),
+      ];
 
 /// Barra inferior do celular: fundo escuro, ícone com nome e o item ativo
 /// numa cápsula.

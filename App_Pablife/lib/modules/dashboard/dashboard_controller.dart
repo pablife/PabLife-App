@@ -4,10 +4,10 @@ import 'package:get/get.dart';
 import '../../infra/models/user_role.dart';
 import '../../infra/services/auth_service.dart';
 import '../auth/entry_visual.dart';
-import '../home/controllers/professional_home_controller.dart';
 import '../home/controllers/user_home_controller.dart';
 import '../profile/profile_controller.dart';
 import '../../shared/mixins/loader_manager.dart';
+import '../professional_area/professional_area_controller.dart';
 
 class DashboardController extends GetxController with LoaderManagerMixin {
   static DashboardController get to => Get.find();
@@ -38,14 +38,20 @@ class DashboardController extends GetxController with LoaderManagerMixin {
     if (index == 0) {
       final role = AuthService.instance.currentUser?.role;
       if (role == UserRole.professional) {
-        if (Get.isRegistered<ProfessionalHomeController>()) {
-          Get.find<ProfessionalHomeController>().refreshDataSilent();
+        if (Get.isRegistered<ProfessionalAreaController>()) {
+          Get.find<ProfessionalAreaController>().load();
         }
       } else {
         if (Get.isRegistered<UserHomeController>()) {
           Get.find<UserHomeController>().refreshDataSilent();
         }
       }
+    }
+
+    if (index == 2 &&
+        AuthService.instance.currentUser?.role == UserRole.professional &&
+        Get.isRegistered<ProfessionalAreaController>()) {
+      Get.find<ProfessionalAreaController>().load();
     }
 
     if (index == 4 && Get.isRegistered<ProfileController>()) {

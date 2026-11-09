@@ -64,6 +64,9 @@ class ProfessionalAppointmentModel {
 
   /// Justificativa de "Cancelada/remarcada" (preenchida pelo profissional).
   final String? cancellationReason;
+
+  /// Quem cancelou: "patient" ou "professional" (só nas canceladas).
+  final String? cancelledBy;
   final String timezone;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -88,6 +91,7 @@ class ProfessionalAppointmentModel {
     this.finishedAt,
     required this.status,
     this.cancellationReason,
+    this.cancelledBy,
     required this.timezone,
     required this.createdAt,
     required this.updatedAt,
@@ -223,6 +227,7 @@ class ProfessionalAppointmentModel {
           : null,
       status: AppointmentStatus.fromString(statusStr),
       cancellationReason: map['cancellation_reason']?.toString(),
+      cancelledBy: map['cancelled_by']?.toString(),
       timezone: timezone,
       createdAt: map['created_at'] != null
           ? DateTime.parse(map['created_at']).toLocal()
@@ -285,6 +290,7 @@ class ProfessionalAppointmentModel {
     DateTime? finishedAt,
     AppointmentStatus? status,
     String? cancellationReason,
+    String? cancelledBy,
     String? timezone,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -308,6 +314,7 @@ class ProfessionalAppointmentModel {
       finishedAt: finishedAt ?? this.finishedAt,
       status: status ?? this.status,
       cancellationReason: cancellationReason ?? this.cancellationReason,
+      cancelledBy: cancelledBy ?? this.cancelledBy,
       timezone: timezone ?? this.timezone,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

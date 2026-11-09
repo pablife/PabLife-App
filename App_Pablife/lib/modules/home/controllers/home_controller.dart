@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../infra/models/user_role.dart';
 import '../../../infra/services/auth_service.dart';
-import '../pages/professional_home_page.dart';
+import '../../professional_area/professional_dashboard_page.dart';
 import '../pages/user_home_page.dart';
 
 class HomeController extends GetxController {
@@ -11,6 +11,6 @@ class HomeController extends GetxController {
 
   /// Segue o lado ativo: a mesma conta pode entrar como profissional ou usuário.
   Widget get homePage => authService.currentUser?.role == UserRole.professional
-      ? const ProfessionalHomePage()
+      ? const ProfessionalDashboardPage()
       : const UserHomePage();
 }
