@@ -86,6 +86,33 @@ class PaymentRepository extends StrautilsTryThis {
     }, action: 'criar assinatura recorrente');
   }
 
+  /// Gera um Pix para o plano (pagamento único, libera 30 dias). Devolve
+  /// {user_subscription_id, payment_id, amount, qr_code, qr_code_base64,
+  /// expires_at}. O valor e o desconto de estudante são calculados no servidor.
+  FStrautilsResponse<Map<String, dynamic>> createPix({
+    required String planId,
+    required String idempotencyKey,
+  }) {
+    return tryThis(() async {
+      final response = await _functions.invoke(
+        'mercadopago-pix',
+        body: {'plan_id': planId},
+        headers: {'X-Idempotency-Key': idempotencyKey},
+      );
+      final data = response.data;
+      if (response.status == 200 && data is Map && data['qr_code'] != null) {
+        return StrautilsResponse.success(Map<String, dynamic>.from(data));
+      }
+      final error = data is Map ? data['error'] : null;
+      final code = error is Map ? error['code'] as String? : null;
+      return StrautilsResponse.error(switch (code) {
+        'ACTIVE_SUBSCRIPTION' => 'Você já tem um plano ativo.',
+        'PLAN_NOT_FOUND' => 'Este plano não está mais disponível.',
+        _ => 'Não foi possível gerar o Pix. Tente de novo em instantes.',
+      });
+    }, action: 'gerar Pix');
+  }
+
   FStrautilsResponse<Map<String, dynamic>> cancelSubscription() {
     return tryThis(() async {
       final response = await _functions.invoke(

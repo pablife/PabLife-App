@@ -142,12 +142,20 @@ class SubscriptionController extends GetxController {
     activeSubscription = list.firstWhereOrNull(_isSubscriptionActiveNow);
     activePlanId = activeSubscription?.planId;
 
+    // Um Pix gerado e não pago não trava a escolha: gerar outro cancela o
+    // anterior (no servidor), e ele expira sozinho em 30 minutos.
+    bool isPix(UserSubscriptionModel s) =>
+        s.mpPreapprovalId.startsWith('TEMP-PIX-');
     pendingSubscription = list.firstWhereOrNull(
-      (subscription) => subscription.status == 'pending',
+      (subscription) =>
+          subscription.status == 'pending' && !isPix(subscription),
     );
 
     final openCount = list
-        .where((subscription) => subscription.status != 'cancelled')
+        .where(
+          (s) =>
+              s.status != 'cancelled' && !(s.status == 'pending' && isPix(s)),
+        )
         .length;
     hasOpenSubscriptionsBlocked = pendingSubscription != null || openCount >= 2;
 

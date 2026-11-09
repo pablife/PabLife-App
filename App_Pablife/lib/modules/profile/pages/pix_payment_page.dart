@@ -10,21 +10,24 @@ import '../../auth/pages/widgets/registration_layout.dart';
 import 'subscription_page.dart' show brl;
 
 /// "Pague com Pix" (canvas P3): QR Code, Pix copia e cola, tempo para pagar
-/// e o botão "Já paguei". Fica desligada até a cobrança por Pix existir no
-/// servidor (veja `PaymentRepository.pixEnabled`).
+/// e o botão "Já paguei". Confere sozinha, a cada 5 segundos, se o pagamento
+/// caiu (o webhook do Mercado Pago ativa a assinatura).
 class PixPaymentPage extends StatefulWidget {
   final String planLabel;
   final double amount;
 
   /// QR Code em base64 (PNG), como o Mercado Pago devolve.
-  final String qrCodeBase64;
+  final String? qrCodeBase64;
 
   /// Código "copia e cola".
   final String copyCode;
   final DateTime expiresAt;
 
-  /// Confere se o pagamento caiu. Devolve true quando aprovado.
-  final Future<bool> Function() onCheckPaid;
+  /// Confere se o pagamento caiu (assinatura ativa).
+  final Future<bool> Function() isPaid;
+
+  /// Chamado uma vez, quando o pagamento cai.
+  final VoidCallback onPaid;
 
   const PixPaymentPage({
     super.key,
@@ -33,7 +36,8 @@ class PixPaymentPage extends StatefulWidget {
     required this.qrCodeBase64,
     required this.copyCode,
     required this.expiresAt,
-    required this.onCheckPaid,
+    required this.isPaid,
+    required this.onPaid,
   });
 
   @override
@@ -42,8 +46,10 @@ class PixPaymentPage extends StatefulWidget {
 
 class _PixPaymentPageState extends State<PixPaymentPage> {
   Timer? _tick;
+  Timer? _poll;
   bool _copied = false;
   bool _checking = false;
+  bool _done = false;
 
   @override
   void initState() {
@@ -52,12 +58,29 @@ class _PixPaymentPageState extends State<PixPaymentPage> {
       const Duration(seconds: 1),
       (_) => mounted ? setState(() {}) : null,
     );
+    _poll = Timer.periodic(const Duration(seconds: 5), (_) => _probe());
   }
 
   @override
   void dispose() {
     _tick?.cancel();
+    _poll?.cancel();
     super.dispose();
+  }
+
+  /// Confere em silêncio; quando cai, segue para "Pagamento aprovado".
+  Future<bool> _probe() async {
+    if (_done || !mounted) return _done;
+    bool paid = false;
+    try {
+      paid = await widget.isPaid();
+    } catch (_) {}
+    if (paid && !_done && mounted) {
+      _done = true;
+      _poll?.cancel();
+      widget.onPaid();
+    }
+    return paid;
   }
 
   String get _remaining {
@@ -76,7 +99,17 @@ class _PixPaymentPageState extends State<PixPaymentPage> {
   Future<void> _check() async {
     setState(() => _checking = true);
     try {
-      await widget.onCheckPaid();
+      final paid = await _probe();
+      if (!paid && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Ainda não recebemos o pagamento. Pode levar alguns segundos '
+              'depois de confirmar no banco.',
+            ),
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _checking = false);
     }
@@ -137,19 +170,20 @@ class _PixPaymentPageState extends State<PixPaymentPage> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Semantics(
-                          label: 'QR Code do Pix',
-                          image: true,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.memory(
-                              base64Decode(widget.qrCodeBase64),
-                              width: 200,
-                              height: 200,
-                              gaplessPlayback: true,
+                        if (widget.qrCodeBase64 != null)
+                          Semantics(
+                            label: 'QR Code do Pix',
+                            image: true,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.memory(
+                                base64Decode(widget.qrCodeBase64!),
+                                width: 200,
+                                height: 200,
+                                gaplessPlayback: true,
+                              ),
                             ),
                           ),
-                        ),
                         const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
