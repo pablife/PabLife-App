@@ -34,6 +34,7 @@ class AppointmentRepository extends StrautilsTryThis {
             finished_at,
             status,
             cancellation_reason,
+            cancelled_by,
             created_at,
             updated_at,
             appointment_time:tb_appointment_times!inner(
@@ -470,6 +471,7 @@ class AppointmentRepository extends StrautilsTryThis {
             finished_at,
             status,
             cancellation_reason,
+            cancelled_by,
             created_at,
             updated_at,
             appointment_time:tb_appointment_times!inner(
@@ -571,6 +573,35 @@ class AppointmentRepository extends StrautilsTryThis {
       }
       return StrautilsResponse.success(true);
     }, action: 'remarcar consulta.');
+  }
+
+  /// Registra como foi a consulta (função register_appointment_outcome):
+  /// completed, no_show, cancelled_patient, cancelled_professional ou
+  /// technical_issue. Devolve a mensagem de erro, ou null se deu certo.
+  Future<String?> registerOutcome({
+    required String appointmentId,
+    required String outcome,
+    String? reason,
+  }) async {
+    try {
+      await _client.rpc(
+        'register_appointment_outcome',
+        params: {
+          'p_appointment_id': appointmentId,
+          'p_outcome': outcome,
+          if (reason != null && reason.trim().isNotEmpty)
+            'p_reason': reason.trim(),
+        },
+      );
+      return null;
+    } on PostgrestException catch (e) {
+      final message = e.message;
+      return message.contains('not_allowed')
+          ? 'Você não pode registrar esta consulta.'
+          : message;
+    } catch (_) {
+      return 'Não foi possível registrar. Verifique a conexão e tente de novo.';
+    }
   }
 
   Future<void> cancelAppointment(String appointmentId) async {
