@@ -142,6 +142,56 @@ class AgendaService {
     return response.message.replaceFirst('Exception: ', '');
   }
 
+  /// Apaga todos os horários livres: os que repetem deixam de abrir a partir
+  /// de agora e os avulsos futuros sem consulta são removidos. Consultas
+  /// já marcadas continuam. Devolve (apagados, erros).
+  Future<(int, List<String>)> clearAll(String professionalId) async {
+    final current = await weekPattern(professionalId);
+    final recurring = current.values.fold<int>(0, (n, m) => n + m.length);
+    final errors = await saveWeekPattern(
+      professionalId: professionalId,
+      current: current,
+      desired: {},
+    );
+    var removed = recurring - errors.length;
+    try {
+      final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final singles = await _client
+          .from('tb_appointment_times')
+          .select('id')
+          .eq('professional_id', professionalId)
+          .isFilter('deleted_at', null)
+          .isFilter('appointment_recurrence_rule_id', null)
+          .gte('due_at', today);
+      final ids = [for (final r in singles) r['id'] as String];
+      if (ids.isNotEmpty) {
+        final booked = await _client
+            .from('tb_appointments')
+            .select('appointment_time_id')
+            .inFilter('appointment_time_id', ids)
+            .eq('status', 'scheduled')
+            .isFilter('deleted_at', null);
+        final taken = {
+          for (final r in booked) r['appointment_time_id'] as String,
+        };
+        for (final id in ids.where((id) => !taken.contains(id))) {
+          try {
+            await _client.rpc(
+              'soft_delete_appointment_time',
+              params: {'appointment_time_id': id},
+            );
+            removed++;
+          } on PostgrestException catch (e) {
+            errors.add(e.message);
+          }
+        }
+      }
+    } on PostgrestException catch (e) {
+      errors.add(e.message);
+    }
+    return (removed, errors);
+  }
+
   /// Horários que repetem toda semana e ainda valem.
   Future<WeekPattern> weekPattern(String professionalId) async {
     final out = <int, Map<String, String>>{};
