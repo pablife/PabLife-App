@@ -1,9 +1,10 @@
-import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
-import '../../shared/themes/app_colors.dart';
-import 'text_default.dart';
-import 'edge_button_rounded.dart';
 
+import '../../shared/themes/pab_colors.dart';
+
+/// Janela de confirmação no visual da repaginação: cartão branco, título em
+/// [PabColors.ink], botão de voltar contornado e botão de confirmar em
+/// [PabColors.accent] (ou vermelho quando [destructive]).
 class AppDialog extends StatelessWidget {
   final String title;
   final Widget content;
@@ -11,8 +12,10 @@ class AppDialog extends StatelessWidget {
   final String? cancelText;
   final VoidCallback? onConfirm;
   final VoidCallback? onCancel;
-  final Color? confirmButtonColor;
-  final Color? cancelButtonColor;
+
+  /// Ação que apaga ou cancela algo: botão de confirmar vermelho.
+  final bool destructive;
+  final IconData? icon;
   final bool barrierDismissible;
 
   const AppDialog({
@@ -23,69 +26,131 @@ class AppDialog extends StatelessWidget {
     this.cancelText,
     this.onConfirm,
     this.onCancel,
-    this.confirmButtonColor,
-    this.cancelButtonColor,
+    this.destructive = false,
+    this.icon,
     this.barrierDismissible = true,
   });
 
+  /// Texto padrão do corpo da janela.
+  static const messageStyle = TextStyle(
+    fontFamily: pabFontFamily,
+    fontSize: 15,
+    height: 1.5,
+    color: PabColors.muted,
+  );
+
   @override
   Widget build(BuildContext context) {
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+    );
     return Dialog(
-      backgroundColor: AppColors.second,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      child: Container(
-        padding: const EdgeInsets.only(top: 24),
-        decoration: BoxDecoration(
-          color: AppColors.aqua,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextDefault(
-              title,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.white,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            content,
-            const SizedBox(height: 24),
-            if (confirmText != null || cancelText != null)
-              Row(
-                children: [
-                  if (cancelText != null) ...[
-                    Expanded(
-                      child: EdgeButtonRounded(
-                        text: cancelText!,
-                        inverseRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(100),
-                        ),
-                        onTap:
-                            onCancel ?? () => Navigator.of(context).pop(false),
-                        backgroundColor:
-                            cancelButtonColor ?? const AppColor(0xFF0C8DA1),
-                      ),
-                    ),
-                    if (confirmText != null) const SizedBox(width: 10),
-                  ],
-                  if (confirmText != null)
-                    Expanded(
-                      child: EdgeButtonRounded(
-                        side: EdgeSide.left,
-                        text: confirmText!,
-                        inverseRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(100),
-                        ),
-                        onTap:
-                            onConfirm ?? () => Navigator.of(context).pop(true),
-                        backgroundColor: confirmButtonColor ?? AppColors.second,
-                      ),
-                    ),
-                ],
+      backgroundColor: PabColors.card,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null || destructive) ...[
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: destructive
+                        ? const Color(0xFFFBE7EB)
+                        : PabColors.soft,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon ?? Icons.delete_outline_rounded,
+                    color: destructive ? PabColors.error : PabColors.softText,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: pabFontFamily,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  color: PabColors.ink,
+                ),
               ),
-          ],
+              const SizedBox(height: 10),
+              DefaultTextStyle.merge(
+                style: messageStyle,
+                textAlign: TextAlign.center,
+                child: content,
+              ),
+              if (confirmText != null || cancelText != null) ...[
+                const SizedBox(height: 22),
+                Row(
+                  children: [
+                    if (cancelText != null)
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed:
+                              onCancel ??
+                              () => Navigator.of(context).pop(false),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 48),
+                            foregroundColor: PabColors.ink,
+                            side: const BorderSide(color: PabColors.lineStrong),
+                            shape: shape,
+                          ),
+                          child: Text(
+                            cancelText!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontFamily: pabFontFamily,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (cancelText != null && confirmText != null)
+                      const SizedBox(width: 10),
+                    if (confirmText != null)
+                      Expanded(
+                        child: FilledButton(
+                          onPressed:
+                              onConfirm ??
+                              () => Navigator.of(context).pop(true),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(0, 48),
+                            backgroundColor: destructive
+                                ? PabColors.error
+                                : PabColors.accent,
+                            foregroundColor: destructive
+                                ? Colors.white
+                                : PabColors.ink,
+                            shape: shape,
+                          ),
+                          child: Text(
+                            confirmText!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontFamily: pabFontFamily,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -97,27 +162,18 @@ class AppDialog extends StatelessWidget {
     required String message,
     String confirmText = 'Confirmar',
     String cancelText = 'Cancelar',
-    Color? confirmButtonColor,
-    Color? cancelButtonColor,
+    bool destructive = false,
+    IconData? icon,
   }) {
     return showDialog<bool>(
       context: context,
       builder: (context) => AppDialog(
         title: title,
-        content: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: TextDefault(
-            message,
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-            color: AppColors.white.withAlpha(204),
-            textAlign: TextAlign.center,
-          ),
-        ),
+        content: Text(message),
         confirmText: confirmText,
         cancelText: cancelText,
-        confirmButtonColor: confirmButtonColor,
-        cancelButtonColor: cancelButtonColor,
+        destructive: destructive,
+        icon: icon,
       ),
     );
   }
@@ -130,8 +186,8 @@ class AppDialog extends StatelessWidget {
     String? cancelText,
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
-    Color? confirmButtonColor,
-    Color? cancelButtonColor,
+    bool destructive = false,
+    IconData? icon,
     bool barrierDismissible = true,
   }) {
     return showDialog<T>(
@@ -144,8 +200,8 @@ class AppDialog extends StatelessWidget {
         cancelText: cancelText,
         onConfirm: onConfirm,
         onCancel: onCancel,
-        confirmButtonColor: confirmButtonColor,
-        cancelButtonColor: cancelButtonColor,
+        destructive: destructive,
+        icon: icon,
         barrierDismissible: barrierDismissible,
       ),
     );

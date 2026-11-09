@@ -1,4 +1,3 @@
-import 'package:pablife/shared/themes/app_palette.dart';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -319,7 +318,7 @@ class AppointmentDetailsController extends GetxController
           'Tem certeza que deseja cancelar esta consulta? Esta ação não pode ser desfeita.',
       confirmText: 'Cancelar',
       cancelText: 'Não',
-      confirmButtonColor: Colors.redAccent,
+      destructive: true,
     );
 
     if (confirmed == true) {
@@ -408,7 +407,6 @@ class AppointmentDetailsController extends GetxController
       message: 'Tem certeza que deseja concluir esta consulta?',
       confirmText: 'Concluir',
       cancelText: 'Cancelar',
-      confirmButtonColor: Colors.green,
     );
 
     if (confirmed == true) {
@@ -447,7 +445,6 @@ class AppointmentDetailsController extends GetxController
       message: 'Tem certeza que deseja iniciar esta consulta agora?',
       confirmText: 'Iniciar',
       cancelText: 'Cancelar',
-      confirmButtonColor: const AppColor(0xFF0C8DA1),
     );
 
     if (confirmed != true) {
@@ -489,7 +486,7 @@ class AppointmentDetailsController extends GetxController
           'Tem certeza que deseja marcar que o paciente não compareceu? Esta ação não pode ser desfeita.',
       confirmText: 'Confirmar',
       cancelText: 'Cancelar',
-      confirmButtonColor: Colors.orangeAccent,
+      destructive: true,
     );
 
     if (confirmed == true) {

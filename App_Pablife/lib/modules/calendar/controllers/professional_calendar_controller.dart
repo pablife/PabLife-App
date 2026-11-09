@@ -1,4 +1,4 @@
-import 'package:pablife/shared/themes/app_palette.dart';
+import 'package:pablife/shared/themes/pab_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -418,7 +418,7 @@ class ProfessionalCalendarController extends GetxController
                           : 'Tem certeza que deseja remover este horário? Esta ação não pode ser desfeita.',
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
-                      color: Colors.white.withAlpha(204),
+                      color: PabColors.muted,
                       textAlign: TextAlign.center,
                     ),
                     if (isRecurring) ...[
@@ -432,7 +432,7 @@ class ProfessionalCalendarController extends GetxController
                                 applyToFuture = value ?? false;
                               });
                             },
-                            activeColor: const AppColor(0xFFFF5252),
+                            activeColor: PabColors.error,
                             checkColor: Colors.white,
                           ),
                           const SizedBox(width: 8),
@@ -441,7 +441,7 @@ class ProfessionalCalendarController extends GetxController
                               'Aplicar para todos os horários futuros',
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
-                              color: Colors.white.withAlpha(204),
+                              color: PabColors.muted,
                             ),
                           ),
                         ],
@@ -452,8 +452,7 @@ class ProfessionalCalendarController extends GetxController
               ),
               confirmText: 'Remover',
               cancelText: 'Cancelar',
-              confirmButtonColor: const AppColor(0xFFFF5252),
-              cancelButtonColor: const AppColor(0xFF0C8DA1),
+              destructive: true,
               onConfirm: () => Navigator.of(context).pop(applyToFuture),
               onCancel: () => Navigator.of(context).pop(null),
             );

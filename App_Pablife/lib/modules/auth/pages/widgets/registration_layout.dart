@@ -376,6 +376,7 @@ class RegPrimaryButton extends StatelessWidget {
   final VoidCallback? onTap;
   final bool loading;
   final bool dim;
+  final Widget? icon;
 
   const RegPrimaryButton({
     super.key,
@@ -383,6 +384,7 @@ class RegPrimaryButton extends StatelessWidget {
     required this.onTap,
     this.loading = false,
     this.dim = false,
+    this.icon,
   });
 
   @override
@@ -410,12 +412,20 @@ class RegPrimaryButton extends StatelessWidget {
                   color: PabColors.ink,
                 ),
               )
-            : Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[icon!, const SizedBox(width: 8)],
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
               ),
       ),
     );

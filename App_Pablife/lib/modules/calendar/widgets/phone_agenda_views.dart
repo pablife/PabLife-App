@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../infra/models/activity_model.dart';
 import '../../../shared/themes/app_palette.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../../women_health/women_health_controller.dart';
+import '../../women_health/women_health_data.dart';
 import '../controllers/professional_wide_calendar_controller.dart';
 import '../controllers/user_wide_calendar_controller.dart';
 import 'wide_agenda_views.dart';
@@ -22,6 +24,68 @@ abstract final class PhoneAgendaColors {
   static const grid = AppColor.pair(0xFFE4ECEC, 0xFFF0E4EC);
   static const gridSoft = AppColor.pair(0xFFEDF2F2, 0xFFF6EDF3);
   static const hourText = AppColor.pair(0xFF4A5E60, 0xFF5E4A66);
+}
+
+/// Cores do ciclo nos calendários e na faixa "dia todo" (canvas).
+abstract final class CycleColors {
+  static const menstruationFill = Color(0xFFFCE8F3);
+  static const menstruationText = Color(0xFF7A1F52);
+  static const fertileFill = Color(0xFFEEEDFF);
+  static const fertileText = Color(0xFF3F3A8C);
+}
+
+/// Quem acompanha o ciclo (não gestação nem menopausa).
+bool tracksCycle(WomenHealthController? women) =>
+    women != null &&
+    women.isActive &&
+    women.lastPeriod != null &&
+    women.trail != WomenTrail.pregnancy &&
+    women.trail != WomenTrail.menopause;
+
+/// Círculo do ciclo nos calendários: menstruação e período fértil.
+Color? cycleTintOn(WomenHealthController? women, DateTime day) {
+  if (!tracksCycle(women) || !women!.showBand) return null;
+  return switch (women.cyclePhaseOn(day)?.kind) {
+    WomenCycleKind.menstruation => CycleColors.menstruationFill,
+    WomenCycleKind.fertile => CycleColors.fertileFill,
+    _ => null,
+  };
+}
+
+/// Legenda dos círculos do ciclo.
+class CycleLegend extends StatelessWidget {
+  const CycleLegend({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget item(Color color, String label) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: PabColors.muted,
+          ),
+        ),
+      ],
+    );
+    return Wrap(
+      spacing: 14,
+      runSpacing: 4,
+      children: [
+        item(CycleColors.menstruationFill, 'Menstruação'),
+        item(CycleColors.fertileFill, 'Fértil (previsto)'),
+      ],
+    );
+  }
 }
 
 const _weekLetters = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
@@ -888,7 +952,7 @@ class PhoneMonthView extends StatelessWidget {
                           }
                           final day = DateTime(month.year, month.month, n);
                           final counts = c.countsOn(day);
-                          final band = women?.bandOn(day);
+                          final tint = cycleTintOn(women, day);
                           final dots = <Color>[
                             if (c.holidayOn(day) != null)
                               PhoneAgendaColors.holiday,
@@ -904,9 +968,7 @@ class PhoneMonthView extends StatelessWidget {
                             label: 'Dia $n',
                             excludeSemantics: true,
                             child: Material(
-                              color: band != null
-                                  ? band.color.withValues(alpha: 0.22)
-                                  : isToday
+                              color: isToday
                                   ? PabColors.accent.withValues(alpha: 0.12)
                                   : Colors.transparent,
                               shape: RoundedRectangleBorder(
@@ -922,20 +984,29 @@ class PhoneMonthView extends StatelessWidget {
                                 onTap: () => c.openDay(day),
                                 borderRadius: BorderRadius.circular(12),
                                 child: SizedBox(
-                                  height: 54,
+                                  height: 56,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        '$n',
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          height: 1,
-                                          fontWeight: FontWeight.w700,
-                                          color: PabColors.ink,
+                                      Container(
+                                        width: 30,
+                                        height: 30,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: tint,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Text(
+                                          '$n',
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            height: 1,
+                                            fontWeight: FontWeight.w700,
+                                            color: PabColors.ink,
+                                          ),
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: 2),
                                       SizedBox(
                                         height: 5,
                                         child: Row(
@@ -970,6 +1041,10 @@ class PhoneMonthView extends StatelessWidget {
                 ],
               ),
             ),
+          if (tracksCycle(women) && women!.showBand) ...[
+            const SizedBox(height: 6),
+            const Align(alignment: Alignment.centerLeft, child: CycleLegend()),
+          ],
         ],
       ),
     );
@@ -990,6 +1065,10 @@ class PhoneYearView extends StatelessWidget {
     final year = c.focusDate.year;
     final today = _dateOnly(DateTime.now());
     const names = ProfessionalWideCalendarController.monthNames;
+    final women = Get.isRegistered<WomenHealthController>()
+        ? WomenHealthController.to
+        : null;
+    final cycle = tracksCycle(women) && women!.showBand;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1014,9 +1093,11 @@ class PhoneYearView extends StatelessWidget {
                             counts.appointments >
                         0;
                   },
+                  tint: cycle ? (day) => cycleTintOn(women, day) : null,
                   onTap: () => c.openMonth(DateTime(year, m, 1)),
                 ),
               ),
+            if (cycle) const CycleLegend(),
           ],
         );
       },
@@ -1029,6 +1110,7 @@ class _MiniMonth extends StatelessWidget {
   final DateTime month;
   final DateTime today;
   final bool Function(DateTime) marked;
+  final Color? Function(DateTime)? tint;
   final VoidCallback onTap;
 
   const _MiniMonth({
@@ -1037,6 +1119,7 @@ class _MiniMonth extends StatelessWidget {
     required this.today,
     required this.marked,
     required this.onTap,
+    this.tint,
   });
 
   @override
@@ -1089,6 +1172,7 @@ class _MiniMonth extends StatelessWidget {
                             final day = DateTime(month.year, month.month, n);
                             final isToday = day == today;
                             final has = marked(day);
+                            final cycle = tint?.call(day);
                             return Container(
                               height: 17,
                               margin: const EdgeInsets.all(0.5),
@@ -1097,9 +1181,10 @@ class _MiniMonth extends StatelessWidget {
                                 shape: BoxShape.circle,
                                 color: isToday
                                     ? PabColors.accent
-                                    : has
-                                    ? PabColors.soft
-                                    : Colors.transparent,
+                                    : cycle ??
+                                          (has
+                                              ? PabColors.soft
+                                              : Colors.transparent),
                               ),
                               child: Text(
                                 '$n',
@@ -1108,7 +1193,7 @@ class _MiniMonth extends StatelessWidget {
                                   fontWeight: isToday || has
                                       ? FontWeight.w800
                                       : FontWeight.w500,
-                                  color: isToday
+                                  color: isToday || cycle != null
                                       ? PabColors.ink
                                       : has
                                       ? PabColors.softText

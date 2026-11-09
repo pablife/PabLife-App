@@ -9,6 +9,9 @@ class WhatsAppIcon extends StatelessWidget {
   final double size;
   final Color color;
 
+  /// Verde do WhatsApp, para fundos claros.
+  static const green = Color(0xFF25D366);
+
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(

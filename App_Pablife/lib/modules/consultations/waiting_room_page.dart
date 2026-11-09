@@ -7,6 +7,7 @@ import '../../infra/repositories/consultation_repository.dart';
 import '../../infra/services/auth_service.dart';
 import '../../shared/themes/pab_colors.dart';
 import '../../shared/utils/app_snackbar.dart';
+import '../../widgets/design_system/whatsapp_icon.dart';
 import '../appointment_details/widgets/patient_appointment_options_sheet.dart';
 import '../auth/pages/widgets/registration_layout.dart';
 import 'consultation_detail_page.dart';
@@ -196,14 +197,18 @@ class _WaitingRoomPageState extends State<WaitingRoomPage> {
                     ),
                     if (a.professionalPhone.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      TextButton(
+                      TextButton.icon(
                         onPressed: () =>
                             PatientAppointmentOptionsSheet.openWhatsApp(a),
+                        icon: const WhatsAppIcon(
+                          size: 18,
+                          color: WhatsAppIcon.green,
+                        ),
                         style: TextButton.styleFrom(
                           foregroundColor: PabColors.onInkSoft,
                           minimumSize: const Size(0, 44),
                         ),
-                        child: const Text(
+                        label: const Text(
                           'Problema para entrar? Fale no WhatsApp',
                           style: TextStyle(
                             fontSize: 14,
