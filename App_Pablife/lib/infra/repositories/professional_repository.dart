@@ -388,6 +388,21 @@ class ProfessionalRepository extends StrautilsTryThis {
     }
   }
 
+  /// Profissionais que ocultaram o perfil para pacientes novos.
+  Future<Set<String>> getHiddenProfessionalIds() async {
+    try {
+      final rows = await _client
+          .from('tb_professionals')
+          .select('id')
+          .eq('visibility_status', 'low_profile')
+          .isFilter('deleted_at', null);
+      return {for (final row in rows) row['id'] as String};
+    } catch (e) {
+      debugPrint('Visibilidade dos profissionais indisponível: $e');
+      return {};
+    }
+  }
+
   /// Próximo horário livre de cada profissional nas próximas duas semanas
   /// (id do profissional → início, no horário do aparelho).
   Future<Map<String, DateTime>> getNextFreeSlots() async {
