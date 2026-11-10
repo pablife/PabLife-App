@@ -1,14 +1,12 @@
-import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../shared/themes/app_colors.dart';
-import '../../../widgets/app_text_vector.dart';
-import '../../../widgets/design_system/app_text_form_field.dart';
-import '../../../widgets/design_system/app_select_field.dart';
-import '../../../widgets/design_system/edge_button_rounded.dart';
-import '../../../widgets/design_system/text_default.dart';
-import '../controllers/goal_editor_controller.dart';
 
+import '../../../shared/themes/pab_colors.dart';
+import '../../auth/pages/widgets/registration_layout.dart';
+import '../controllers/goal_editor_controller.dart';
+import '../widgets/editor_form_widgets.dart';
+
+/// "Nova meta" / "Editar meta" no visual da repaginação.
 class GoalEditorPage extends StatelessWidget {
   const GoalEditorPage({super.key});
 
@@ -17,257 +15,117 @@ class GoalEditorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<GoalEditorController>(
-      builder: (controller) {
-        return Scaffold(
-          backgroundColor: const AppColor(0xFF00343C),
-          body: SafeArea(
-            child: Column(
+      builder: (c) {
+        return RegistrationLayout(
+          title: c.isEditMode ? 'Editar meta' : 'Nova meta',
+          onBack: c.goBack,
+          fields: [
+            if (!c.isEditMode) _SuggestionsCard(onTap: c.showGoalSuggestions),
+            RegField(
+              label: 'Nome da meta',
+              hint: 'Ex.: Ler 12 livros no ano',
+              controller: c.nameController,
+              onChanged: (_) {},
+              capitalization: TextCapitalization.sentences,
+            ),
+            EditorPickerField(
+              label: 'Prazo final',
+              hint: 'Escolher data',
+              controller: c.deadlineController,
+              onTap: c.selectDeadline,
+              icon: Icons.calendar_today_outlined,
+            ),
+            EditorPriorityPicker(
+              options: GoalEditorController.priorityOptions,
+              value: c.selectedPriority,
+              onChanged: c.onPriorityChanged,
+            ),
+            EditorTextArea(
+              label: 'Estratégia',
+              hint: 'Como você vai chegar lá?',
+              controller: c.strategyController,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildHeader(controller),
-                Expanded(child: _buildContent(controller)),
-                _buildBottomButtons(controller),
+                for (var i = 0; i < c.stepControllers.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 10),
+                  RegField(
+                    label: 'Etapa ${i + 1}',
+                    hint: 'Um passo da meta',
+                    controller: c.stepControllers[i],
+                    onChanged: (_) => c.onStepsChanged(),
+                    capitalization: TextCapitalization.sentences,
+                  ),
+                ],
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: c.canAddAnotherStep ? c.addStepField : null,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      foregroundColor: PabColors.accentText,
+                    ),
+                    icon: const Icon(Icons.add, size: 20),
+                    label: const Text(
+                      'Adicionar etapa',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
+          ],
+          footer: [
+            EditorFooter(
+              onCancel: c.goBack,
+              onSave: c.saveGoal,
+              loading: c.isLoading,
+            ),
+          ],
         );
       },
     );
   }
+}
 
-  Widget _buildHeader(GoalEditorController controller) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+class _SuggestionsCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SuggestionsCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: PabColors.soft,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: const Padding(
+          padding: EdgeInsets.all(14),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              GestureDetector(
-                onTap: controller.goBack,
-                child: Container(
-                  width: 66,
-                  height: 65,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white, width: 1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 32,
-                    ),
+              Icon(Icons.lightbulb_outline, color: PabColors.softText),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Sem ideia? Veja sugestões de metas',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: PabColors.softText,
                   ),
                 ),
               ),
-              const AppTextVector(width: 148, height: 45),
-              GestureDetector(
-                onTap: controller.showGoalSuggestions,
-                child: Container(
-                  width: 66,
-                  height: 65,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white, width: 1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.lightbulb_outline,
-                      color: Colors.white,
-                      size: 32,
-                    ),
-                  ),
-                ),
-              ),
+              Icon(Icons.chevron_right, color: PabColors.softText),
             ],
           ),
         ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 29,
-              height: 29,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.flag_outlined,
-                color: AppColor(0xFF00343C),
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 10),
-            TextDefault(
-              controller.isEditMode ? 'Editar Meta' : 'Nova Meta',
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildContent(GoalEditorController controller) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 10),
-      decoration: const BoxDecoration(
-        color: AppColor(0xFFC1CDFF),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(39),
-          topRight: Radius.circular(39),
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 30),
-        child: Column(
-          children: [
-            AppTextFormField(
-              hintText: 'Nome',
-              controller: controller.nameController,
-            ),
-            const SizedBox(height: 15),
-            GestureDetector(
-              onTap: controller.selectDeadline,
-              child: AbsorbPointer(
-                child: AppTextFormField(
-                  hintText: 'Prazo Final',
-                  labelText: 'Prazo Final',
-                  controller: controller.deadlineController,
-                ),
-              ),
-            ),
-            const SizedBox(height: 15),
-            AppSelectField<String>(
-              labelText: 'Prioridade',
-              hintText: 'Selecione a prioridade',
-              value: controller.selectedPriority,
-              items: GoalEditorController.priorityOptions
-                  .map(
-                    (option) => SelectOption(
-                      value: option['value']!,
-                      label: option['label']!,
-                    ),
-                  )
-                  .toList(),
-              valueFromString: (value) => value,
-              onChanged: controller.onPriorityChanged,
-            ),
-            const SizedBox(height: 15),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: TextFormField(
-                controller: controller.strategyController,
-                maxLines: 5,
-                decoration: InputDecoration(
-                  hintText: 'Estratégia para fazer',
-                  hintStyle: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black.withAlpha(143),
-                    fontFamily: 'PlusJakartaSans',
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black,
-                  fontFamily: 'PlusJakartaSans',
-                ),
-              ),
-            ),
-            const SizedBox(height: 15),
-            _buildStepsSection(controller),
-            const SizedBox(height: 80),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStepsSection(GoalEditorController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Align(
-          alignment: Alignment.centerLeft,
-          child: TextDefault(
-            'Etapas',
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppColor(0xFF00343C),
-          ),
-        ),
-        const SizedBox(height: 8),
-        ...List.generate(controller.stepControllers.length, (index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: AppTextFormField(
-              labelText: 'Etapa ${index + 1}',
-              hintText: 'Etapa ${index + 1}',
-              controller: controller.stepControllers[index],
-              onChanged: (_) => controller.onStepsChanged(),
-            ),
-          );
-        }),
-        const SizedBox(height: 8),
-        Center(
-          child: TextButton.icon(
-            onPressed: controller.canAddAnotherStep
-                ? controller.addStepField
-                : null,
-            style: TextButton.styleFrom(
-              foregroundColor: const AppColor(0xFF00343C),
-            ),
-            icon: const Icon(Icons.add),
-            label: const TextDefault(
-              'Adicionar etapa',
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColor(0xFF00343C),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBottomButtons(GoalEditorController controller) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      color: AppColors.second,
-      child: Row(
-        children: [
-          Expanded(
-            child: EdgeButtonRounded(
-              text: 'Cancelar',
-              onTap: controller.goBack,
-              backgroundColor: const AppColor(0xFF0C8DA1),
-              side: EdgeSide.right,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: EdgeButtonRounded(
-              text: 'Salvar',
-              onTap: controller.saveGoal,
-              isLoading: controller.isLoading,
-              backgroundColor: const AppColor(0xFF00343C),
-              side: EdgeSide.left,
-            ),
-          ),
-        ],
       ),
     );
   }

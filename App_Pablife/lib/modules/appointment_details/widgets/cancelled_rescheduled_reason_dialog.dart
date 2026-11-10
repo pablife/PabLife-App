@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../shared/themes/pab_colors.dart';
+import '../../../widgets/design_system/app_dialog.dart';
+
 /// Caixa da justificativa para marcar a consulta como "Cancelada/remarcada".
 /// Devolve o texto digitado, ou null se o profissional desistir.
 class CancelledRescheduledReasonDialog extends StatefulWidget {
@@ -44,46 +47,55 @@ class _CancelledRescheduledReasonDialogState
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Cancelada/remarcada'),
-      content: SizedBox(
-        width: 420,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Escreva a justificativa da consulta com ${widget.patientName}. '
-              'O horário volta a ficar livre na agenda.',
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
+    return AppDialog(
+      title: 'Cancelada/remarcada',
+      icon: Icons.event_busy_outlined,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Escreva a justificativa da consulta com ${widget.patientName}. '
+            'O horário volta a ficar livre na agenda.',
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            minLines: 3,
+            maxLines: 6,
+            maxLength: 500,
+            textAlign: TextAlign.start,
+            textCapitalization: TextCapitalization.sentences,
+            style: const TextStyle(fontSize: 15, color: PabColors.ink),
+            onChanged: (_) {
+              if (_showError) setState(() => _showError = false);
+            },
+            decoration: InputDecoration(
+              hintText: 'Ex.: paciente pediu para remarcar para outro dia',
+              hintStyle: const TextStyle(color: PabColors.muted),
+              filled: true,
+              fillColor: PabColors.card,
+              errorText: _showError ? 'Escreva a justificativa' : null,
+              enabledBorder: border(PabColors.lineStrong),
+              focusedBorder: border(PabColors.accent, 2),
+              errorBorder: border(PabColors.error),
+              focusedErrorBorder: border(PabColors.error, 2),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _controller,
-              autofocus: true,
-              minLines: 3,
-              maxLines: 6,
-              maxLength: 500,
-              textCapitalization: TextCapitalization.sentences,
-              onChanged: (_) {
-                if (_showError) setState(() => _showError = false);
-              },
-              decoration: InputDecoration(
-                hintText: 'Ex.: paciente pediu para remarcar para outro dia',
-                border: const OutlineInputBorder(),
-                errorText: _showError ? 'Escreva a justificativa' : null,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(onPressed: () => Get.back(), child: const Text('Voltar')),
-        TextButton(
-          onPressed: _confirm,
-          style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-          child: const Text('Confirmar'),
-        ),
-      ],
+      cancelText: 'Voltar',
+      onCancel: () => Get.back<void>(),
+      confirmText: 'Confirmar',
+      onConfirm: _confirm,
+      destructive: true,
     );
   }
 }

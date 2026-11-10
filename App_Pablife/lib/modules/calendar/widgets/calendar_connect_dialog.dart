@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../infra/repositories/calendar_feed_repository.dart';
+import '../../../widgets/design_system/app_dialog.dart';
 import 'wide_agenda_views.dart';
 
 /// Conecta o planner e a trilha de Saúde da mulher ao calendário do celular ou
@@ -123,22 +124,12 @@ class _CalendarConnectDialogState extends State<CalendarConnectDialog> {
     required String message,
     required String action,
   }) async {
-    final result = await showDialog<bool>(
+    final result = await AppDialog.showConfirmation(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Voltar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(action),
-          ),
-        ],
-      ),
+      title: title,
+      message: message,
+      confirmText: action,
+      cancelText: 'Voltar',
     );
     return result ?? false;
   }

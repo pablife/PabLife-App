@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../widgets/editor_form_widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:pablife/modules/calendar/controllers/interactive_calendar_controller.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -31,7 +32,8 @@ class TaskEditorController extends GetxController with LoaderManagerMixin {
   bool isEditMode = false;
 
   bool get isRecurring =>
-      _originalActivity?.activityRecurrenceRuleId != null && isRecurrenceEnabled;
+      _originalActivity?.activityRecurrenceRuleId != null &&
+      isRecurrenceEnabled;
 
   bool get showRecurrenceToggle => !isEditMode || isRecurring;
 
@@ -94,6 +96,7 @@ class TaskEditorController extends GetxController with LoaderManagerMixin {
 
   Future<void> selectDate() async {
     final date = await showDatePicker(
+      builder: pabPickerTheme,
       context: Get.context!,
       initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(2020),
@@ -109,6 +112,7 @@ class TaskEditorController extends GetxController with LoaderManagerMixin {
 
   Future<void> selectTime() async {
     final time = await showTimePicker(
+      builder: pabPickerTheme,
       context: Get.context!,
       initialTime: selectedTime ?? TimeOfDay.now(),
     );
@@ -292,8 +296,9 @@ class TaskEditorController extends GetxController with LoaderManagerMixin {
   }
 
   Future<void> _loadRecurrenceRule(String recurrenceRuleId) async {
-    final response =
-        await _activityRepository.getRecurrenceRuleById(recurrenceRuleId);
+    final response = await _activityRepository.getRecurrenceRuleById(
+      recurrenceRuleId,
+    );
     if (!response.success || response.data == null) {
       AppSnackbar.to.show('Não foi possível carregar a recorrência.');
       return;
@@ -306,11 +311,16 @@ class TaskEditorController extends GetxController with LoaderManagerMixin {
       final parsedStartAt = DateTime.parse(ruleStartAt);
       final localStart = tz.TZDateTime.from(parsedStartAt, tz.local);
       selectedTime = TimeOfDay.fromDateTime(localStart);
-      selectedDate ??= DateTime(localStart.year, localStart.month, localStart.day);
+      selectedDate ??= DateTime(
+        localStart.year,
+        localStart.month,
+        localStart.day,
+      );
     }
 
-    final dbWeekdays =
-        List<int>.from(_recurrenceRule?['by_week_day'] ?? const <int>[]);
+    final dbWeekdays = List<int>.from(
+      _recurrenceRule?['by_week_day'] ?? const <int>[],
+    );
     selectedWeekdays = dbWeekdays
         .map((dbDay) => dbDay == 0 ? 6 : dbDay - 1)
         .toList();
@@ -411,13 +421,14 @@ class TaskEditorController extends GetxController with LoaderManagerMixin {
         final newStartAt = _buildRecurringStartAt(selectedTime!);
         final timezoneName = tz.local.name;
 
-        final recurrenceResponse = await _activityRepository.updateRecurrenceRule(
-          recurrenceRuleId: _originalActivity!.activityRecurrenceRuleId!,
-          startAt: newStartAt,
-          byWeekDay: dbWeekdays,
-          weekStart: 0,
-          timezone: timezoneName,
-        );
+        final recurrenceResponse = await _activityRepository
+            .updateRecurrenceRule(
+              recurrenceRuleId: _originalActivity!.activityRecurrenceRuleId!,
+              startAt: newStartAt,
+              byWeekDay: dbWeekdays,
+              weekStart: 0,
+              timezone: timezoneName,
+            );
 
         if (!recurrenceResponse.success) {
           changeLoading(false);
@@ -444,8 +455,9 @@ class TaskEditorController extends GetxController with LoaderManagerMixin {
         updatedAt: DateTime.now(),
       );
 
-      final updateResponse =
-          await _activityRepository.updateActivity(updatedActivity);
+      final updateResponse = await _activityRepository.updateActivity(
+        updatedActivity,
+      );
 
       if (updateResponse.success && updateResponse.data != null) {
         _activityService.updateActivity(updateResponse.data!);

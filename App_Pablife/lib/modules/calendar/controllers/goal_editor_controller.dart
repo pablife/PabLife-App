@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../widgets/editor_form_widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../../../shared/mixins/loader_manager.dart';
@@ -80,6 +81,7 @@ class GoalEditorController extends GetxController with LoaderManagerMixin {
   Future<void> selectDeadline() async {
     final now = DateTime.now();
     final date = await showDatePicker(
+      builder: pabPickerTheme,
       context: Get.context!,
       initialDate: selectedDeadline ?? now,
       firstDate: now,
@@ -345,7 +347,9 @@ class GoalEditorController extends GetxController with LoaderManagerMixin {
         updatedAt: DateTime.now(),
       );
 
-      final response = await _activityRepository.updateActivity(updatedActivity);
+      final response = await _activityRepository.updateActivity(
+        updatedActivity,
+      );
 
       if (response.success && response.data != null) {
         _activityService.updateActivity(response.data!);
