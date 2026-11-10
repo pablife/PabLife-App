@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:timezone/timezone.dart' as tz;
 
-import '../../../infra/models/activity_model.dart';
-import '../../../infra/repositories/activity_repository.dart';
-import '../../../infra/services/activity_service.dart';
-import '../../../infra/services/auth_service.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../../../shared/utils/app_snackbar.dart';
 import '../../../widgets/pabi/pabi.dart';
 import '../../dashboard/dashboard_controller.dart';
+import '../diary/diary_entry_page.dart';
+import '../diary/women_diary_controller.dart';
 import '../women_health_controller.dart';
 import '../women_health_data.dart';
 
@@ -140,7 +137,7 @@ const _moods = [
 _MoodText? _moodByLabel(String? label) =>
     _moods.where((m) => m.label == label).firstOrNull;
 
-enum _Step { pick, saved, note, noteSaved }
+enum _Step { pick, saved }
 
 const _sleepOptions = [
   ('bem', 'Bem'),
@@ -164,8 +161,8 @@ class MoodCheckInPage extends StatefulWidget {
 
 class _MoodCheckInPageState extends State<MoodCheckInPage> {
   final _women = WomenHealthController.to;
+  final _diary = WomenDiaryController.to;
   final _text = TextEditingController();
-  final _note = TextEditingController();
 
   _Step _step = _Step.pick;
   String? _mood;
@@ -174,11 +171,20 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
   String? _sleep;
   bool _saving = false;
 
+  /// Acabou de salvar (o título agradece); senão só está revendo.
+  bool _justSaved = false;
+
   @override
   void initState() {
     super.initState();
     final today = _women.todayCheckIn;
-    if (_moodByLabel(today) != null) _mood = today;
+    if (_moodByLabel(today) != null) {
+      _mood = today;
+      // Já registrou hoje: abre mostrando o registro, não o formulário.
+      _step = _Step.saved;
+    }
+    // O texto do dia mora no diário.
+    _text.text = _diary.todayEntry?.dayText ?? '';
     _women.todayDetails().then((details) {
       if (!mounted || details == null) return;
       setState(() {
@@ -187,16 +193,13 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
         );
         _energy = details['energy'] as int?;
         _sleep = details['sleep'] as String?;
-        _text.text = details['note'] as String? ?? '';
       });
     });
-    _note.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     _text.dispose();
-    _note.dispose();
     super.dispose();
   }
 
@@ -204,74 +207,46 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
 
   String get _title => switch (_step) {
     _Step.pick => 'Como estou hoje',
-    _Step.saved => 'Obrigada por registrar',
-    _Step.note => 'Nova anotação',
-    _Step.noteSaved => 'Anotação salva',
+    _Step.saved => _justSaved ? 'Obrigada por registrar' : 'Registro de hoje',
   };
 
   Future<void> _save() async {
     final mood = _mood;
     if (mood == null || _saving) return;
     setState(() => _saving = true);
-    final text = _text.text.trim();
     final ok = await _women.saveTodayCheckIn(
       mood: mood,
       symptoms: _symptoms.toList(),
       energy: _energy,
       sleep: _sleep,
-      note: text.isEmpty ? null : text,
     );
+    // "Quer contar algo?" fica no diário, como "Como foi meu dia?".
+    final textOk = ok && await _diary.saveTodayText(_text.text);
     if (!mounted) return;
     setState(() => _saving = false);
     if (!ok) {
       AppSnackbar.to.show('Não foi possível salvar agora. Tente de novo.');
       return;
     }
-    setState(() => _step = _Step.saved);
+    if (!textOk) {
+      AppSnackbar.to.show('O humor foi salvo, mas o texto não. Tente de novo.');
+    }
+    setState(() {
+      _justSaved = true;
+      _step = _Step.saved;
+    });
   }
 
-  /// Guarda a anotação na agenda, no dia de hoje. Só a própria pessoa vê.
-  Future<void> _saveNote() async {
-    final text = _note.text.trim();
-    final userId = AuthService.instance.currentUser?.id;
-    if (text.isEmpty || userId == null || _saving) return;
-    setState(() => _saving = true);
-    final now = DateTime.now();
-    final firstLine = text.split('\n').first.trim();
-    final name = firstLine.length > 60
-        ? '${firstLine.substring(0, 57)}…'
-        : firstLine;
-    final response = await ActivityRepository().createActivity(
-      ActivityModel(
-        id: '',
-        userId: userId,
-        type: 'note',
-        name: name,
-        description: text == firstLine ? null : text,
-        priority: 'medium',
-        dueAt: now.toUtc(),
-        allDay: false,
-        timezone: tz.local.name,
-        createdAt: now,
-        updatedAt: now,
-      ),
-    );
-    if (!mounted) return;
-    setState(() => _saving = false);
-    if (!response.success || response.data == null) {
-      AppSnackbar.to.show(response.message);
-      return;
-    }
-    ActivityService.instance
-      ..addActivity(response.data!)
-      ..refresh();
-    setState(() => _step = _Step.noteSaved);
+  /// A anotação do dia fica no "Meu diário".
+  Future<void> _openDiary() async {
+    await DiaryEntryPage.open();
+    if (mounted) setState(() {});
   }
 
   void _follow(_Go go) {
     switch (go) {
       case _Go.note:
-        setState(() => _step = _Step.note);
+        _openDiary();
       case _Go.mentorias:
         _leaveTo(2);
       case _Go.professionals:
@@ -286,22 +261,11 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
     }
   }
 
-  void _back() {
-    switch (_step) {
-      case _Step.note:
-        setState(() => _step = _Step.saved);
-      case _Step.pick || _Step.saved || _Step.noteSaved:
-        Get.back<void>();
-    }
-  }
+  void _back() => Get.back<void>();
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: _step != _Step.note,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) setState(() => _step = _Step.saved);
-      },
       child: Scaffold(
         backgroundColor: PabColors.background,
         body: SafeArea(
@@ -316,8 +280,6 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
                     child: switch (_step) {
                       _Step.pick => _pick(),
                       _Step.saved => _saved(),
-                      _Step.note => _noteEditor(),
-                      _Step.noteSaved => _noteSaved(),
                     },
                   ),
                   if (_step == _Step.pick)
@@ -328,11 +290,6 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
                           ? 'Escolha como você se sente'
                           : 'Salvar registro',
                       onTap: _mood == null ? null : _save,
-                    ),
-                  if (_step == _Step.note)
-                    _bottomButton(
-                      label: _saving ? 'Salvando…' : 'Salvar anotação',
-                      onTap: _note.text.trim().isEmpty ? null : _saveNote,
                     ),
                 ],
               ),
@@ -768,18 +725,20 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
             side: const BorderSide(color: PabColors.pink),
           ),
           child: InkWell(
-            onTap: () => setState(() => _step = _Step.note),
+            onTap: _openDiary,
             borderRadius: BorderRadius.circular(16),
-            child: const SizedBox(
+            child: SizedBox(
               height: 52,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.edit_note, size: 20, color: PabColors.ink),
-                  SizedBox(width: 8),
+                  const Icon(Icons.edit_note, size: 20, color: PabColors.ink),
+                  const SizedBox(width: 8),
                   Text(
-                    'Escrever uma anotação sobre hoje',
-                    style: TextStyle(
+                    _diary.todayEntry == null
+                        ? 'Escrever no meu diário'
+                        : 'Ver no meu diário',
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                       color: PabColors.ink,
@@ -802,129 +761,6 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
           child: const Text(
             'Editar o registro de hoje',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _noteEditor() {
-    final current = _current ?? _moods[1];
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-      children: [
-        Row(
-          children: [
-            Pabi(mood: current.face, women: true, size: 56),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                current.prompt,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: PabColors.ink,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        const Text(
-          'Para começar',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: PabColors.muted,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final starter in current.starters)
-              _Pill(
-                label: '${starter.trim()}…',
-                selected: false,
-                onTap: () {
-                  final before = _note.text;
-                  _note.text = before.isEmpty ? starter : '$before\n$starter';
-                  _note.selection = TextSelection.collapsed(
-                    offset: _note.text.length,
-                  );
-                },
-              ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        _TextBox(
-          controller: _note,
-          hint: 'Escreva aqui',
-          lines: 8,
-          autofocus: true,
-        ),
-        const SizedBox(height: 12),
-        const _PrivacyLine(
-          text: 'A anotação fica na sua agenda, no dia de hoje. Só você vê.',
-        ),
-      ],
-    );
-  }
-
-  Widget _noteSaved() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-      children: [
-        Center(
-          child: Pabi(
-            mood: _current?.face ?? PabiMood.feliz,
-            women: true,
-            size: 150,
-          ),
-        ),
-        const SizedBox(height: 12),
-        const Text(
-          'Anotação guardada na sua agenda.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: PabColors.ink,
-          ),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Você encontra em Agenda, no dia de hoje.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, color: PabColors.muted),
-        ),
-        const SizedBox(height: 20),
-        FilledButton(
-          onPressed: () => _leaveTo(1),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size(0, 52),
-            backgroundColor: PabColors.pink,
-            foregroundColor: PabColors.ink,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          child: const Text(
-            'Abrir agenda',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextButton(
-          onPressed: () => Get.back<void>(),
-          style: TextButton.styleFrom(
-            minimumSize: const Size(0, 48),
-            foregroundColor: PabColors.ink,
-          ),
-          child: const Text(
-            'Voltar ao Dashboard',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -1141,15 +977,8 @@ class _Box extends StatelessWidget {
 class _TextBox extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
-  final int lines;
-  final bool autofocus;
 
-  const _TextBox({
-    required this.controller,
-    required this.hint,
-    this.lines = 3,
-    this.autofocus = false,
-  });
+  const _TextBox({required this.controller, required this.hint});
 
   @override
   Widget build(BuildContext context) {
@@ -1159,9 +988,8 @@ class _TextBox extends StatelessWidget {
     );
     return TextField(
       controller: controller,
-      autofocus: autofocus,
-      minLines: lines,
-      maxLines: lines + 4,
+      minLines: 3,
+      maxLines: 7,
       maxLength: 2000,
       textCapitalization: TextCapitalization.sentences,
       style: const TextStyle(fontSize: 15, color: PabColors.ink),
@@ -1180,9 +1008,9 @@ class _TextBox extends StatelessWidget {
 }
 
 class _PrivacyLine extends StatelessWidget {
-  final String text;
+  static const text = 'Seus registros são privados. Só você vê.';
 
-  const _PrivacyLine({this.text = 'Seus registros são privados. Só você vê.'});
+  const _PrivacyLine();
 
   @override
   Widget build(BuildContext context) {

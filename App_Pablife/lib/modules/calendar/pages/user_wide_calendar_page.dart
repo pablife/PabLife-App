@@ -1014,9 +1014,14 @@ class _CycleCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                'Registrar como estou hoje',
-                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+              child: Text(
+                women.todayCheckIn == null
+                    ? 'Registrar como estou hoje'
+                    : 'Hoje: ${women.todayCheckIn} · ver registro',
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
