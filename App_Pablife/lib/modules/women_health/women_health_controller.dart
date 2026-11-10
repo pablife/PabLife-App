@@ -191,29 +191,14 @@ class WomenHealthController extends GetxController {
     return true;
   }
 
-  /// "Sair do modo": só acontece quando a usuária confirma. Pode manter os
-  /// registros de humor ou apagar tudo o que foi guardado.
-  Future<void> exit({required bool eraseData}) async {
+  /// "Sair do modo": só acontece quando a usuária confirma. Os registros
+  /// (ciclo, respostas e humor) continuam guardados na conta.
+  Future<void> exit() async {
     trail = null;
     AppPalette.apply(false);
     UserPreferencesRepository().saveTheme(rose: false);
-    if (!eraseData) {
-      update();
-      await _save();
-      return;
-    }
-    lastPeriod = null;
-    answers = {};
-    checkIns = {};
     update();
-    final userId = _userId;
-    if (userId == null) return;
-    try {
-      await _repository.deleteAll(userId);
-    } catch (e) {
-      debugPrint('Erro ao apagar Saúde da mulher: $e');
-      AppSnackbar.to.show('Não foi possível apagar. Tente novamente.');
-    }
+    await _save();
   }
 
   void setShowBand(bool value) {

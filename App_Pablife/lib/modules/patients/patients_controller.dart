@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../widgets/design_system/app_dialog.dart';
 
 import '../../infra/models/professional_appointment_model.dart';
 import '../../infra/repositories/appointment_repository.dart';
@@ -125,21 +126,14 @@ class PatientsController extends GetxController with LoaderManagerMixin {
     if (appointment == null) return;
 
     final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Marcar como concluída'),
+      AppDialog(
+        title: 'Marcar como concluída',
+        icon: Icons.check_circle_outline,
         content: Text(
           'Deseja marcar a consulta com ${appointment.patientName} como concluída?',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: const Text('Confirmar'),
-          ),
-        ],
+        cancelText: 'Voltar',
+        confirmText: 'Confirmar',
       ),
     );
 
@@ -161,22 +155,15 @@ class PatientsController extends GetxController with LoaderManagerMixin {
     if (appointment == null) return;
 
     final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Cancelar consulta'),
+      AppDialog(
+        title: 'Cancelar consulta',
+        icon: Icons.event_busy_outlined,
+        destructive: true,
         content: Text(
           'Deseja cancelar a consulta com ${appointment.patientName}?',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Não'),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Cancelar'),
-          ),
-        ],
+        cancelText: 'Voltar',
+        confirmText: 'Cancelar consulta',
       ),
     );
 

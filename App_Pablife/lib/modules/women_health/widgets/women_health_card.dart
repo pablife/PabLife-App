@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../widgets/design_system/app_dialog.dart';
+
 import '../pages/women_health_flow_page.dart';
 import '../women_health_controller.dart';
 import '../women_health_data.dart';
@@ -14,37 +16,24 @@ class WomenHealthCard extends StatelessWidget {
   Future<void> _confirmExit(BuildContext context) =>
       confirmExit(context, controller);
 
-  /// Pergunta antes de sair do modo (usado também no Perfil).
+  /// Pergunta antes de sair do modo (usado também no Perfil). Os registros
+  /// sempre ficam guardados: ao voltar para o modo, está tudo lá.
   static Future<void> confirmExit(
     BuildContext context,
     WomenHealthController controller,
   ) async {
-    final choice = await showDialog<String>(
+    final confirmed = await AppDialog.showConfirmation(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Sair do modo Saúde da mulher?'),
-        content: const Text(
-          'O app volta para as cores normais. Seus registros podem ficar '
-          'guardados na sua conta ou ser apagados.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Continuar no modo'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop('keep'),
-            child: const Text('Sair e manter registros'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop('erase'),
-            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-            child: const Text('Sair e apagar tudo'),
-          ),
-        ],
-      ),
+      title: 'Voltar para o visual normal?',
+      message:
+          'O app volta para as cores normais. Seus registros continuam '
+          'guardados na sua conta e aparecem de novo quando você voltar '
+          'para Saúde da mulher.',
+      confirmText: 'Voltar ao normal',
+      cancelText: 'Continuar',
+      icon: Icons.palette_outlined,
     );
-    if (choice != null) await controller.exit(eraseData: choice == 'erase');
+    if (confirmed == true) await controller.exit();
   }
 
   @override
