@@ -16,6 +16,7 @@ import 'appointment_outcome.dart';
 import 'professional_area_controller.dart';
 import 'professional_dashboard_page.dart' show ProfessionalDashboardPage, hhmm;
 import 'professional_room_page.dart';
+import 'shared_diary_section.dart';
 
 /// Um paciente do profissional, montado a partir das consultas.
 class PatientSummary {
@@ -650,6 +651,7 @@ class _PatientDetailState extends State<_PatientDetail> {
             ),
           ],
         ),
+        SharedDiarySection(patientUserId: p.id),
         const SizedBox(height: 18),
         const Row(
           children: [

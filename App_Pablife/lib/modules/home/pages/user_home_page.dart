@@ -18,6 +18,7 @@ import '../../women_health/women_health_data.dart';
 import '../../../infra/repositories/daily_verse_repository.dart';
 import '../../consultations/my_consultations_page.dart';
 import '../controllers/user_home_controller.dart';
+import '../../women_health/diary/women_diary_card.dart';
 
 const _months = [
   'jan',
@@ -96,6 +97,7 @@ class _HomeBody extends StatelessWidget {
     final goals = _GoalsCard(controller: c);
     final tasks = _TasksCard(controller: c);
     final cycle = _womenMode ? _CycleCard(women: women!) : null;
+    final diary = _womenMode ? WomenDiaryCard(women: women!) : null;
     final verse = c.showDailyVerse ? c.dailyVerse : null;
     final verseCard = verse == null ? null : _VerseCard(verse: verse);
 
@@ -104,6 +106,7 @@ class _HomeBody extends StatelessWidget {
       content = [
         if (verseCard != null) ...[verseCard, gap],
         if (cycle != null) ...[cycle, gap],
+        if (diary != null) ...[diary, gap],
         _Grid(
           minItemWidth: 260,
           children: [
@@ -121,6 +124,7 @@ class _HomeBody extends StatelessWidget {
       content = [
         if (verseCard != null) ...[verseCard, gap],
         if (cycle != null) ...[cycle, gap],
+        if (diary != null) ...[diary, gap],
         appointment,
         if (!_womenMode) ...[gap, balance],
         gap,
@@ -1070,10 +1074,16 @@ class _CycleCard extends StatelessWidget {
         children: [
           if (followsCycle) ..._cycle(w) else ..._summary(w),
           const SizedBox(height: 12),
-          _PrimaryButton(
-            label: 'Registrar como estou hoje',
-            onTap: () => showMoodSheet(context, w),
-          ),
+          if (w.todayCheckIn == null)
+            _PrimaryButton(
+              label: 'Registrar como estou hoje',
+              onTap: () => showMoodSheet(context, w),
+            )
+          else
+            _MoodDone(
+              mood: w.todayCheckIn!,
+              onTap: () => showMoodSheet(context, w),
+            ),
           if (followsCycle) ...[
             const SizedBox(height: 10),
             const Text(
@@ -1273,6 +1283,75 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Humor de hoje já registrado: mostra o registro em vez de pedir de novo.
+class _MoodDone extends StatelessWidget {
+  final String mood;
+  final VoidCallback onTap;
+
+  const _MoodDone({required this.mood, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: PabColors.soft,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 6, 12, 6),
+            child: Row(
+              children: [
+                Pabi(mood: PabiMood.fromCheckIn(mood), women: true, size: 36),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Registro de hoje feito',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: PabColors.softText,
+                        ),
+                      ),
+                      Text(
+                        mood,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: PabColors.ink,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.check_circle,
+                  size: 20,
+                  color: PabColors.accentText,
+                ),
+                const SizedBox(width: 6),
+                const Text(
+                  'Ver',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: PabColors.accentText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

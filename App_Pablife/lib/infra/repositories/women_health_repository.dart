@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'women_diary_repository.dart';
+
 /// Dados do modo Saúde da mulher. As regras do banco só deixam a própria
 /// usuária ler e alterar estas tabelas.
 class WomenHealthRepository {
@@ -49,7 +51,7 @@ class WomenHealthRepository {
     });
   }
 
-  /// Sintomas, energia, sono e texto do dia. Gravado à parte: se o banco
+  /// Sintomas, energia e sono do dia (o texto do dia vai para o diário). Gravado à parte: se o banco
   /// ainda não tiver essas colunas, o humor continua salvo.
   Future<bool> saveCheckInDetails(
     String userId,
@@ -57,17 +59,11 @@ class WomenHealthRepository {
     required List<String> symptoms,
     required int? energy,
     required String? sleep,
-    required String? note,
   }) async {
     try {
       await _client
           .from(_checkIns)
-          .update({
-            'symptoms': symptoms,
-            'energy': energy,
-            'sleep': sleep,
-            'note': note,
-          })
+          .update({'symptoms': symptoms, 'energy': energy, 'sleep': sleep})
           .eq('user_id', userId)
           .eq('day', day);
       return true;
@@ -85,7 +81,7 @@ class WomenHealthRepository {
     try {
       return await _client
           .from(_checkIns)
-          .select('symptoms, energy, sleep, note')
+          .select('symptoms, energy, sleep')
           .eq('user_id', userId)
           .eq('day', day)
           .maybeSingle();
@@ -102,7 +98,9 @@ class WomenHealthRepository {
         .eq('day', day);
   }
 
+  /// Apaga tudo da Saúde da Mulher da usuária, inclusive o "Meu diário".
   Future<void> deleteAll(String userId) async {
+    await WomenDiaryRepository().deleteAll(userId);
     await _client.from(_checkIns).delete().eq('user_id', userId);
     await _client.from(_profiles).delete().eq('user_id', userId);
   }

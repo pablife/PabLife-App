@@ -285,13 +285,13 @@ class WomenHealthController extends GetxController {
     return _repository.getCheckInDetails(userId, _dayKey(_today));
   }
 
-  /// Salva o registro completo de hoje. Retorna false se nem o humor salvou.
+  /// Salva o registro de hoje (o texto do dia vai para o diário, à parte).
+  /// Retorna false se nem o humor salvou.
   Future<bool> saveTodayCheckIn({
     required String mood,
     required List<String> symptoms,
     required int? energy,
     required String? sleep,
-    required String? note,
   }) async {
     final key = _dayKey(_today);
     final previous = checkIns[key];
@@ -317,7 +317,6 @@ class WomenHealthController extends GetxController {
       symptoms: symptoms,
       energy: energy,
       sleep: sleep,
-      note: note,
     );
     return true;
   }
@@ -333,6 +332,15 @@ class WomenHealthController extends GetxController {
   /// Dia do ciclo (1 = primeiro dia da menstruação).
   int cycleDay(DateTime day) =>
       (_dateOnly(day).difference(lastPeriod!).inDays % cycleLength) + 1;
+
+  /// Dia do ciclo para o diário, ou null quando ela não acompanha o ciclo
+  /// (gestação, menopausa, sem data da última menstruação).
+  int? cycleDayOrNull(DateTime day) {
+    if (lastPeriod == null) return null;
+    if (trail != WomenTrail.cycle && trail != WomenTrail.conceive) return null;
+    if (_dateOnly(day).isBefore(lastPeriod!)) return null;
+    return cycleDay(day);
+  }
 
   /// A ovulação costuma vir cerca de 14 dias antes da próxima menstruação.
   int get _ovulationDay => cycleLength - 14;
