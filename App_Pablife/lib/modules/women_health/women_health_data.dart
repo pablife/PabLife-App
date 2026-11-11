@@ -343,3 +343,32 @@ const womenCare = {
 const womenDisclaimer =
     'As previsões são estimativas. O Pablife não substitui consulta médica e '
     'não é método contraceptivo.';
+
+/// Registro do dia: menstruação, tentativa ou teste.
+class WomenLog {
+  final DateTime day;
+  final String kind;
+  final String? value;
+
+  const WomenLog(this.day, this.kind, this.value);
+
+  static const periodStart = 'period_start';
+  static const periodEnd = 'period_end';
+  static const noPeriod = 'no_period';
+  static const attempt = 'attempt';
+  static const ovulationTest = 'ovulation_test';
+  static const pregnancyTest = 'pregnancy_test';
+}
+
+/// Um ciclo do histórico: começo, fim da menstruação (se registrado) e
+/// tamanho (até o próximo começo).
+class WomenCycleRecord {
+  final DateTime start;
+  final DateTime? periodEnd;
+  final int? length;
+
+  const WomenCycleRecord(this.start, this.periodEnd, this.length);
+
+  int? get periodDays =>
+      periodEnd == null ? null : periodEnd!.difference(start).inDays + 1;
+}

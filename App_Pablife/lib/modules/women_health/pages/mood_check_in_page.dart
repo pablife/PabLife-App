@@ -12,7 +12,7 @@ import '../women_health_controller.dart';
 import '../women_health_data.dart';
 
 /// Para onde leva a sugestão depois do registro.
-enum _Go { note, mentorias, professionals }
+enum _Go { note, professionals }
 
 /// O que a Pabi diz para cada humor (canvas "Como estou hoje").
 class _MoodText {
@@ -56,9 +56,9 @@ const _moods = [
     PabiMood.tranquila,
     'Que bom te ver em paz.',
     'Aproveite essa calma. Ela é sua.',
-    'Uma mentoria para manter o ritmo',
-    'Ver',
-    _Go.mentorias,
+    'Anotar o que trouxe essa calma',
+    'Anotar',
+    _Go.note,
     'O que trouxe essa calma?',
     ['Hoje eu consegui ', 'Me ajudou ', 'Quero manter '],
   ),
@@ -67,9 +67,9 @@ const _moods = [
     PabiMood.cansada,
     'Dia pesado, né? Tudo bem.',
     'Descansar também é cuidar de você.',
-    'Uma pausa guiada de 5 minutos',
-    'Pausar',
-    _Go.mentorias,
+    'Anotar o que pesou hoje',
+    'Anotar',
+    _Go.note,
     'O que pesou hoje?',
     ['Estou cansada porque ', 'Eu precisava de ', 'Amanhã quero '],
   ),
@@ -89,9 +89,9 @@ const _moods = [
     PabiMood.ansiosa,
     'Respira comigo: 4 segundos dentro, 4 fora.',
     'Um passo de cada vez. Você está indo bem.',
-    'Respiração guiada de 2 minutos',
-    'Respirar',
-    _Go.mentorias,
+    'Escrever o que está na sua cabeça',
+    'Escrever',
+    _Go.note,
     'O que está na sua cabeça agora?',
     [
       'Estou preocupada com ',
@@ -126,13 +126,82 @@ const _moods = [
     PabiMood.sensivel,
     'Dias sensíveis pedem gentileza.',
     'Seja gentil com você mesma hoje.',
-    'Uma mentoria de autocuidado',
-    'Ver',
-    _Go.mentorias,
+    'Escrever o que você está sentindo',
+    'Escrever',
+    _Go.note,
     'O que você está sentindo?',
     ['Hoje eu me senti ', 'Eu preciso de ', 'Quero ser gentil comigo e '],
   ),
 ];
+
+/// Conselhos para cada humor: três aparecem por vez e "Ver outros
+/// conselhos" mostra os seguintes.
+const _advice = <String, List<String>>{
+  'Feliz': [
+    'Anote três coisas que deram certo hoje. Lembrar delas ajuda nos dias difíceis.',
+    'Repare no que trouxe esse bem-estar (sono, companhia, movimento) e tente repetir.',
+    'Compartilhe a alegria: mande uma mensagem para alguém que faz parte desse momento.',
+    'Aproveite a energia para algo que você vem adiando, sem se sobrecarregar.',
+    'Celebre as pequenas conquistas. Elas contam tanto quanto as grandes.',
+    'Mexa o corpo de um jeito gostoso: dançar uma música já vale.',
+  ],
+  'Tranquila': [
+    'Guarde esse estado: respire fundo três vezes e repare como o corpo está.',
+    'Use a calma para organizar o amanhã sem pressa.',
+    'Uma caminhada leve ou um alongamento ajudam a manter o ritmo.',
+    'Diminua as telas à noite para proteger o sono e essa paz.',
+    'Reserve um tempo só seu: um livro, um chá, uma música.',
+    'Anote o que trouxe essa calma, para voltar a ela quando precisar.',
+  ],
+  'Cansada': [
+    'Faça uma pausa de 5 minutos: feche os olhos, solte os ombros e respire devagar.',
+    'Beba um copo de água. A falta de água aumenta o cansaço.',
+    'Escolha só uma ou duas tarefas importantes hoje e deixe o resto para amanhã.',
+    'Se puder, durma mais cedo e deixe o celular longe da cama.',
+    'Um lanche com proteína e fruta dá energia mais estável do que doce.',
+    'Peça ajuda: dividir tarefas também é cuidar de você. Se o cansaço durar semanas, converse com um médico.',
+  ],
+  'Triste': [
+    'Permita-se sentir. Chorar e desacelerar fazem parte.',
+    'Converse com alguém de confiança, nem que seja uma mensagem curta.',
+    'Abra a janela ou saia um pouco: a luz do dia ajuda o humor.',
+    'Faça uma coisa pequena e gentil por você: um banho quente, uma música, um chá.',
+    'Evite decisões grandes hoje. Elas podem esperar.',
+    'Se a tristeza durar mais de duas semanas, uma psicóloga pode te ajudar.',
+  ],
+  'Ansiosa': [
+    'Respire assim: puxe o ar em 4 segundos, segure 4 e solte em 6. Repita 5 vezes.',
+    'Faça o 5-4-3-2-1: repare em 5 coisas que vê, 4 que toca, 3 que ouve, 2 cheiros e 1 sabor.',
+    'Escreva o que preocupa e separe o que está nas suas mãos do que não está.',
+    'Divida o que assusta em um primeiro passo bem pequeno e comece por ele.',
+    'Hoje, diminua o café e as notícias.',
+    'Caminhe 10 minutos: mexer o corpo diminui a tensão.',
+  ],
+  'Irritada': [
+    'Antes de responder alguém, respire fundo e conte até dez.',
+    'Gaste a energia: uma caminhada rápida ou um alongamento baixam a tensão.',
+    'Escreva o que aconteceu, sem filtro. Depois decida se vale conversar.',
+    'Lave o rosto com água fria. Ajuda o corpo a desacelerar.',
+    'Repare se a fome, o sono ou a TPM estão pesando hoje.',
+    'Se for conversar, fale do que você sentiu ("eu me senti…"), não de acusações.',
+  ],
+  'Com cólica': [
+    'Uma bolsa de água morna na barriga ou nas costas alivia a dor.',
+    'Beba água e prefira chás quentes, como camomila ou gengibre.',
+    'Movimentos leves ajudam: alongar, caminhar ou ioga suave.',
+    'Deitar de lado com as pernas dobradas pode aliviar.',
+    'Nestes dias, diminua sal, café e doces: ajudam no inchaço.',
+    'Remédio, só com orientação. Se a dor for forte ou diferente, procure a ginecologista.',
+  ],
+  'Sensível': [
+    'Fale com você como falaria com uma amiga querida.',
+    'Diminua os estímulos: menos barulho e telas, mais conforto.',
+    'Diga não ao que pode esperar. Hoje você pode ir devagar.',
+    'Um abraço, um banho quente ou uma coberta já fazem diferença.',
+    'Dar nome ao que sente ajuda a entender: escreva umas linhas.',
+    'Nos dias antes da menstruação é comum ficar mais sensível. Isso passa.',
+  ],
+};
 
 _MoodText? _moodByLabel(String? label) =>
     _moods.where((m) => m.label == label).firstOrNull;
@@ -247,8 +316,6 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
     switch (go) {
       case _Go.note:
         _openDiary();
-      case _Go.mentorias:
-        _leaveTo(2);
       case _Go.professionals:
         _leaveTo(3);
     }
@@ -613,31 +680,19 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
         ),
         if (current != null) ...[
           const SizedBox(height: 14),
+          _AdviceCard(tips: _advice[current.label] ?? const []),
+          const SizedBox(height: 12),
           _Card(
             child: Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Sugestão para agora',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: PabColors.muted,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        current.tip,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: PabColors.ink,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    current.tip,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: PabColors.ink,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -1155,6 +1210,103 @@ class _Week extends StatelessWidget {
                 ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Conselhos para hoje": três por vez; "Ver outros conselhos" mostra os
+/// seguintes.
+class _AdviceCard extends StatefulWidget {
+  final List<String> tips;
+
+  const _AdviceCard({required this.tips});
+
+  @override
+  State<_AdviceCard> createState() => _AdviceCardState();
+}
+
+class _AdviceCardState extends State<_AdviceCard> {
+  int _page = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final tips = widget.tips;
+    if (tips.isEmpty) return const SizedBox.shrink();
+    final pages = (tips.length / 3).ceil();
+    final shown = tips.skip((_page % pages) * 3).take(3).toList();
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      decoration: BoxDecoration(
+        color: PabColors.soft,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                size: 20,
+                color: PabColors.softText,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Conselhos para hoje',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: PabColors.softText,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          for (final tip in shown)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    margin: const EdgeInsets.only(top: 7, right: 10),
+                    decoration: const BoxDecoration(
+                      color: PabColors.menstruation,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      tip,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.5,
+                        color: PabColors.ink,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (pages > 1)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => setState(() => _page++),
+                style: TextButton.styleFrom(
+                  foregroundColor: PabColors.softText,
+                ),
+                icon: const Icon(Icons.autorenew_rounded, size: 18),
+                label: const Text(
+                  'Ver outros conselhos',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            ),
         ],
       ),
     );

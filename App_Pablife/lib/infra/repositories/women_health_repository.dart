@@ -9,6 +9,41 @@ class WomenHealthRepository {
 
   static const _profiles = 'tb_women_health_profiles';
   static const _checkIns = 'tb_women_health_check_ins';
+  static const _logs = 'tb_women_health_logs';
+
+  /// Registros de menstruação, tentativas e testes (mais novos primeiro).
+  Future<List<Map<String, dynamic>>> getLogs(String userId) async {
+    final rows = await _client
+        .from(_logs)
+        .select('day, kind, value, note')
+        .eq('user_id', userId)
+        .order('day', ascending: false)
+        .limit(2000);
+    return [for (final r in rows) Map<String, dynamic>.from(r)];
+  }
+
+  Future<void> saveLog(
+    String userId,
+    String day,
+    String kind, {
+    String? value,
+  }) {
+    return _client.from(_logs).upsert({
+      'user_id': userId,
+      'day': day,
+      'kind': kind,
+      'value': value,
+    }, onConflict: 'user_id,day,kind');
+  }
+
+  Future<void> deleteLog(String userId, String day, String kind) {
+    return _client
+        .from(_logs)
+        .delete()
+        .eq('user_id', userId)
+        .eq('day', day)
+        .eq('kind', kind);
+  }
 
   Future<Map<String, dynamic>?> getProfile(String userId) {
     return _client.from(_profiles).select().eq('user_id', userId).maybeSingle();
@@ -102,6 +137,9 @@ class WomenHealthRepository {
   Future<void> deleteAll(String userId) async {
     await WomenDiaryRepository().deleteAll(userId);
     await _client.from(_checkIns).delete().eq('user_id', userId);
+    try {
+      await _client.from(_logs).delete().eq('user_id', userId);
+    } catch (_) {}
     await _client.from(_profiles).delete().eq('user_id', userId);
   }
 }
