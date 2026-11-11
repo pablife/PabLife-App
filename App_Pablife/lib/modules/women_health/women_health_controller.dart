@@ -12,6 +12,7 @@ import '../../infra/repositories/user_preferences_repository.dart';
 import '../../shared/themes/app_palette.dart';
 import '../../shared/utils/app_snackbar.dart';
 import '../auth/entry_visual.dart';
+import 'pregnancy/pregnancy_controller.dart';
 import 'women_health_data.dart';
 
 /// Modo Saúde da mulher. Os dados ficam na conta da usuária, em tabelas que
@@ -192,12 +193,22 @@ class WomenHealthController extends GetxController {
     AppPalette.apply(true);
     UserPreferencesRepository().saveTheme(rose: true);
     update();
+    // Gestação: cria (ou atualiza a DUM) do acompanhamento; ao trocar de
+    // trilha, encerra o anterior (para os avisos semanais).
+    if (newTrail == WomenTrail.pregnancy) {
+      PregnancyController.to.load();
+    } else if (previousTrail == WomenTrail.pregnancy) {
+      PregnancyController.to.endPregnancy();
+    }
     return true;
   }
 
   /// "Sair do modo": só acontece quando a usuária confirma. Os registros
   /// (ciclo, respostas e humor) continuam guardados na conta.
   Future<void> exit() async {
+    if (trail == WomenTrail.pregnancy) {
+      await PregnancyController.to.endPregnancy();
+    }
     trail = null;
     AppPalette.apply(false);
     UserPreferencesRepository().saveTheme(rose: false);
