@@ -56,6 +56,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/pabi/
     - assets/pages/onboarding/
     - assets/pages/auth/
     - assets/pages/consultations/

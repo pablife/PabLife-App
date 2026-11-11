@@ -39,12 +39,14 @@ class _MoodText {
   );
 }
 
+// Mensagens da PABI do canvas "PABI · Expressões e mensagens" (sugestões que
+// devem ser revisadas por um psicólogo da equipe).
 const _moods = [
   _MoodText(
     'Feliz',
     PabiMood.feliz,
-    'Que bom! Seu sorriso aparece aqui.',
-    'Que dia bom! Guarde esse momento.',
+    'Que alegria! Guarde esse momento, ele é seu.',
+    'Que alegria! Guarde esse momento, ele é seu.',
     'Anotar o que te fez bem',
     'Anotar',
     _Go.note,
@@ -52,21 +54,21 @@ const _moods = [
     ['Hoje eu me senti bem porque ', 'Sou grata por ', 'Quero repetir '],
   ),
   _MoodText(
-    'Tranquila',
-    PabiMood.tranquila,
-    'Que bom te ver em paz.',
-    'Aproveite essa calma. Ela é sua.',
-    'Anotar o que trouxe essa calma',
+    'Bem',
+    PabiMood.bem,
+    'Que bom! Aproveite esse dia leve.',
+    'Que bom! Aproveite esse dia leve.',
+    'Anotar o que deixou o dia leve',
     'Anotar',
     _Go.note,
-    'O que trouxe essa calma?',
+    'O que deixou o dia leve?',
     ['Hoje eu consegui ', 'Me ajudou ', 'Quero manter '],
   ),
   _MoodText(
     'Cansada',
     PabiMood.cansada,
-    'Dia pesado, né? Tudo bem.',
-    'Descansar também é cuidar de você.',
+    'Descanse um pouquinho, você merece.',
+    'Descanse um pouquinho, você merece.',
     'Anotar o que pesou hoje',
     'Anotar',
     _Go.note,
@@ -74,24 +76,24 @@ const _moods = [
     ['Estou cansada porque ', 'Eu precisava de ', 'Amanhã quero '],
   ),
   _MoodText(
-    'Triste',
-    PabiMood.triste,
-    'Sinto muito que hoje esteja difícil.',
-    'Obrigada por contar. Hoje não precisa ser perfeito.',
-    'Conversar com uma psicóloga',
-    'Agendar',
-    _Go.professionals,
-    'Quer contar o que aconteceu?',
-    ['Hoje eu senti ', 'O que me deixou assim foi ', 'Eu gostaria de '],
+    'Enjoada',
+    PabiMood.enjoada,
+    'Goles de água e refeições leves podem ajudar. Se continuar, fale com seu médico.',
+    'Goles de água e refeições leves podem ajudar. Se continuar, fale com seu médico.',
+    'Anotar quando o enjoo aparece',
+    'Anotar',
+    _Go.note,
+    'Quando o enjoo aparece?',
+    ['O enjoo começou ', 'Piora quando ', 'O que aliviou foi '],
   ),
   _MoodText(
     'Ansiosa',
     PabiMood.ansiosa,
-    'Respira comigo: 4 segundos dentro, 4 fora.',
-    'Um passo de cada vez. Você está indo bem.',
-    'Escrever o que está na sua cabeça',
-    'Escrever',
-    _Go.note,
+    'Respire fundo, uma coisa de cada vez. Quer conversar com um psicólogo?',
+    'Respire fundo, uma coisa de cada vez. Quer conversar com um psicólogo?',
+    'Conversar com um psicólogo',
+    'Ver',
+    _Go.professionals,
     'O que está na sua cabeça agora?',
     [
       'Estou preocupada com ',
@@ -100,37 +102,37 @@ const _moods = [
     ],
   ),
   _MoodText(
-    'Irritada',
-    PabiMood.irritada,
-    'Tudo bem sentir raiva.',
-    'Escrever sobre o que aconteceu pode aliviar.',
-    'Desabafar numa anotação',
+    'Emotiva',
+    PabiMood.emotiva,
+    'Sentir muito também faz parte. Estou aqui com você.',
+    'Sentir muito também faz parte. Estou aqui com você.',
+    'Escrever o que você está sentindo',
     'Escrever',
     _Go.note,
-    'O que aconteceu?',
-    ['O que aconteceu foi ', 'Eu senti ', 'Da próxima vez eu '],
-  ),
-  _MoodText(
-    'Com cólica',
-    PabiMood.colica,
-    'Ai, cólica! Uma bolsa morna pode ajudar.',
-    'Vá com calma hoje. Seu corpo está trabalhando.',
-    'Registrar a intensidade da dor',
-    'Registrar',
-    _Go.note,
-    'Como está a dor hoje?',
-    ['A dor começou ', 'O que aliviou foi ', 'A intensidade de 0 a 10 é '],
+    'O que mexeu com você hoje?',
+    ['Hoje eu senti ', 'Me emocionei com ', 'Eu preciso de '],
   ),
   _MoodText(
     'Sensível',
     PabiMood.sensivel,
-    'Dias sensíveis pedem gentileza.',
-    'Seja gentil com você mesma hoje.',
+    'Você sente fundo, e tudo bem. Vá com calma e cuide de você.',
+    'Você sente fundo, e tudo bem. Vá com calma e cuide de você.',
     'Escrever o que você está sentindo',
     'Escrever',
     _Go.note,
     'O que você está sentindo?',
     ['Hoje eu me senti ', 'Eu preciso de ', 'Quero ser gentil comigo e '],
+  ),
+  _MoodText(
+    'Triste',
+    PabiMood.triste,
+    'Sinto muito. Você não precisa passar por isso sozinha. Que tal falar com um psicólogo da Pablife?',
+    'Sinto muito. Você não precisa passar por isso sozinha. Que tal falar com um psicólogo da Pablife?',
+    'Conversar com um psicólogo da Pablife',
+    'Ver',
+    _Go.professionals,
+    'Quer contar o que aconteceu?',
+    ['Hoje eu senti ', 'O que me deixou assim foi ', 'Eu gostaria de '],
   ),
 ];
 
@@ -145,13 +147,13 @@ const _advice = <String, List<String>>{
     'Celebre as pequenas conquistas. Elas contam tanto quanto as grandes.',
     'Mexa o corpo de um jeito gostoso: dançar uma música já vale.',
   ],
-  'Tranquila': [
+  'Bem': [
     'Guarde esse estado: respire fundo três vezes e repare como o corpo está.',
-    'Use a calma para organizar o amanhã sem pressa.',
+    'Use o dia leve para organizar o amanhã sem pressa.',
     'Uma caminhada leve ou um alongamento ajudam a manter o ritmo.',
-    'Diminua as telas à noite para proteger o sono e essa paz.',
+    'Diminua as telas à noite para proteger o sono.',
     'Reserve um tempo só seu: um livro, um chá, uma música.',
-    'Anote o que trouxe essa calma, para voltar a ela quando precisar.',
+    'Anote o que deixou o dia leve, para voltar a isso quando precisar.',
   ],
   'Cansada': [
     'Faça uma pausa de 5 minutos: feche os olhos, solte os ombros e respire devagar.',
@@ -177,21 +179,21 @@ const _advice = <String, List<String>>{
     'Hoje, diminua o café e as notícias.',
     'Caminhe 10 minutos: mexer o corpo diminui a tensão.',
   ],
-  'Irritada': [
-    'Antes de responder alguém, respire fundo e conte até dez.',
-    'Gaste a energia: uma caminhada rápida ou um alongamento baixam a tensão.',
-    'Escreva o que aconteceu, sem filtro. Depois decida se vale conversar.',
-    'Lave o rosto com água fria. Ajuda o corpo a desacelerar.',
-    'Repare se a fome, o sono ou a TPM estão pesando hoje.',
-    'Se for conversar, fale do que você sentiu ("eu me senti…"), não de acusações.',
+  'Emotiva': [
+    'Deixe a emoção vir: chorar ou rir à toa também faz parte.',
+    'Escreva umas linhas sobre o que mexeu com você hoje.',
+    'Converse com alguém de confiança, nem que seja uma mensagem curta.',
+    'Respire devagar: puxe o ar em 4 segundos e solte em 6.',
+    'Repare se o sono, a fome ou os hormônios estão pesando hoje.',
+    'Se as emoções estiverem difíceis de levar, um psicólogo pode ajudar.',
   ],
-  'Com cólica': [
-    'Uma bolsa de água morna na barriga ou nas costas alivia a dor.',
-    'Beba água e prefira chás quentes, como camomila ou gengibre.',
-    'Movimentos leves ajudam: alongar, caminhar ou ioga suave.',
-    'Deitar de lado com as pernas dobradas pode aliviar.',
-    'Nestes dias, diminua sal, café e doces: ajudam no inchaço.',
-    'Remédio, só com orientação. Se a dor for forte ou diferente, procure a ginecologista.',
+  'Enjoada': [
+    'Beba água em goles pequenos ao longo do dia.',
+    'Prefira refeições leves e em pequenas porções, várias vezes ao dia.',
+    'Biscoito de água e sal ou uma fruta podem ajudar ao acordar.',
+    'Evite cheiros fortes e alimentos muito gordurosos.',
+    'Descanse depois de comer, sem deitar logo em seguida.',
+    'Remédio, só com orientação. Se o enjoo for forte ou não passar, fale com seu médico.',
   ],
   'Sensível': [
     'Fale com você como falaria com uma amiga querida.',
@@ -273,6 +275,15 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
   }
 
   _MoodText? get _current => _moodByLabel(_mood);
+
+  /// Ansiosa ou triste nos últimos 3 dias seguidos (hoje incluído).
+  bool get _heavyStreak {
+    final today = DateUtils.dateOnly(DateTime.now());
+    return List.generate(
+      3,
+      (i) => today.subtract(Duration(days: i)),
+    ).every((d) => const ['Ansiosa', 'Triste'].contains(_women.checkInOn(d)));
+  }
 
   String get _title => switch (_step) {
     _Step.pick => 'Como estou hoje',
@@ -494,11 +505,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
                 ),
               ),
               const SizedBox(height: 6),
-              Pabi(
-                mood: current?.face ?? PabiMood.tranquila,
-                women: true,
-                size: 170,
-              ),
+              Pabi(mood: current?.face ?? PabiMood.bem, women: true, size: 170),
             ],
           ),
         ),
@@ -659,11 +666,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              Pabi(
-                mood: current?.face ?? PabiMood.tranquila,
-                women: true,
-                size: 160,
-              ),
+              Pabi(mood: current?.face ?? PabiMood.bem, women: true, size: 160),
               const SizedBox(height: 8),
               Text(
                 current?.reply ?? 'Obrigada por contar como você está.',
@@ -680,6 +683,42 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
         ),
         if (current != null) ...[
           const SizedBox(height: 14),
+          if (_heavyStreak) ...[
+            _Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Você registrou ansiosa ou triste nos últimos dias. '
+                    'Conversar com um psicólogo da Pablife pode ajudar.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                      fontWeight: FontWeight.w700,
+                      color: PabColors.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  FilledButton(
+                    onPressed: () => _follow(_Go.professionals),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(44),
+                      backgroundColor: PabColors.ink,
+                      foregroundColor: PabColors.onInk,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Falar com um psicólogo',
+                      style: TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           _AdviceCard(tips: _advice[current.label] ?? const []),
           const SizedBox(height: 12),
           _Card(
