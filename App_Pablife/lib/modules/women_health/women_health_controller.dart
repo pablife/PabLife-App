@@ -29,6 +29,9 @@ class WomenHealthController extends GetxController {
   /// Check-in de cada dia ('2026-11-04' => 'Calma').
   Map<String, String> checkIns = {};
 
+  /// Registros de menstruação, tentativas e testes.
+  List<WomenLog> logs = [];
+
   /// Caixa da trilha em "Mostrar": liga a faixa na agenda.
   bool showBand = true;
 
@@ -97,6 +100,7 @@ class WomenHealthController extends GetxController {
       await _moveLocalDataToAccount(userId);
       final profile = await _repository.getProfile(userId);
       checkIns = await _repository.getCheckIns(userId);
+      await _loadLogs(userId);
       trail = WomenTrail.values.firstWhereOrNull(
         (t) => t.name == profile?['trail'],
       );
@@ -207,10 +211,166 @@ class WomenHealthController extends GetxController {
   }
 
   /// "Minha menstruação veio hoje": recomeça a contagem do ciclo.
-  Future<void> registerPeriodToday() async {
-    lastPeriod = _today;
+  Future<void> registerPeriodToday() => registerPeriodStart(_today);
+
+  // ------------------------------------------------------------ registros
+
+  Future<void> _loadLogs(String userId) async {
+    try {
+      final rows = await _repository.getLogs(userId);
+      logs = [
+        for (final r in rows)
+          WomenLog(
+            DateTime.parse(r['day'] as String),
+            r['kind'] as String,
+            r['value'] as String?,
+          ),
+      ];
+    } catch (e) {
+      debugPrint('Registros da Saúde da Mulher: $e');
+    }
+  }
+
+  WomenLog? logOn(DateTime day, String kind) {
+    final d = _dateOnly(day);
+    return logs.firstWhereOrNull((l) => l.kind == kind && l.day == d);
+  }
+
+  List<WomenLog> logsOf(String kind) =>
+      logs.where((l) => l.kind == kind).toList()
+        ..sort((a, b) => b.day.compareTo(a.day));
+
+  /// Começos de menstruação registrados (do mais antigo ao mais novo).
+  List<DateTime> get periodStarts =>
+      logsOf(WomenLog.periodStart).map((l) => l.day).toList().reversed.toList();
+
+  /// Histórico de ciclos, do mais novo para o mais antigo.
+  List<WomenCycleRecord> get cycleHistory {
+    final starts = periodStarts;
+    final ends = logsOf(WomenLog.periodEnd).map((l) => l.day).toList();
+    return [
+      for (var i = starts.length - 1; i >= 0; i--)
+        WomenCycleRecord(
+          starts[i],
+          ends.firstWhereOrNull(
+            (e) =>
+                !e.isBefore(starts[i]) &&
+                e.difference(starts[i]).inDays < 15 &&
+                (i == starts.length - 1 || e.isBefore(starts[i + 1])),
+          ),
+          i == starts.length - 1
+              ? null
+              : starts[i + 1].difference(starts[i]).inDays,
+        ),
+    ];
+  }
+
+  /// Média dos últimos ciclos registrados (21 a 45 dias), ou null.
+  int? get averageCycle {
+    final lengths = cycleHistory
+        .map((c) => c.length)
+        .whereType<int>()
+        .where((n) => n >= 21 && n <= 45)
+        .take(6)
+        .toList();
+    if (lengths.isEmpty) return null;
+    return (lengths.reduce((a, b) => a + b) / lengths.length).round();
+  }
+
+  /// Dias de atraso da menstruação (0 se não está atrasada).
+  int get daysLate {
+    if (lastPeriod == null) return 0;
+    final expected = lastPeriod!.add(Duration(days: cycleLength));
+    final late = _today.difference(expected).inDays;
+    return late > 0 ? late : 0;
+  }
+
+  /// Marcou "não veio" depois da última menstruação?
+  bool get markedNoPeriod {
+    final last = lastPeriod;
+    return logsOf(
+      WomenLog.noPeriod,
+    ).any((l) => last == null || l.day.isAfter(last));
+  }
+
+  Future<bool> _saveLog(DateTime day, String kind, {String? value}) async {
+    final userId = _userId;
+    if (userId == null) return false;
+    final d = _dateOnly(day);
+    final previous = logOn(d, kind);
+    logs
+      ..removeWhere((l) => l.kind == kind && l.day == d)
+      ..add(WomenLog(d, kind, value));
+    update();
+    try {
+      await _repository.saveLog(userId, _dayKey(d), kind, value: value);
+      return true;
+    } catch (e) {
+      logs.removeWhere((l) => l.kind == kind && l.day == d);
+      if (previous != null) logs.add(previous);
+      update();
+      AppSnackbar.to.show('Não foi possível salvar. Tente novamente.');
+      return false;
+    }
+  }
+
+  Future<bool> removeLog(DateTime day, String kind) async {
+    final userId = _userId;
+    if (userId == null) return false;
+    final d = _dateOnly(day);
+    final previous = logOn(d, kind);
+    if (previous == null) return true;
+    logs.removeWhere((l) => l.kind == kind && l.day == d);
+    update();
+    try {
+      await _repository.deleteLog(userId, _dayKey(d), kind);
+      if (kind == WomenLog.periodStart) await _syncCycleFromLogs();
+      return true;
+    } catch (e) {
+      logs.add(previous);
+      update();
+      AppSnackbar.to.show('Não foi possível apagar. Tente novamente.');
+      return false;
+    }
+  }
+
+  /// A última menstruação e o tamanho do ciclo passam a vir dos registros.
+  Future<void> _syncCycleFromLogs() async {
+    final starts = periodStarts;
+    if (starts.isNotEmpty) lastPeriod = starts.last;
+    final avg = averageCycle;
+    if (avg != null) cycleLength = avg;
     update();
     await _save();
+  }
+
+  /// A menstruação começou neste dia.
+  Future<void> registerPeriodStart(DateTime day) async {
+    if (await _saveLog(day, WomenLog.periodStart)) await _syncCycleFromLogs();
+  }
+
+  Future<void> registerPeriodEnd(DateTime day) =>
+      _saveLog(day, WomenLog.periodEnd);
+
+  /// "Não veio este mês".
+  Future<void> registerNoPeriod() => _saveLog(_today, WomenLog.noPeriod);
+
+  Future<void> toggleAttempt(DateTime day) async {
+    if (logOn(day, WomenLog.attempt) != null) {
+      await removeLog(day, WomenLog.attempt);
+    } else {
+      await _saveLog(day, WomenLog.attempt);
+    }
+  }
+
+  /// Teste do dia (ovulação ou gravidez). Tocar de novo na mesma opção
+  /// apaga.
+  Future<void> setTest(DateTime day, String kind, String value) async {
+    if (logOn(day, kind)?.value == value) {
+      await removeLog(day, kind);
+    } else {
+      await _saveLog(day, kind, value: value);
+    }
   }
 
   Future<void> toggleCheckIn(String value) async {

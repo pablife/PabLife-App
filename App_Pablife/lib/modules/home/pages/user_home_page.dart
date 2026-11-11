@@ -19,6 +19,7 @@ import '../../../infra/repositories/daily_verse_repository.dart';
 import '../../consultations/my_consultations_page.dart';
 import '../controllers/user_home_controller.dart';
 import '../../women_health/diary/women_diary_card.dart';
+import '../../women_health/pages/cycle_tools_pages.dart';
 
 const _months = [
   'jan',
@@ -1084,6 +1085,10 @@ class _CycleCard extends StatelessWidget {
               mood: w.todayCheckIn!,
               onTap: () => showMoodSheet(context, w),
             ),
+          if (w.trail != null && w.trail != WomenTrail.pregnancy) ...[
+            const SizedBox(height: 10),
+            CycleToolsRow(women: w),
+          ],
           if (followsCycle) ...[
             const SizedBox(height: 10),
             const Text(
