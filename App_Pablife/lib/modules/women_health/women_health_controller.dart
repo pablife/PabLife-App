@@ -221,6 +221,29 @@ class WomenHealthController extends GetxController {
     update();
   }
 
+  /// Fases do ciclo que aparecem na agenda (filtros separados).
+  bool showMenstruation = true;
+  bool showFertile = true;
+  bool showOvulation = true;
+
+  /// Alguma fase do ciclo ligada na agenda.
+  bool get anyCyclePhaseShown =>
+      showMenstruation || showFertile || showOvulation;
+
+  void setCycleFilter({bool? menstruation, bool? fertile, bool? ovulation}) {
+    showMenstruation = menstruation ?? showMenstruation;
+    showFertile = fertile ?? showFertile;
+    showOvulation = ovulation ?? showOvulation;
+    update();
+  }
+
+  /// A fase deste dia está ligada no filtro da agenda?
+  bool showsPhase(WomenCyclePhase? phase) => switch (phase?.kind) {
+    WomenCycleKind.menstruation => showMenstruation,
+    WomenCycleKind.fertile => phase!.isOvulation ? showOvulation : showFertile,
+    _ => false,
+  };
+
   /// "Minha menstruação veio hoje": recomeça a contagem do ciclo.
   Future<void> registerPeriodToday() => registerPeriodStart(_today);
 
@@ -585,9 +608,21 @@ class WomenHealthController extends GetxController {
 
     final phase = _phase(cycleDay(day));
     return switch (phase) {
-      'Menstruação' => WomenBand(phase, WomenColors.rose, WomenColors.ink),
-      'Fértil' => WomenBand(phase, WomenColors.mauve, WomenColors.ink),
-      'Ovulação' => WomenBand(phase, WomenColors.violet, Colors.white),
+      'Menstruação' when showMenstruation => WomenBand(
+        phase,
+        WomenColors.rose,
+        WomenColors.ink,
+      ),
+      'Fértil' when showFertile => WomenBand(
+        phase,
+        WomenColors.mauve,
+        WomenColors.ink,
+      ),
+      'Ovulação' when showOvulation => WomenBand(
+        phase,
+        WomenColors.violet,
+        Colors.white,
+      ),
       'Folicular' when trail == WomenTrail.cycle => WomenBand(
         phase,
         WomenColors.blush,

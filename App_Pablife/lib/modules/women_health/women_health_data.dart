@@ -257,6 +257,9 @@ class WomenCyclePhase {
   final String label;
 
   const WomenCyclePhase(this.kind, this.label);
+
+  /// Ovulação fica dentro do período fértil, mas tem filtro e cor próprios.
+  bool get isOvulation => label.contains('ovulação');
 }
 
 class WomenBand {

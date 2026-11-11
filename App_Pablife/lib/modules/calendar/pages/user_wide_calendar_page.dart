@@ -340,16 +340,13 @@ class _PhoneCalendar extends StatelessWidget {
                     count: c.holidaysInRange,
                     onChanged: c.setShowHolidays,
                   ),
-                  if (women.isActive)
+                  for (final f in _womenFilters(women, c))
                     WideFilterRow(
-                      label: women.trail!.title,
-                      color: _PlannerColors.women,
-                      value: women.showBand,
-                      count: c.weekDays.length,
-                      onChanged: (value) {
-                        women.setShowBand(value);
-                        c.update();
-                      },
+                      label: f.label,
+                      color: f.color,
+                      value: f.on,
+                      count: f.count,
+                      onChanged: (_) => f.toggle(),
                     ),
                   const SizedBox(height: 8),
                   _ConnectCalendarButton(
@@ -614,16 +611,8 @@ class _FilterChips extends StatelessWidget {
         c.showHolidays,
         () => c.setShowHolidays(!c.showHolidays),
       ),
-      if (women.isActive)
-        (
-          women.trail!.title,
-          _PlannerColors.women,
-          women.showBand,
-          () {
-            women.setShowBand(!women.showBand);
-            c.update();
-          },
-        ),
+      for (final f in _womenFilters(women, c))
+        (f.label, f.color, f.on, f.toggle),
     ];
 
     return SizedBox(
@@ -680,6 +669,64 @@ class _FilterChips extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Filtros da Saúde da Mulher na agenda: quem acompanha o ciclo vê
+/// Menstruação, Fértil e Ovulação separados; as outras trilhas, um filtro só.
+List<({String label, Color color, bool on, int count, VoidCallback toggle})>
+_womenFilters(WomenHealthController women, UserWideCalendarController c) {
+  if (!women.isActive) return const [];
+  void refresh() => c.update();
+  if (!tracksCycle(women)) {
+    return [
+      (
+        label: women.trail!.title,
+        color: _PlannerColors.women,
+        on: women.showBand,
+        count: c.weekDays.length,
+        toggle: () {
+          women.setShowBand(!women.showBand);
+          refresh();
+        },
+      ),
+    ];
+  }
+  int days(bool Function(WomenCyclePhase p) test) => c.weekDays.where((d) {
+    final phase = women.cyclePhaseOn(d);
+    return phase != null && test(phase);
+  }).length;
+  return [
+    (
+      label: 'Menstruação',
+      color: PabColors.menstruation,
+      on: women.showMenstruation,
+      count: days((p) => p.kind == WomenCycleKind.menstruation),
+      toggle: () {
+        women.setCycleFilter(menstruation: !women.showMenstruation);
+        refresh();
+      },
+    ),
+    (
+      label: 'Fértil',
+      color: PabColors.fertile,
+      on: women.showFertile,
+      count: days((p) => p.kind == WomenCycleKind.fertile && !p.isOvulation),
+      toggle: () {
+        women.setCycleFilter(fertile: !women.showFertile);
+        refresh();
+      },
+    ),
+    (
+      label: 'Ovulação',
+      color: CycleColors.ovulationDot,
+      on: women.showOvulation,
+      count: days((p) => p.isOvulation),
+      toggle: () {
+        women.setCycleFilter(ovulation: !women.showOvulation);
+        refresh();
+      },
+    ),
+  ];
 }
 
 // ------------------------------------------------------------ coluna lateral
@@ -750,12 +797,14 @@ class _SideColumn extends StatelessWidget {
               selectedDay: controller.focusDate,
               onDayTap: controller.openDay,
               dayTint: cycle ? (day) => cycleTintOn(women, day) : null,
-              legend: cycle && women.showBand
-                  ? const [
-                      (CycleColors.menstruationFill, 'Menstruação'),
-                      (CycleColors.fertileFill, 'Fértil (previsto)'),
-                    ]
-                  : const [],
+              legend: [
+                if (cycle && women.showMenstruation)
+                  (CycleColors.menstruationFill, 'Menstruação'),
+                if (cycle && women.showFertile)
+                  (CycleColors.fertileFill, 'Fértil (previsto)'),
+                if (cycle && women.showOvulation)
+                  (CycleColors.ovulationFill, 'Ovulação (prevista)'),
+              ],
             ),
           ),
           const SizedBox(height: 14),
@@ -772,13 +821,13 @@ class _SideColumn extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                if (women.isActive)
+                for (final f in _womenFilters(women, controller))
                   WideFilterRow(
-                    label: cycle ? 'Meu ciclo' : women.trail!.title,
-                    color: PabColors.menstruation,
-                    value: women.showBand,
-                    count: controller.weekDays.length,
-                    onChanged: women.setShowBand,
+                    label: f.label,
+                    color: f.color,
+                    value: f.on,
+                    count: f.count,
+                    onChanged: (_) => f.toggle(),
                   ),
                 WideFilterRow(
                   label: 'Tarefas',
