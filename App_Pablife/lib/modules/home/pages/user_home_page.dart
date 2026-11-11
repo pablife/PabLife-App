@@ -20,6 +20,7 @@ import '../../consultations/my_consultations_page.dart';
 import '../controllers/user_home_controller.dart';
 import '../../women_health/diary/women_diary_card.dart';
 import '../../women_health/pages/cycle_tools_pages.dart';
+import '../../women_health/pregnancy/pregnancy_dashboard_card.dart';
 
 const _months = [
   'jan',
@@ -97,7 +98,11 @@ class _HomeBody extends StatelessWidget {
     final balance = _BalanceCard(controller: c);
     final goals = _GoalsCard(controller: c);
     final tasks = _TasksCard(controller: c);
-    final cycle = _womenMode ? _CycleCard(women: women!) : null;
+    final cycle = !_womenMode
+        ? null
+        : women!.trail == WomenTrail.pregnancy
+        ? PregnancyDashboardCards(women: women!)
+        : _CycleCard(women: women!);
     final diary = _womenMode ? WomenDiaryCard(women: women!) : null;
     final verse = c.showDailyVerse ? c.dailyVerse : null;
     final verseCard = verse == null ? null : _VerseCard(verse: verse);

@@ -12,6 +12,7 @@ import '../../infra/repositories/user_preferences_repository.dart';
 import '../../shared/themes/app_palette.dart';
 import '../../shared/utils/app_snackbar.dart';
 import '../auth/entry_visual.dart';
+import 'pregnancy/pregnancy_controller.dart';
 import 'women_health_data.dart';
 
 /// Modo Saúde da mulher. Os dados ficam na conta da usuária, em tabelas que
@@ -192,12 +193,22 @@ class WomenHealthController extends GetxController {
     AppPalette.apply(true);
     UserPreferencesRepository().saveTheme(rose: true);
     update();
+    // Gestação: cria (ou atualiza a DUM) do acompanhamento; ao trocar de
+    // trilha, encerra o anterior (para os avisos semanais).
+    if (newTrail == WomenTrail.pregnancy) {
+      PregnancyController.to.load();
+    } else if (previousTrail == WomenTrail.pregnancy) {
+      PregnancyController.to.endPregnancy();
+    }
     return true;
   }
 
   /// "Sair do modo": só acontece quando a usuária confirma. Os registros
   /// (ciclo, respostas e humor) continuam guardados na conta.
   Future<void> exit() async {
+    if (trail == WomenTrail.pregnancy) {
+      await PregnancyController.to.endPregnancy();
+    }
     trail = null;
     AppPalette.apply(false);
     UserPreferencesRepository().saveTheme(rose: false);
@@ -209,6 +220,29 @@ class WomenHealthController extends GetxController {
     showBand = value;
     update();
   }
+
+  /// Fases do ciclo que aparecem na agenda (filtros separados).
+  bool showMenstruation = true;
+  bool showFertile = true;
+  bool showOvulation = true;
+
+  /// Alguma fase do ciclo ligada na agenda.
+  bool get anyCyclePhaseShown =>
+      showMenstruation || showFertile || showOvulation;
+
+  void setCycleFilter({bool? menstruation, bool? fertile, bool? ovulation}) {
+    showMenstruation = menstruation ?? showMenstruation;
+    showFertile = fertile ?? showFertile;
+    showOvulation = ovulation ?? showOvulation;
+    update();
+  }
+
+  /// A fase deste dia está ligada no filtro da agenda?
+  bool showsPhase(WomenCyclePhase? phase) => switch (phase?.kind) {
+    WomenCycleKind.menstruation => showMenstruation,
+    WomenCycleKind.fertile => phase!.isOvulation ? showOvulation : showFertile,
+    _ => false,
+  };
 
   /// "Minha menstruação veio hoje": recomeça a contagem do ciclo.
   Future<void> registerPeriodToday() => registerPeriodStart(_today);
@@ -574,9 +608,21 @@ class WomenHealthController extends GetxController {
 
     final phase = _phase(cycleDay(day));
     return switch (phase) {
-      'Menstruação' => WomenBand(phase, WomenColors.rose, WomenColors.ink),
-      'Fértil' => WomenBand(phase, WomenColors.mauve, WomenColors.ink),
-      'Ovulação' => WomenBand(phase, WomenColors.violet, Colors.white),
+      'Menstruação' when showMenstruation => WomenBand(
+        phase,
+        WomenColors.rose,
+        WomenColors.ink,
+      ),
+      'Fértil' when showFertile => WomenBand(
+        phase,
+        WomenColors.mauve,
+        WomenColors.ink,
+      ),
+      'Ovulação' when showOvulation => WomenBand(
+        phase,
+        WomenColors.violet,
+        Colors.white,
+      ),
       'Folicular' when trail == WomenTrail.cycle => WomenBand(
         phase,
         WomenColors.blush,

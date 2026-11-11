@@ -204,18 +204,26 @@ const womenMenopauseSymptoms = [
 /// Humores da tela "Como estou hoje" (canvas), com o rosto da Pabi.
 const womenCheckInMoods = [
   WomenMood('Feliz', '😄'),
-  WomenMood('Tranquila', '😌'),
+  WomenMood('Bem', '🙂'),
   WomenMood('Cansada', '😴'),
-  WomenMood('Triste', '😢'),
+  WomenMood('Enjoada', '🤢'),
   WomenMood('Ansiosa', '😰'),
+  WomenMood('Emotiva', '🥹'),
+  WomenMood('Sensível', '🥺'),
+  WomenMood('Triste', '😢'),
+];
+
+/// Humores de registros antigos (continuam aparecendo no histórico).
+const womenLegacyCheckInMoods = [
+  WomenMood('Tranquila', '😌'),
   WomenMood('Irritada', '😤'),
   WomenMood('Com cólica', '🤕'),
-  WomenMood('Sensível', '🥺'),
 ];
 
 WomenMood? womenMoodByLabel(String? label) {
   for (final mood in [
     ...womenCheckInMoods,
+    ...womenLegacyCheckInMoods,
     ...womenMoods,
     ...womenMenopauseSymptoms,
   ]) {
@@ -249,6 +257,9 @@ class WomenCyclePhase {
   final String label;
 
   const WomenCyclePhase(this.kind, this.label);
+
+  /// Ovulação fica dentro do período fértil, mas tem filtro e cor próprios.
+  bool get isOvulation => label.contains('ovulação');
 }
 
 class WomenBand {

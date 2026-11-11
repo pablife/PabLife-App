@@ -436,7 +436,7 @@ class _Empty extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(
         children: [
-          const Pabi(mood: PabiMood.tranquila, women: true, size: 90),
+          const Pabi(mood: PabiMood.bem, women: true, size: 90),
           const SizedBox(height: 10),
           Text(
             text,

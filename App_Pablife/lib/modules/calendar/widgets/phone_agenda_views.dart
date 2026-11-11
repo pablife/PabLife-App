@@ -32,6 +32,11 @@ abstract final class CycleColors {
   static const menstruationText = Color(0xFF7A1F52);
   static const fertileFill = Color(0xFFEEEDFF);
   static const fertileText = Color(0xFF3F3A8C);
+  static const ovulationFill = Color(0xFFD3CCFF);
+  static const ovulationText = Color(0xFF2E2880);
+
+  /// Bolinha dos filtros (mais forte que o círculo do dia).
+  static const ovulationDot = Color(0xFF5B4FD6);
 }
 
 /// Quem acompanha o ciclo (não gestação nem menopausa).
@@ -42,19 +47,31 @@ bool tracksCycle(WomenHealthController? women) =>
     women.trail != WomenTrail.pregnancy &&
     women.trail != WomenTrail.menopause;
 
-/// Círculo do ciclo nos calendários: menstruação e período fértil.
+/// Círculo do ciclo nos calendários: menstruação, período fértil e
+/// ovulação, cada um só quando o filtro dele está ligado.
 Color? cycleTintOn(WomenHealthController? women, DateTime day) {
-  if (!tracksCycle(women) || !women!.showBand) return null;
-  return switch (women.cyclePhaseOn(day)?.kind) {
+  if (!tracksCycle(women)) return null;
+  final phase = women!.cyclePhaseOn(day);
+  if (!women.showsPhase(phase)) return null;
+  return switch (phase?.kind) {
     WomenCycleKind.menstruation => CycleColors.menstruationFill,
-    WomenCycleKind.fertile => CycleColors.fertileFill,
+    WomenCycleKind.fertile =>
+      phase!.isOvulation ? CycleColors.ovulationFill : CycleColors.fertileFill,
     _ => null,
   };
 }
 
+/// Mostra a legenda/os círculos do ciclo (alguma fase ligada).
+bool showsCycle(WomenHealthController? women) =>
+    tracksCycle(women) && women!.anyCyclePhaseShown;
+
 /// Legenda dos círculos do ciclo.
 class CycleLegend extends StatelessWidget {
   const CycleLegend({super.key});
+
+  WomenHealthController? get _women => Get.isRegistered<WomenHealthController>()
+      ? WomenHealthController.to
+      : null;
 
   @override
   Widget build(BuildContext context) {
@@ -81,8 +98,12 @@ class CycleLegend extends StatelessWidget {
       spacing: 14,
       runSpacing: 4,
       children: [
-        item(CycleColors.menstruationFill, 'Menstruação'),
-        item(CycleColors.fertileFill, 'Fértil (previsto)'),
+        if (_women?.showMenstruation ?? true)
+          item(CycleColors.menstruationFill, 'Menstruação'),
+        if (_women?.showFertile ?? true)
+          item(CycleColors.fertileFill, 'Fértil (previsto)'),
+        if (_women?.showOvulation ?? true)
+          item(CycleColors.ovulationFill, 'Ovulação (prevista)'),
       ],
     );
   }
@@ -1041,7 +1062,7 @@ class PhoneMonthView extends StatelessWidget {
                 ],
               ),
             ),
-          if (tracksCycle(women) && women!.showBand) ...[
+          if (showsCycle(women)) ...[
             const SizedBox(height: 6),
             const Align(alignment: Alignment.centerLeft, child: CycleLegend()),
           ],
@@ -1068,7 +1089,7 @@ class PhoneYearView extends StatelessWidget {
     final women = Get.isRegistered<WomenHealthController>()
         ? WomenHealthController.to
         : null;
-    final cycle = tracksCycle(women) && women!.showBand;
+    final cycle = showsCycle(women);
 
     return LayoutBuilder(
       builder: (context, constraints) {
