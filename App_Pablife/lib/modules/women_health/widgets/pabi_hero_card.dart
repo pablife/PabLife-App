@@ -111,7 +111,7 @@ class _PabiHeroCardState extends State<PabiHeroCard>
 
     final title = today == null
         ? 'Oi$name! Como você está hoje?'
-        : 'Hoje você está ${today.toLowerCase()}';
+        : 'Hoje estou ${today.toLowerCase()}';
     final message = today == null
         ? 'Toque numa carinha para me contar.'
         : current?.$3 ?? 'Obrigada por me contar como você está.';
