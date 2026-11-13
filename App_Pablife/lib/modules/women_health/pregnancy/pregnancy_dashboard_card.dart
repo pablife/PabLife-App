@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../shared/themes/pab_colors.dart';
-import '../pages/mood_check_in_page.dart';
 import '../women_health_controller.dart';
 import 'my_pregnancy_page.dart';
 import 'pregnancy_controller.dart';
@@ -30,8 +29,6 @@ class PregnancyDashboardCards extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _PregnancyCard(pregnancy: p, controller: c),
-            const SizedBox(height: 14),
-            _MoodCard(women: women),
             if (next != null) ...[
               const SizedBox(height: 14),
               NextStepCard(tip: next),
@@ -161,80 +158,6 @@ class _PregnancyCard extends StatelessWidget {
           const Text(
             pregnancyDisclaimer,
             style: TextStyle(fontSize: 11, height: 1.5, color: PabColors.muted),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MoodCard extends StatelessWidget {
-  final WomenHealthController women;
-
-  const _MoodCard({required this.women});
-
-  @override
-  Widget build(BuildContext context) {
-    final mood = women.todayCheckIn;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: PabColors.card,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: PabColors.line),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: const BoxDecoration(
-              color: PabColors.lilac,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.mood_rounded,
-              color: PabColors.lilacText,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Como você está hoje?',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: PabColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  mood == null ? 'Registre em poucos segundos.' : 'Hoje: $mood',
-                  style: const TextStyle(fontSize: 12, color: PabColors.muted),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          FilledButton(
-            onPressed: MoodCheckInPage.open,
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(0, 44),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              backgroundColor: PabColors.lilac,
-              foregroundColor: PabColors.ink,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child: Text(
-              mood == null ? 'Registrar' : 'Mudar',
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-            ),
           ),
         ],
       ),
