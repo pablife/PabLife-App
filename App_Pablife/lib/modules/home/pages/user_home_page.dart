@@ -7,7 +7,6 @@ import '../../../shared/themes/pab_colors.dart';
 import '../../../shared/utils/wide_layout.dart';
 import '../../../widgets/banners/banner_carousel_widget.dart';
 import '../../../widgets/pab_logo.dart';
-import '../../../widgets/pabi/pabi.dart';
 import '../../calendar/calendar_controller.dart';
 import '../../dashboard/dashboard_controller.dart';
 import '../../notifications/notifications_page.dart';
@@ -20,6 +19,7 @@ import '../../consultations/my_consultations_page.dart';
 import '../controllers/user_home_controller.dart';
 import '../../women_health/diary/women_diary_card.dart';
 import '../../women_health/pages/cycle_tools_pages.dart';
+import '../../women_health/widgets/pabi_hero_card.dart';
 import '../../women_health/pregnancy/pregnancy_dashboard_card.dart';
 
 const _months = [
@@ -104,14 +104,34 @@ class _HomeBody extends StatelessWidget {
         ? PregnancyDashboardCards(women: women!)
         : _CycleCard(women: women!);
     final diary = _womenMode ? WomenDiaryCard(women: women!) : null;
+    final preferred = c.user?.preferredName?.trim() ?? '';
+    final pabi = !_womenMode
+        ? null
+        : PabiHeroCard(
+            women: women!,
+            firstName: preferred.isNotEmpty
+                ? preferred
+                : (c.user?.fullName.trim() ?? '').split(RegExp(r'\s+')).first,
+          );
     final verse = c.showDailyVerse ? c.dailyVerse : null;
     final verseCard = verse == null ? null : _VerseCard(verse: verse);
 
     final List<Widget> content;
     if (wide) {
       content = [
+        // A PABI e o ciclo lado a lado, no topo.
+        if (pabi != null && cycle != null) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: pabi),
+              const SizedBox(width: 16),
+              Expanded(child: cycle),
+            ],
+          ),
+          gap,
+        ],
         if (verseCard != null) ...[verseCard, gap],
-        if (cycle != null) ...[cycle, gap],
         if (diary != null) ...[diary, gap],
         _Grid(
           minItemWidth: 260,
@@ -128,8 +148,10 @@ class _HomeBody extends StatelessWidget {
       ];
     } else {
       content = [
-        if (verseCard != null) ...[verseCard, gap],
+        ?pabi,
+        if (pabi != null) gap,
         if (cycle != null) ...[cycle, gap],
+        if (verseCard != null) ...[verseCard, gap],
         if (diary != null) ...[diary, gap],
         appointment,
         if (!_womenMode) ...[gap, balance],
@@ -292,27 +314,6 @@ class _Header extends StatelessWidget {
                 ),
               Row(
                 children: [
-                  if (w != null) ...[
-                    Semantics(
-                      button: true,
-                      label: 'Registrar como estou hoje',
-                      excludeSemantics: true,
-                      child: Material(
-                        color: PabColors.onInk.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(18),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(18),
-                          onTap: () => showMoodSheet(context, w),
-                          child: Pabi(
-                            mood: PabiMood.fromCheckIn(w.todayCheckIn),
-                            women: true,
-                            size: 60,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1079,19 +1080,8 @@ class _CycleCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (followsCycle) ..._cycle(w) else ..._summary(w),
-          const SizedBox(height: 12),
-          if (w.todayCheckIn == null)
-            _PrimaryButton(
-              label: 'Registrar como estou hoje',
-              onTap: () => showMoodSheet(context, w),
-            )
-          else
-            _MoodDone(
-              mood: w.todayCheckIn!,
-              onTap: () => showMoodSheet(context, w),
-            ),
           if (w.trail != null && w.trail != WomenTrail.pregnancy) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             CycleToolsRow(women: w),
           ],
           if (followsCycle) ...[
@@ -1293,75 +1283,6 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Humor de hoje já registrado: mostra o registro em vez de pedir de novo.
-class _MoodDone extends StatelessWidget {
-  final String mood;
-  final VoidCallback onTap;
-
-  const _MoodDone({required this.mood, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: PabColors.soft,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 6, 12, 6),
-            child: Row(
-              children: [
-                Pabi(mood: PabiMood.fromCheckIn(mood), women: true, size: 36),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Registro de hoje feito',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: PabColors.softText,
-                        ),
-                      ),
-                      Text(
-                        mood,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: PabColors.ink,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.check_circle,
-                  size: 20,
-                  color: PabColors.accentText,
-                ),
-                const SizedBox(width: 6),
-                const Text(
-                  'Ver',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: PabColors.accentText,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
