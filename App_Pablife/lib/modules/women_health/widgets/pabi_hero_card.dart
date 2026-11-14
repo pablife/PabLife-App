@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../shared/themes/pab_colors.dart';
@@ -40,9 +42,9 @@ const pabiHeroMoods = <(String, PabiMood, String)>[
   ),
 ];
 
-/// A PABI no topo do Dashboard (Saúde da Mulher): flutua, reage ao toque e
-/// pergunta como a usuária está. Tocar numa carinha registra o humor do dia
-/// e a PABI muda de expressão.
+/// A PABI no topo do Dashboard (Saúde da Mulher): grande, no centro do
+/// cartão, sempre em movimento. Tocar nela abre a escolha das expressões;
+/// depois de escolher, o cartão mostra "Hoje estou" e o humor em destaque.
 class PabiHeroCard extends StatefulWidget {
   final WomenHealthController women;
   final String firstName;
@@ -55,10 +57,16 @@ class PabiHeroCard extends StatefulWidget {
 
 class _PabiHeroCardState extends State<PabiHeroCard>
     with TickerProviderStateMixin {
-  /// Flutuar e "respirar".
+  /// Flutuar, respirar e balançar.
   late final _float = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2600),
+  );
+
+  /// Nuvens passando devagar ao fundo.
+  late final _drift = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 14),
   );
 
   /// Pulinho ao tocar ou ao registrar.
@@ -67,22 +75,23 @@ class _PabiHeroCardState extends State<PabiHeroCard>
     duration: const Duration(milliseconds: 650),
   );
 
-  bool _saving = false;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Respeita "reduzir movimento" do aparelho.
     if (MediaQuery.of(context).disableAnimations) {
       _float.stop();
-    } else if (!_float.isAnimating) {
-      _float.repeat(reverse: true);
+      _drift.stop();
+    } else {
+      if (!_float.isAnimating) _float.repeat(reverse: true);
+      if (!_drift.isAnimating) _drift.repeat(reverse: true);
     }
   }
 
   @override
   void dispose() {
     _float.dispose();
+    _drift.dispose();
     _bounce.dispose();
     super.dispose();
   }
@@ -92,13 +101,24 @@ class _PabiHeroCardState extends State<PabiHeroCard>
     _bounce.forward(from: 0);
   }
 
-  Future<void> _pick(String label) async {
-    if (_saving) return;
+  /// Abre as expressões; a escolhida vira o humor de hoje.
+  Future<void> _choose() async {
     _hop();
-    if (widget.women.todayCheckIn == label) return;
-    setState(() => _saving = true);
-    await widget.women.toggleCheckIn(label);
-    if (mounted) setState(() => _saving = false);
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _MoodSheet(selected: widget.women.todayCheckIn),
+    );
+    if (picked == null || !mounted) return;
+    if (picked == _details) {
+      await MoodCheckInPage.open();
+      return;
+    }
+    if (picked != widget.women.todayCheckIn) {
+      await widget.women.toggleCheckIn(picked);
+    }
+    if (mounted) _hop();
   }
 
   @override
@@ -109,138 +129,291 @@ class _PabiHeroCardState extends State<PabiHeroCard>
     final face = today == null ? PabiMood.bem : PabiMood.fromCheckIn(today);
     final name = widget.firstName.isEmpty ? '' : ', ${widget.firstName}';
 
-    final title = today == null
-        ? 'Oi$name! Como você está hoje?'
-        : 'Hoje estou ${today.toLowerCase()}';
-    final message = today == null
-        ? 'Toque numa carinha para me contar.'
-        : current?.$3 ?? 'Obrigada por me contar como você está.';
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFFFFFF), Color(0xFFFFF1F8)],
+    return Semantics(
+      button: true,
+      label: today == null
+          ? 'PABI pergunta como você está hoje. Toque para escolher'
+          : 'Hoje estou ${today.toLowerCase()}. Toque para trocar',
+      excludeSemantics: true,
+      child: Material(
+        color: const Color(0xFFFFF1F8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+          side: const BorderSide(color: Color(0xFFF3CFE3)),
         ),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFF3CFE3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              _AnimatedPabi(
-                float: _float,
-                bounce: _bounce,
-                mood: face,
-                onTap: _hop,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: AnimatedSwitcher(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: _choose,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 230,
+                  child: _Stage(
+                    float: _float,
+                    drift: _drift,
+                    bounce: _bounce,
+                    mood: face,
+                  ),
+                ),
+                AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   transitionBuilder: (child, animation) => FadeTransition(
                     opacity: animation,
-                    child: SlideTransition(
-                      position: Tween(
-                        begin: const Offset(0, 0.15),
-                        end: Offset.zero,
-                      ).animate(animation),
+                    child: ScaleTransition(
+                      scale: Tween(begin: 0.92, end: 1.0).animate(animation),
                       child: child,
                     ),
                   ),
-                  layoutBuilder: (current, previous) => Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [...previous, ?current],
-                  ),
                   child: Column(
                     key: ValueKey(today),
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        title,
+                        today == null ? 'Oi$name!' : 'Hoje estou',
                         style: const TextStyle(
-                          fontSize: 20,
-                          height: 1.2,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
                           color: PabColors.ink,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          today == null
+                              ? 'Como você está hoje?'
+                              : today.toLowerCase(),
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: today == null ? 26 : 38,
+                            height: 1.15,
+                            fontWeight: FontWeight.w800,
+                            color: PabColors.ink,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        message,
+                        today == null
+                            ? 'Toque em mim para escolher.'
+                            : current?.$3 ??
+                                  'Obrigada por me contar como você está.',
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 13,
-                          height: 1.4,
+                          fontSize: 14,
+                          height: 1.45,
                           color: PabColors.muted,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            today == null
-                ? 'Como você está agora?'
-                : 'Mudou? Toque para trocar',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: PabColors.ink,
+                const SizedBox(height: 14),
+                // Parece botão, mas o cartão inteiro responde ao toque.
+                Container(
+                  height: 44,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: BoxDecoration(
+                    color: PabColors.ink,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        today == null
+                            ? 'Escolher como estou'
+                            : 'Trocar como estou',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: PabColors.onInk,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.touch_app_outlined,
+                        size: 18,
+                        color: PabColors.onInk,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              // 4 por linha no celular; todas numa linha quando cabe.
-              final columns = constraints.maxWidth >= 560 ? 8 : 4;
-              final width = constraints.maxWidth / columns;
-              return Wrap(
-                runSpacing: 6,
-                children: [
-                  for (final (label, mood, _) in pabiHeroMoods)
-                    SizedBox(
-                      width: width,
-                      child: _MoodChoice(
-                        label: label,
-                        mood: mood,
-                        selected: label == today,
-                        onTap: () => _pick(label),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: MoodCheckInPage.open,
-              style: TextButton.styleFrom(
-                foregroundColor: PabColors.softText,
-                minimumSize: const Size(0, 44),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    today == null
-                        ? 'Registrar com detalhes'
-                        : 'Contar mais e ver conselhos',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// Valor devolvido pela folha quando a usuária quer o registro completo.
+const _details = '__detalhes__';
+
+/// O palco: nuvens passando, o chão e a PABI grande flutuando.
+class _Stage extends StatelessWidget {
+  final Animation<double> float;
+  final Animation<double> drift;
+  final Animation<double> bounce;
+  final PabiMood mood;
+
+  const _Stage({
+    required this.float,
+    required this.drift,
+    required this.bounce,
+    required this.mood,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const size = 150.0;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        return AnimatedBuilder(
+          animation: Listenable.merge([float, drift, bounce]),
+          builder: (context, child) {
+            final t = Curves.easeInOut.transform(float.value);
+            final d = Curves.easeInOut.transform(drift.value);
+            final b = bounce.value == 0
+                ? 1.0
+                : Curves.elasticOut.transform(bounce.value);
+            final hop = bounce.value == 0
+                ? 0.0
+                : -26 * (1 - (2 * bounce.value - 1).abs()).clamp(0.0, 1.0);
+            final dy = -7 + 14 * t + hop;
+            final scale = (1 + 0.035 * t) * (0.9 + 0.1 * b);
+            // Balanço leve de um lado para o outro.
+            final tilt = math.sin(float.value * math.pi) * 0.05 - 0.025;
+            final lift = ((dy + 33) / 47).clamp(0.0, 1.0);
+
+            return Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  left: width * 0.02 + 14 * d,
+                  top: 46,
+                  child: const _Cloud(width: 96),
+                ),
+                Positioned(
+                  right: width * 0.04 + 18 * (1 - d),
+                  top: 26,
+                  child: const _Cloud(width: 68),
+                ),
+                Positioned(
+                  right: width * 0.1 - 10 * d,
+                  top: 104,
+                  child: const _Cloud(width: 84),
+                ),
+                // Chão.
+                Positioned(
+                  bottom: 6,
+                  child: Container(
+                    width: math.min(width * 0.72, 260),
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF7D9EA),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  const Icon(Icons.chevron_right_rounded, size: 18),
-                ],
+                ),
+                // Sombra: encolhe quando ela sobe.
+                Positioned(
+                  bottom: 18,
+                  child: Container(
+                    width: 92 * (0.6 + 0.4 * lift),
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: PabColors.ink.withValues(
+                        alpha: 0.07 + 0.09 * lift,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 40,
+                  child: Transform.translate(
+                    offset: Offset(0, dy),
+                    child: Transform.rotate(
+                      angle: tilt,
+                      child: Transform.scale(scale: scale, child: child),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: PabColors.pink.withValues(alpha: 0.4),
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              switchInCurve: Curves.easeOutBack,
+              transitionBuilder: (child, animation) => ScaleTransition(
+                scale: Tween(begin: 0.7, end: 1.0).animate(animation),
+                child: FadeTransition(opacity: animation, child: child),
+              ),
+              child: Pabi(
+                key: ValueKey(mood),
+                mood: mood,
+                women: true,
+                size: size,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Nuvem branca do fundo.
+class _Cloud extends StatelessWidget {
+  final double width;
+
+  const _Cloud({required this.width});
+
+  @override
+  Widget build(BuildContext context) {
+    final h = width * 0.34;
+    return SizedBox(
+      width: width,
+      height: h * 1.7,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              height: h,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(h),
+              ),
+            ),
+          ),
+          Positioned(
+            left: width * 0.22,
+            bottom: h * 0.35,
+            child: Container(
+              width: width * 0.42,
+              height: width * 0.42,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
               ),
             ),
           ),
@@ -250,100 +423,101 @@ class _PabiHeroCardState extends State<PabiHeroCard>
   }
 }
 
-/// A PABI grande: flutua, respira, dá um pulinho ao toque e troca de
-/// expressão com um "pop".
-class _AnimatedPabi extends StatelessWidget {
-  final Animation<double> float;
-  final Animation<double> bounce;
-  final PabiMood mood;
-  final VoidCallback onTap;
+/// Folha "Como estou hoje?": as 8 expressões para escolher.
+class _MoodSheet extends StatelessWidget {
+  final String? selected;
 
-  const _AnimatedPabi({
-    required this.float,
-    required this.bounce,
-    required this.mood,
-    required this.onTap,
-  });
+  const _MoodSheet({required this.selected});
 
   @override
   Widget build(BuildContext context) {
-    const size = 96.0;
-    return Semantics(
-      button: true,
-      label: 'PABI ${mood.label}. Toque para brincar',
-      excludeSemantics: true,
-      child: GestureDetector(
-        onTap: onTap,
-        child: SizedBox(
-          width: size + 8,
-          height: size + 22,
-          child: AnimatedBuilder(
-            animation: Listenable.merge([float, bounce]),
-            builder: (context, child) {
-              final t = Curves.easeInOut.transform(float.value);
-              // Pulinho: sobe e volta, com um balanço no fim.
-              final b = bounce.isAnimating || bounce.value > 0
-                  ? Curves.elasticOut.transform(bounce.value)
-                  : 1.0;
-              final hop = bounce.value == 0
-                  ? 0.0
-                  : -18 * (1 - (2 * bounce.value - 1).abs()).clamp(0.0, 1.0);
-              final dy = -4 + 8 * t + hop;
-              final scale = (1 + 0.03 * t) * (0.9 + 0.1 * b);
-              final lift = ((dy + 22) / 30).clamp(0.0, 1.0);
-              return Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  // Sombra no chão: encolhe quando ela sobe.
-                  Positioned(
-                    bottom: 0,
-                    child: Container(
-                      width: 56 * (0.6 + 0.4 * lift),
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: PabColors.pink.withValues(
-                          alpha: 0.12 + 0.16 * lift,
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: Container(
+          margin: const EdgeInsets.all(12),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            12,
+            16,
+            12 + MediaQuery.paddingOf(context).bottom,
+          ),
+          decoration: BoxDecoration(
+            color: PabColors.card,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: PabColors.line,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Como estou hoje?',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: PabColors.ink,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Toque na expressão que mais combina com você agora.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: PabColors.muted),
+              ),
+              const SizedBox(height: 14),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  const gap = 8.0;
+                  final width = (constraints.maxWidth - 3 * gap) / 4;
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (final (label, mood, _) in pabiHeroMoods)
+                        SizedBox(
+                          width: width,
+                          child: _MoodChoice(
+                            label: label,
+                            mood: mood,
+                            selected: label == selected,
+                            onTap: () => Navigator.of(context).pop(label),
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(8),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 6),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(_details),
+                style: TextButton.styleFrom(
+                  foregroundColor: PabColors.softText,
+                  minimumSize: const Size(0, 44),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Contar mais e ver conselhos',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ),
-                  Positioned(
-                    top: 6,
-                    child: Transform.translate(
-                      offset: Offset(0, dy),
-                      child: Transform.scale(scale: scale, child: child),
-                    ),
-                  ),
-                ],
-              );
-            },
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: PabColors.pink.withValues(alpha: 0.35),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 350),
-                switchInCurve: Curves.easeOutBack,
-                transitionBuilder: (child, animation) => ScaleTransition(
-                  scale: Tween(begin: 0.7, end: 1.0).animate(animation),
-                  child: FadeTransition(opacity: animation, child: child),
-                ),
-                child: Pabi(
-                  key: ValueKey(mood),
-                  mood: mood,
-                  women: true,
-                  size: size,
+                    Icon(Icons.chevron_right_rounded, size: 18),
+                  ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -351,7 +525,7 @@ class _AnimatedPabi extends StatelessWidget {
   }
 }
 
-/// Carinha pequena para escolher o humor.
+/// Uma expressão na folha de escolha.
 class _MoodChoice extends StatelessWidget {
   final String label;
   final PabiMood mood;
@@ -370,43 +544,40 @@ class _MoodChoice extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: label,
+      label: 'Estou ${label.toLowerCase()}',
       excludeSemantics: true,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            children: [
-              AnimatedScale(
-                scale: selected ? 1.12 : 1,
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutBack,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: selected ? PabColors.pink : Colors.transparent,
-                      width: 2,
+      child: Material(
+        color: selected ? PabColors.soft : PabColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: selected ? PabColors.pink : PabColors.line,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(2, 10, 2, 8),
+            child: Column(
+              children: [
+                Pabi(mood: mood, women: true, size: 56),
+                const SizedBox(height: 6),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                      color: PabColors.ink,
                     ),
                   ),
-                  child: Pabi(mood: mood, women: true, size: 48),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
-                  color: PabColors.ink,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
