@@ -78,10 +78,12 @@ class CycleToolsRow extends StatelessWidget {
 }
 
 /// Moldura das três telas: cabeçalho escuro com voltar, título e subtítulo.
+/// O conteúdo é montado dentro do GetBuilder, para que cada registro
+/// (menstruação, tentativa, teste) apareça na hora.
 class _ToolFrame extends StatelessWidget {
   final String title;
   final String subtitle;
-  final List<Widget> children;
+  final List<Widget> Function() children;
 
   const _ToolFrame({
     required this.title,
@@ -153,7 +155,7 @@ class _ToolFrame extends StatelessWidget {
             child: GetBuilder<WomenHealthController>(
               builder: (_) => ListView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-                children: children,
+                children: children(),
               ),
             ),
           ),
@@ -230,7 +232,7 @@ class PeriodLogPage extends StatelessWidget {
     return _ToolFrame(
       title: 'Minha menstruação',
       subtitle: 'Registre quando vem, quando termina e quando atrasa.',
-      children: [_PeriodBody(women: w)],
+      children: () => [_PeriodBody(women: w)],
     );
   }
 }
@@ -516,7 +518,7 @@ class _AttemptsPageState extends State<AttemptsPage> {
     return _ToolFrame(
       title: 'Dias de tentativa',
       subtitle: 'Marque os dias e veja o período fértil previsto.',
-      children: [_body(w)],
+      children: () => [_body(w)],
     );
   }
 
@@ -809,7 +811,7 @@ class _TestsPageState extends State<TestsPage> {
     return _ToolFrame(
       title: 'Testes',
       subtitle: 'Registre os testes de ovulação e de gravidez.',
-      children: [_body(context, w)],
+      children: () => [_body(context, w)],
     );
   }
 
