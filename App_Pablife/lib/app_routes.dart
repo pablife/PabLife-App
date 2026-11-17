@@ -16,7 +16,9 @@ import 'modules/auth/pages/student_proof_page.dart';
 import 'modules/waiting_approval/pages/waiting_approval_page.dart';
 import 'modules/dashboard/dashboard_page.dart';
 import 'modules/onboarding/onboarding_page.dart';
+import 'shared/utils/startup_guard.dart';
 import 'shared/utils/wide_layout.dart';
+import 'modules/splash/splash_page.dart';
 import 'modules/splash/splash_routes.dart';
 import 'modules/auth/auth_routes.dart';
 import 'modules/onboarding/onboarding_routes.dart';
@@ -59,13 +61,20 @@ class AppRoutes {
 
   /// No computador, as telas desenhadas para celular abrem numa coluna
   /// centralizada.
+  ///
+  /// Todas passam pela [StartupGuard]: abrir o site direto numa tela (o
+  /// navegador guarda o último endereço) começa sempre pela Splash.
   static List<GetPage> pages = _allPages
       .map(
-        (page) => _fullWidthRoutes.contains(page.name)
-            ? page
-            : page.copy(
-                page: () => WideCenter(maxWidth: 760, child: page.page()),
-              ),
+        (page) => page.copy(
+          page: _fullWidthRoutes.contains(page.name)
+              ? page.page
+              : () => WideCenter(maxWidth: 760, child: page.page()),
+          middlewares: [
+            ...?page.middlewares,
+            StartupGuard(SplashPage.route),
+          ],
+        ),
       )
       .toList();
 
