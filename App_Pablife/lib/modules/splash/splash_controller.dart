@@ -13,6 +13,7 @@ import '../../infra/repositories/professional_repository.dart';
 import '../../infra/repositories/user_repository.dart';
 import '../../infra/services/auth_service.dart';
 import '../../shared/mixins/loader_manager.dart';
+import '../../shared/utils/startup_guard.dart';
 
 class SplashController extends GetxController with LoaderManagerMixin {
   final AuthService _authService = AuthService.instance;
@@ -27,6 +28,7 @@ class SplashController extends GetxController with LoaderManagerMixin {
   }
 
   void _checkAuthentication() async {
+    StartupGuard.passedSplash = true;
     changeLoading(true);
 
     // Na web não há loja de apps nem OneSignal.
