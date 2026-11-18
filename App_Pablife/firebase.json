@@ -23,7 +23,10 @@
     "target": "app",
     "public": "build/web",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [{ "source": "**", "destination": "/index.html" }],
+    "rewrites": [
+      { "source": "/excluir-conta", "destination": "/excluir-conta.html" },
+      { "source": "**", "destination": "/index.html" }
+    ],
     "headers": [
       {
         "source": "**/*.@(js|json|html)",
