@@ -1,0 +1,79 @@
+# Monta o pacote da Play Store (.aab) assinado, nos computadores do GitHub.
+#
+# Roda sozinho a cada envio para uma branch release/* (ex.: release/1.1.0).
+# O pacote fica em Actions → (a execução) → Artifacts, por 3 dias.
+#
+# Os arquivos privados NUNCA ficam no repositório. Vêm dos "Secrets"
+# (Settings → Secrets and variables → Actions):
+#   ANDROID_KEYSTORE_BASE64      chave da Play Store (.jks) em base64
+#   ANDROID_KEY_PROPERTIES       conteúdo do key.properties (storeFile=upload.jks)
+#   FIREBASE_OPTIONS_DART_BASE64 lib/firebase_options.dart em base64
+#   GOOGLE_SERVICES_JSON_BASE64  android/app/google-services.json em base64
+name: Android - pacote da Play Store
+
+on:
+  push:
+    branches: ['release/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  appbundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: App_Pablife
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.6'
+          channel: stable
+          cache: true
+
+      - name: Colocar os arquivos privados (vindos dos Secrets)
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+          FIREBASE_OPTIONS: ${{ secrets.FIREBASE_OPTIONS_DART_BASE64 }}
+          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          for v in KEYSTORE KEY_PROPERTIES FIREBASE_OPTIONS GOOGLE_SERVICES; do
+            if [ -z "${!v}" ]; then echo "::error::Falta cadastrar o Secret de $v"; exit 1; fi
+          done
+          echo "$KEYSTORE" | base64 -d > android/app/upload.jks
+          printf '%s\n' "$KEY_PROPERTIES" | tr -d '\r' > android/key.properties
+          echo "$FIREBASE_OPTIONS" | base64 -d > lib/firebase_options.dart
+          echo "$GOOGLE_SERVICES" | base64 -d > android/app/google-services.json
+
+      - run: flutter pub get
+
+      - run: flutter test
+
+      - run: flutter build appbundle --release
+
+      - name: Conferir a assinatura (mostra só a parte pública)
+        run: keytool -printcert -jarfile build/app/outputs/bundle/release/app-release.aab | grep -E "Owner|SHA1|SHA256"
+
+      - name: Apagar os arquivos privados
+        if: always()
+        run: rm -f android/app/upload.jks android/key.properties
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pablife-play-store-${{ github.run_number }}
+          path: App_Pablife/build/app/outputs/bundle/release/app-release.aab
+          retention-days: 3
+          if-no-files-found: error
