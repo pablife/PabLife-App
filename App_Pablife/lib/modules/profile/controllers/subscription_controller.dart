@@ -57,6 +57,10 @@ class SubscriptionController extends GetxController {
     'exhausted': 'Cupom esgotado.',
     'already_used': 'Você já usou este cupom.',
     'not_authenticated': 'Entre na sua conta para usar o cupom.',
+    'has_subscription':
+        'Você já tem um plano em vigor ou um pagamento em andamento. '
+        'O cupom vale para quem ainda não tem plano.',
+    'plan_not_found': 'Escolha um plano para usar o cupom.',
   };
 
   @override

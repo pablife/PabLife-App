@@ -321,6 +321,9 @@ class PhoneDayView extends StatelessWidget {
                               _minutes(item) / 60 * hourHeight,
                             ),
                             onTap: () => c.openItem(item),
+                            onCheck: item.type == 'appointment'
+                                ? null
+                                : () => c.toggleDone(item, day),
                           ),
                         if (_same(now, day) &&
                             now.hour >= first &&
@@ -538,11 +541,16 @@ class _TimedBlock extends StatelessWidget {
   final double height;
   final VoidCallback onTap;
 
+  /// Tarefas e metas com horário também podem ser marcadas como feitas aqui
+  /// (consultas não têm o círculo).
+  final VoidCallback? onCheck;
+
   const _TimedBlock({
     required this.item,
     required this.top,
     required this.height,
     required this.onTap,
+    this.onCheck,
   });
 
   @override
@@ -561,35 +569,65 @@ class _TimedBlock extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            child: Column(
+            padding: EdgeInsets.fromLTRB(onCheck != null ? 4 : 10, 4, 10, 4),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '${_time(item.dueAt!)} · ${_title(item)}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: look.fg,
-                    decoration: done ? TextDecoration.lineThrough : null,
-                    decorationColor: look.fg,
-                  ),
-                ),
-                if (height >= 60)
-                  Text(
-                    look.label,
-                    maxLines: 1,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: look.fg.withValues(alpha: 0.85),
+                if (onCheck != null)
+                  Tooltip(
+                    message: done ? 'Desmarcar' : 'Marcar como feito',
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: onCheck,
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Icon(
+                          done
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          size: 20,
+                          color: look.fg,
+                        ),
+                      ),
                     ),
                   ),
+                Expanded(child: _content(look, done)),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _content(({Color bg, Color fg, String label}) look, bool done) {
+    return Padding(
+      padding: EdgeInsets.only(top: onCheck != null ? 4 : 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${_time(item.dueAt!)} · ${_title(item)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: look.fg,
+              decoration: done ? TextDecoration.lineThrough : null,
+              decorationColor: look.fg,
+            ),
+          ),
+          if (height >= 60)
+            Text(
+              look.label,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 12,
+                color: look.fg.withValues(alpha: 0.85),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -1,115 +1,157 @@
 import 'package:flutter/material.dart';
 
+/// Política de Privacidade do PabLife (endereço informado ao Google Play e à
+/// App Store). Texto revisado pelo encarregado de dados em 18/11/2026.
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
 
   static const String route = '/politica-de-privacidade';
+
+  static const _azul = Color(0xFF1E3A5F);
+  static const _email = 'pablifeapp@pablife.com.br';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E3A5F),
+        backgroundColor: _azul,
         title: const Text(
-          'Politica de Privacidade',
+          'Política de Privacidade',
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 800),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Center(
-                  child: Text(
-                    'Politica de Privacidade',
+            child: SelectionArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Política de Privacidade do PabLife',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E3A5F),
+                      color: _azul,
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-                _buildParagraph(
-                  'A sua privacidade e importante para nos. E politica do Pablife respeitar a sua privacidade em relacao a qualquer informacao sua que possamos coletar no site Pablife, e outros sites que possuimos e operamos.',
-                ),
-                _buildParagraph(
-                  'Solicitamos informacoes pessoais apenas quando realmente precisamos delas para lhe fornecer um servico. Fazemo-lo por meios justos e legais, com o seu conhecimento e consentimento. Tambem informamos por que estamos coletando e como sera usado.',
-                ),
-                _buildParagraph(
-                  'Apenas retemos as informacoes coletadas pelo tempo necessario para fornecer o servico solicitado. Quando armazenamos dados, protegemos dentro de meios comercialmente aceitaveis para evitar perdas e roubos, bem como acesso, divulgacao, copia, uso ou modificacao nao autorizados.',
-                ),
-                _buildParagraph(
-                  'Nao compartilhamos informacoes de identificacao pessoal publicamente ou com terceiros, exceto quando exigido por lei.',
-                ),
-                _buildParagraph(
-                  'O nosso site pode ter links para sites externos que nao sao operados por nos. Esteja ciente de que nao temos controle sobre o conteudo e praticas desses sites e nao podemos aceitar responsabilidade por suas respectivas politicas de privacidade.',
-                ),
-                _buildParagraph(
-                  'Voce e livre para recusar a nossa solicitacao de informacoes pessoais, entendendo que talvez nao possamos fornecer alguns dos servicos desejados.',
-                ),
-                _buildParagraph(
-                  'O uso continuado de nosso site sera considerado como aceitacao de nossas praticas em torno de privacidade e informacoes pessoais. Se voce tiver alguma duvida sobre como lidamos com dados do usuario e informacoes pessoais, entre em contato conosco.',
-                ),
-                const SizedBox(height: 24),
-                _buildParagraph(
-                  'O servico Google AdSense que usamos para veicular publicidade usa um cookie DoubleClick para veicular anuncios mais relevantes em toda a Web e limitar o numero de vezes que um determinado anuncio e exibido para voce.',
-                ),
-                _buildParagraph(
-                  'Para mais informacoes sobre o Google AdSense, consulte as FAQs oficiais sobre privacidade do Google AdSense.',
-                ),
-                _buildParagraph(
-                  'Utilizamos anuncios para compensar os custos de funcionamento deste site e fornecer financiamento para futuros desenvolvimentos. Os cookies de publicidade comportamental usados por este site foram projetados para garantir que voce forneca os anuncios mais relevantes sempre que possivel, rastreando anonimamente seus interesses e apresentando coisas semelhantes que possam ser do seu interesse.',
-                ),
-                _buildParagraph(
-                  'Varios parceiros anunciam em nosso nome e os cookies de rastreamento de afiliados simplesmente nos permitem ver se nossos clientes acessaram o site atraves de um dos sites de nossos parceiros, para que possamos credita-los adequadamente e, quando aplicavel, permitir que nossos parceiros afiliados oferecam qualquer promocao que pode fornece-lo para fazer uma compra.',
-                ),
-                const SizedBox(height: 24),
-                _buildSection('Compromisso do Usuario'),
-                _buildParagraph(
-                  'O usuario se compromete a fazer uso adequado dos conteudos e da informacao que o Pablife oferece no site e com carater enunciativo, mas nao limitativo:',
-                ),
-                _buildListItem(
-                  'A) Nao se envolver em atividades que sejam ilegais ou contrarias a boa fe e a ordem publica;',
-                ),
-                _buildListItem(
-                  'B) Nao difundir propaganda ou conteudo de natureza racista, xenofobica, jogos de azar, qualquer tipo de pornografia ilegal, de apologia ao terrorismo ou contra os direitos humanos;',
-                ),
-                _buildListItem(
-                  'C) Nao causar danos aos sistemas fisicos (hardwares) e logicos (softwares) do Pablife, de seus fornecedores ou terceiros, para introduzir ou disseminar virus informaticos ou quaisquer outros sistemas de hardware ou software que sejam capazes de causar danos anteriormente mencionados.',
-                ),
-                const SizedBox(height: 24),
-                _buildSection('Mais informacoes'),
-                _buildParagraph(
-                  'Esperamos que esteja esclarecido e, como mencionado anteriormente, se houver algo que voce nao tem certeza se precisa ou nao, geralmente e mais seguro deixar os cookies ativados, caso interaja com um dos recursos que voce usa em nosso site.',
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Esta politica e efetiva a partir de 27 de Novembro de 2025',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 40),
-                const Divider(),
-                const SizedBox(height: 16),
-                Center(
-                  child: Text(
-                    '© ${DateTime.now().year} Pablife. Todos os direitos reservados.',
+                  const SizedBox(height: 8),
+                  Text(
+                    'Última atualização: 18 de novembro de 2026',
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
-                ),
-                const SizedBox(height: 24),
-              ],
+                  const SizedBox(height: 24),
+                  _p(
+                    'Esta política explica quais dados o PabLife coleta, para que usa, com quem compartilha e como você pode exercer seus direitos pela Lei Geral de Proteção de Dados (Lei nº 13.709/2018, LGPD). Vale para o app PabLife no Android e no iPhone e para o site app.pablife.com.br.',
+                  ),
+                  _h('1. Quem somos e como falar conosco'),
+                  _p(
+                    'O PabLife é o controlador dos seus dados pessoais: decide como e para que eles são usados.',
+                  ),
+                  _item('Empresa: PAB DESENVOLVIMENTO LTDA (nome fantasia: PAB LIFE)'),
+                  _item('CNPJ: 62.990.545/0001-40'),
+                  _item('Endereço: Rua Abdon Galdino, 2069, Letra B, Centro, Cascavel - CE, CEP 62850-000'),
+                  _item('Encarregado de dados (DPO): Rafael Paulino Bulhões Alves'),
+                  _item('Contato para privacidade: $_email'),
+                  _p('Respondemos pedidos sobre seus dados em até 15 dias.'),
+                  _h('2. Quais dados coletamos'),
+                  _p(
+                    'Coletamos só o necessário para o app funcionar. Dados de saúde são dados pessoais sensíveis pela LGPD e recebem cuidado redobrado.',
+                  ),
+                  _item('Cadastro: nome, apelido, e-mail, telefone, CPF e foto de perfil, ao criar e editar a conta.'),
+                  _item('Saúde da Mulher (dado sensível): ciclo menstrual, sintomas, humor, energia, sono, diário, tentativas e testes, gestação e seus registros. Só se você usar essa área e der seu consentimento.'),
+                  _item('Consultas: profissional escolhida, datas, remarcações, cancelamentos e motivo, avaliações.'),
+                  _item('Registros feitos pela profissional (dado sensível): anotações sobre o atendimento.'),
+                  _item('Agenda pessoal: tarefas, metas diárias e lembretes que você cria.'),
+                  _item('Profissionais: registro no conselho, documentos de validação, especialização e descrição.'),
+                  _item('Estudantes: instituição, curso e comprovante, ao pedir o plano estudante.'),
+                  _item('Pagamentos: plano, valor, datas, situação do pagamento e cupom usado.'),
+                  _item('Aparelho e uso do app: identificador para notificações e relatórios de falha (modelo do aparelho, versão do sistema).'),
+                  _p(
+                    'Os dados do cartão (número, validade, código de segurança, nome e CPF do titular) são digitados no app e enviados por conexão segura ao Mercado Pago para a cobrança. O PabLife não guarda esses dados.',
+                  ),
+                  _p(
+                    'Não coletamos localização, contatos do celular, calendário do celular nem áudio. O PabLife não exibe anúncios.',
+                  ),
+                  _h('3. Para que usamos e com qual base legal'),
+                  _p(
+                    'Cada uso tem uma base legal da LGPD. Não vendemos seus dados e não usamos dados de saúde para publicidade.',
+                  ),
+                  _item('Criar e manter sua conta; agendar, remarcar e cancelar consultas; lembretes e avisos do app: execução de contrato (art. 7º, V).'),
+                  _item('Acompanhar ciclo, humor, diário e gestação: consentimento específico e destacado (art. 11, I), registrado no app.'),
+                  _item('Registros de saúde feitos pela profissional: tutela da saúde, em procedimento realizado por profissional de saúde (art. 11, II, f).'),
+                  _item('Validar profissionais e estudantes e evitar fraudes: cumprimento de obrigação legal e legítimo interesse (art. 7º, II e IX).'),
+                  _item('Cobrar planos e guardar comprovantes: execução de contrato e obrigação legal fiscal (art. 7º, V e II).'),
+                  _item('E-mails sobre novidades e benefícios: legítimo interesse (art. 7º, IX), com opção de sair em todo e-mail.'),
+                  _item('Corrigir falhas do app: legítimo interesse (art. 7º, IX).'),
+                  _p(
+                    'Você pode retirar o consentimento da Saúde da Mulher a qualquer momento. Isso não afeta o que foi feito antes da retirada.',
+                  ),
+                  _h('4. Com quem compartilhamos'),
+                  _p(
+                    'Profissionais que você escolhe: ao agendar, a profissional vê seu nome, telefone, CPF e os dados da consulta. Diário e registros da gestação só chegam a ela se você escolher compartilhar.',
+                  ),
+                  _p(
+                    'Empresas que operam o serviço para nós, que só podem usar os dados para prestar o serviço ao PabLife:',
+                  ),
+                  _item('Supabase: banco de dados, login e arquivos.'),
+                  _item('Google Firebase: site e relatórios de falha.'),
+                  _item('OneSignal: notificações no celular.'),
+                  _item('Mercado Pago: cobrança dos planos.'),
+                  _item('Customer.io: e-mails do PabLife.'),
+                  _p('Autoridades: quando a lei ou uma ordem judicial exigir.'),
+                  _h('5. Onde os dados ficam, segurança e por quanto tempo'),
+                  _p(
+                    'O banco de dados fica nos Estados Unidos (Supabase). Firebase, OneSignal e Customer.io também podem tratar dados fora do Brasil. Essas transferências seguem o art. 33 da LGPD, com garantias contratuais de proteção.',
+                  ),
+                  _item('Todo envio de dados usa conexão criptografada (HTTPS).'),
+                  _item('Regras no banco garantem que cada pessoa só acesse os próprios dados; a profissional só vê pacientes que agendaram com ela.'),
+                  _item('Senhas não ficam guardadas em texto aberto.'),
+                  _item('O acesso da equipe aos dados é restrito.'),
+                  _p('Por quanto tempo guardamos:'),
+                  _item('Conta, Saúde da Mulher e agenda: enquanto a conta existir; apagados ao excluir a conta.'),
+                  _item('Registros de pagamento, sem nome nem e-mail: pelo prazo da lei fiscal (em geral, 5 anos).'),
+                  _item('Datas de consultas já realizadas, sem dados pessoais: pelo tempo necessário à prestação de contas e ao exercício regular de direitos.'),
+                  _item('Registros feitos pela profissional: anonimizados ao excluir a conta, respeitadas as regras de guarda do conselho profissional.'),
+                  _item('Relatórios de falha: até 90 dias.'),
+                  _h('6. Seus direitos'),
+                  _p('Pela LGPD (art. 18), você pode pedir a qualquer momento:'),
+                  _item('confirmação de que tratamos seus dados e acesso a eles;'),
+                  _item('correção de dados errados ou desatualizados;'),
+                  _item('anonimização, bloqueio ou eliminação de dados desnecessários;'),
+                  _item('portabilidade para outro serviço;'),
+                  _item('informação sobre com quem compartilhamos;'),
+                  _item('retirada do consentimento e eliminação dos dados tratados com ele.'),
+                  _p(
+                    'Muitos dados você mesmo corrige em Perfil. Para o resto, escreva para $_email. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).',
+                  ),
+                  _p(
+                    'Excluir a conta: no app ou no site, vá em Perfil → Excluir conta. O passo a passo e o que é apagado estão em app.pablife.com.br/excluir-conta.',
+                  ),
+                  _p(
+                    'Menores de idade: o PabLife é para maiores de 18 anos. Não coletamos dados de crianças de propósito; se isso acontecer, apagamos.',
+                  ),
+                  _p(
+                    'Mudanças nesta política: avisamos no app antes de mudanças importantes. A data da última atualização fica no topo desta página.',
+                  ),
+                  const SizedBox(height: 32),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Text(
+                      '© ${DateTime.now().year} PAB DESENVOLVIMENTO LTDA. Todos os direitos reservados.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),
@@ -117,44 +159,48 @@ class PrivacyPolicyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(String title) {
+  static Widget _h(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(top: 16, bottom: 12),
       child: Text(
         title,
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF1E3A5F),
+          color: _azul,
         ),
       ),
     );
   }
 
-  Widget _buildParagraph(String content) {
+  static Widget _p(String content) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Text(
         content,
-        style: const TextStyle(
-          fontSize: 16,
-          height: 1.6,
-          color: Colors.black87,
-        ),
+        style: const TextStyle(fontSize: 16, height: 1.6, color: Colors.black87),
       ),
     );
   }
 
-  Widget _buildListItem(String content) {
+  static Widget _item(String content) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12, left: 16),
-      child: Text(
-        content,
-        style: const TextStyle(
-          fontSize: 16,
-          height: 1.6,
-          color: Colors.black87,
-        ),
+      padding: const EdgeInsets.only(bottom: 8, left: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('•  ', style: TextStyle(fontSize: 16, height: 1.6)),
+          Expanded(
+            child: Text(
+              content,
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.6,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
