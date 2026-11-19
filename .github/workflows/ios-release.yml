@@ -40,6 +40,13 @@ jobs:
       # Número do build sempre maior que o anterior, sem mexer no pubspec.
       - run: echo "BUILD_NUMBER=$((2100 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
 
+      # A Apple só aceita apps montados com o Xcode 26 (SDK do iOS 26) ou mais novo.
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26'
+
+      - run: xcodebuild -version
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.38.6'
