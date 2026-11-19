@@ -2,6 +2,9 @@ import 'package:pablife/modules/auth/pages/choose_profile_page.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:flutter/services.dart' show Uint8List;
+import '../../shared/utils/photo_resize.dart' show jpgFileName;
+import '../../widgets/photo_crop/photo_crop_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
@@ -135,15 +138,24 @@ class ProfileController extends GetxController with LoaderManagerMixin {
         String? base64Image;
         String fileName = file.name;
 
+        Uint8List? picked;
         if (kIsWeb) {
-          if (file.bytes != null) {
-            base64Image = _encodeImageToBase64(file.bytes!);
-          }
-        } else {
-          if (file.path != null) {
-            final fileBytes = await File(file.path!).readAsBytes();
-            base64Image = _encodeImageToBase64(fileBytes);
-          }
+          picked = file.bytes;
+        } else if (file.path != null) {
+          picked = await File(file.path!).readAsBytes();
+        }
+
+        // A pessoa posiciona a foto no círculo antes de enviar.
+        if (picked != null) {
+          changeLoading(false);
+          final cropped = await Get.to<Uint8List>(
+            () => PhotoCropPage(bytes: picked!),
+            fullscreenDialog: true,
+          );
+          if (cropped == null) return;
+          changeLoading(true);
+          base64Image = _encodeImageToBase64(cropped);
+          fileName = jpgFileName(fileName);
         }
 
         if (base64Image == null) {
