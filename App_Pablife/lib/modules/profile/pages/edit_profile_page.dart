@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../infra/models/user_role.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../../../widgets/design_system/app_image.dart';
+import '../../auth/pages/widgets/personal_data_fields.dart';
 import '../../auth/pages/widgets/registration_layout.dart';
 import '../profile_controller.dart';
 
@@ -160,6 +161,19 @@ class EditProfilePage extends StatelessWidget {
                   TelefoneInputFormatter(),
                 ],
               ),
+              if (c.personalDataLoaded) ...[
+                BirthDateField(
+                  controller: c.birthDateController,
+                  onChanged: c.updateBirthDate,
+                  error: c.birthDateError,
+                  enabled: !c.isLoading,
+                ),
+                GenderField(
+                  value: c.gender,
+                  onChanged: c.updateGender,
+                  enabled: !c.isLoading,
+                ),
+              ],
               if (pro) ...[
                 RegField(
                   label: 'Link da sala de atendimento',

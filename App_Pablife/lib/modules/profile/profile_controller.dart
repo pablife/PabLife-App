@@ -18,7 +18,10 @@ import '../../infra/models/user_model.dart';
 import '../../infra/models/user_role.dart';
 import '../../infra/repositories/consultation_repository.dart';
 import '../../infra/repositories/professional_repository.dart';
+import '../../infra/models/gender.dart';
+import '../../infra/repositories/user_personal_data_repository.dart';
 import '../../infra/repositories/user_preferences_repository.dart';
+import '../../shared/utils/birth_date.dart';
 import '../auth/pages/recovery_password_page.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import '../../widgets/design_system/app_dialog.dart';
@@ -45,6 +48,25 @@ class ProfileController extends GetxController with LoaderManagerMixin {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController preferredNameController = TextEditingController();
   final TextEditingController meetingUrlController = TextEditingController();
+  final TextEditingController birthDateController = TextEditingController();
+
+  /// Gênero (opcional) e data como vieram do banco. [_personalData] fica null
+  /// se não deu para carregar; aí Salvar não mexe nesses dados.
+  Gender? gender;
+  UserPersonalData? _personalData;
+  String? birthDateError;
+
+  bool get personalDataLoaded => _personalData != null;
+
+  void updateBirthDate(String _) {
+    birthDateError = null;
+    update();
+  }
+
+  void updateGender(Gender? value) {
+    gender = value;
+    update();
+  }
 
   /// "Receber notificações" (Editar perfil).
   bool pushNotifications = true;
@@ -76,6 +98,11 @@ class ProfileController extends GetxController with LoaderManagerMixin {
         preferredNameController.text = currentUser!.preferredName ?? '';
         pushNotifications = await UserPreferencesRepository()
             .loadPushNotifications();
+        _personalData = await UserPersonalDataRepository().load();
+        final birth = _personalData?.birthDate;
+        birthDateController.text = birth == null ? '' : BirthDate.format(birth);
+        gender = _personalData?.gender;
+        birthDateError = null;
         emailController.text = currentUser!.email;
         phoneController.text = currentUser!.phone;
 
@@ -120,6 +147,7 @@ class ProfileController extends GetxController with LoaderManagerMixin {
     descriptionController.dispose();
     preferredNameController.dispose();
     meetingUrlController.dispose();
+    birthDateController.dispose();
     super.onClose();
   }
 
@@ -244,6 +272,17 @@ class ProfileController extends GetxController with LoaderManagerMixin {
       return;
     }
 
+    // Contas antigas podem deixar a data em branco; quem já informou não apaga.
+    final birthText = birthDateController.text.trim();
+    if (personalDataLoaded &&
+        (birthText.isNotEmpty || _personalData!.birthDate != null)) {
+      birthDateError = BirthDate.errorFor(birthText);
+      if (birthDateError != null) {
+        update();
+        return;
+      }
+    }
+
     changeLoading(true);
 
     final phoneDigits = UtilBrasilFields.removeCaracteres(phoneController.text);
@@ -265,6 +304,26 @@ class ProfileController extends GetxController with LoaderManagerMixin {
         _professionalId!,
         meetingUrlController.text,
       );
+    }
+
+    final birthDate = BirthDate.parse(birthText);
+    if (response.success &&
+        linkError == null &&
+        personalDataLoaded &&
+        (birthDate != _personalData!.birthDate ||
+            gender != _personalData!.gender)) {
+      final saved = await UserPersonalDataRepository().save(
+        birthDate: birthDate,
+        gender: gender,
+      );
+      if (!saved) {
+        changeLoading(false);
+        AppSnackbar.to.show(
+          'Não foi possível salvar a data de nascimento e o gênero. '
+          'Tente de novo.',
+        );
+        return;
+      }
     }
 
     changeLoading(false);

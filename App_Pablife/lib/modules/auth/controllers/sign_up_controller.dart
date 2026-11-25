@@ -5,13 +5,17 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../infra/models/gender.dart';
 import '../../../infra/models/professional_type.dart';
 import '../../../infra/models/user_model.dart';
 import '../../../infra/models/user_role.dart';
 import '../../../infra/models/user_status.dart';
 import '../../../infra/repositories/student_repository.dart';
+import '../../../infra/repositories/user_personal_data_repository.dart';
 import '../../../infra/services/auth_service.dart';
 import '../../../shared/mixins/loader_manager.dart';
+import '../../../shared/utils/app_snackbar.dart';
+import '../../../shared/utils/birth_date.dart';
 import '../entry_visual.dart';
 import '../pages/account_created_page.dart';
 import '../pages/professional_profile_page.dart';
@@ -27,6 +31,11 @@ class SignUpController extends GetxController with LoaderManagerMixin {
   String fullName = '';
   String phone = '';
   String cpfDocument = '';
+
+  /// Data de nascimento como foi digitada (dd/mm/aaaa) e gênero (opcional).
+  String birthText = '';
+  Gender? gender;
+
   String accountType = 'cliente';
   bool termsAccepted = false;
 
@@ -69,6 +78,8 @@ class SignUpController extends GetxController with LoaderManagerMixin {
       _set(() => phone = UtilBrasilFields.removeCaracteres(v));
   void updateCpfDocument(String v) =>
       _set(() => cpfDocument = UtilBrasilFields.removeCaracteres(v));
+  void updateBirthText(String v) => _set(() => birthText = v.trim());
+  void updateGender(Gender? v) => _set(() => gender = v);
   void updatePassword(String v) => _set(() => password = v);
   void updateTerms(bool v) => _set(() => termsAccepted = v);
   void toggleStudent() => _set(() => isStudent = !isStudent);
@@ -88,11 +99,16 @@ class SignUpController extends GetxController with LoaderManagerMixin {
     if (!_emailPattern.hasMatch(email)) 'e-mail',
     if (phone.length < 10) 'WhatsApp',
     if (!UtilBrasilFields.isCPFValido(cpfDocument)) 'CPF',
+    if (BirthDate.errorFor(birthText) != null) 'data de nascimento',
     if (password.length < 8) 'senha',
     if (isProfessional && profession == null) 'profissão',
     if (isProfessional && councilNumber.length < 3) 'registro',
     if (!termsAccepted) 'aceite dos termos',
   ];
+
+  /// Aviso embaixo da data: quando ela está completa ou já tentou continuar.
+  String? get birthError =>
+      touched || birthText.length == 10 ? BirthDate.errorFor(birthText) : null;
 
   String get missingText => 'Falta preencher: ${missing.join(', ')}.';
 
@@ -119,6 +135,8 @@ class SignUpController extends GetxController with LoaderManagerMixin {
           'fullName': fullName,
           'phone': phone,
           'cpfDocument': cpfDocument,
+          'birthText': birthText,
+          'gender': gender?.value,
           'professionalType': profession!.value,
           'councilNumber': councilNumber,
           'councilRegion': councilRegion,
@@ -195,6 +213,11 @@ class SignUpController extends GetxController with LoaderManagerMixin {
         return;
       }
       await EntryVisual.onAccountCreated(professional: false);
+      final personalDataSaved = await UserPersonalDataRepository()
+          .saveAfterSignUp(
+            birthDate: BirthDate.parse(birthText),
+            gender: gender,
+          );
 
       String? proofError;
       if (sendProof) {
@@ -213,6 +236,12 @@ class SignUpController extends GetxController with LoaderManagerMixin {
           'proofError': proofError,
         },
       );
+      if (!personalDataSaved) {
+        AppSnackbar.to.show(
+          'Conta criada, mas a data de nascimento não foi salva. '
+          'Preencha em Perfil → Editar.',
+        );
+      }
     } catch (e) {
       error = 'Não foi possível criar a conta. Tente de novo.';
     } finally {

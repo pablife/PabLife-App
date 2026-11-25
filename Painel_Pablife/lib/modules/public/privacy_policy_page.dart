@@ -63,7 +63,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                   _p(
                     'Coletamos só o necessário para o app funcionar. Dados de saúde são dados pessoais sensíveis pela LGPD e recebem cuidado redobrado.',
                   ),
-                  _item('Cadastro: nome, apelido, e-mail, telefone, CPF e foto de perfil, ao criar e editar a conta.'),
+                  _item('Cadastro: nome, apelido, e-mail, telefone, CPF, data de nascimento, gênero (opcional) e foto de perfil, ao criar e editar a conta. A data de nascimento confirma a idade mínima de 18 anos; data e gênero não são mostrados às profissionais nem a outros usuários.'),
                   _item('Saúde da Mulher (dado sensível): ciclo menstrual, sintomas, humor, energia, sono, diário, tentativas e testes, gestação e seus registros. Só se você usar essa área e der seu consentimento.'),
                   _item('Consultas: profissional escolhida, datas, remarcações, cancelamentos e motivo, avaliações.'),
                   _item('Registros feitos pela profissional (dado sensível): anotações sobre o atendimento.'),
