@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pablife/modules/dashboard/widgets/dashboard_navbar.dart';
 import 'package:get/get.dart';
 
 import '../../infra/repositories/student_repository.dart';
@@ -56,7 +57,12 @@ class ProfilePage extends StatelessWidget {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 640),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      16,
+                      16,
+                      24 + FloatingNavSpace.of(context),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

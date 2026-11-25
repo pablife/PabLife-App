@@ -1,5 +1,6 @@
 import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
+import 'package:pablife/modules/dashboard/widgets/dashboard_navbar.dart';
 import 'package:get/get.dart';
 
 import '../../../infra/models/activity_model.dart';
@@ -164,14 +165,20 @@ class _PhoneCalendar extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: PabColors.background,
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Criar',
-        backgroundColor: PabColors.accent,
-        foregroundColor: PabColors.ink,
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        onPressed: () => _showCreateSheet(context),
-        child: const Icon(Icons.add),
+      floatingActionButton: Padding(
+        // Acima da barra flutuante.
+        padding: EdgeInsets.only(bottom: FloatingNavSpace.of(context)),
+        child: FloatingActionButton(
+          tooltip: 'Criar',
+          backgroundColor: PabColors.accent,
+          foregroundColor: PabColors.ink,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          onPressed: () => _showCreateSheet(context),
+          child: const Icon(Icons.add),
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -185,7 +192,12 @@ class _PhoneCalendar extends StatelessWidget {
               panel: Container(
                 color: PabColors.background,
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 96),
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    14,
+                    16,
+                    96 + FloatingNavSpace.of(context),
+                  ),
                   children: [
                     _FilterChips(controller: controller, women: women),
                     const SizedBox(height: 12),

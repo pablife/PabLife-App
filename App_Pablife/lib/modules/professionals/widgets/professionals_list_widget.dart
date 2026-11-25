@@ -1,5 +1,6 @@
 import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
+import 'package:pablife/modules/dashboard/widgets/dashboard_navbar.dart';
 import '../../../infra/models/professional_with_user_model.dart';
 import '../../../widgets/design_system/empty_state_widget.dart';
 import 'professional_tile.dart';
@@ -52,7 +53,12 @@ class ProfessionalsListWidget extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        24 + FloatingNavSpace.of(context),
+      ),
       itemCount: professionals.length,
       itemBuilder: (context, index) {
         final professional = professionals[index];
