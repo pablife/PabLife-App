@@ -5,13 +5,17 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../infra/models/gender.dart';
 import '../../../infra/models/professional_type.dart';
 import '../../../infra/models/user_model.dart';
 import '../../../infra/models/user_role.dart';
 import '../../../infra/models/user_status.dart';
+import '../../../infra/repositories/user_personal_data_repository.dart';
 import '../../../infra/repositories/user_repository.dart';
 import '../../../infra/services/auth_service.dart';
 import '../../../shared/mixins/loader_manager.dart';
+import '../../../shared/utils/app_snackbar.dart';
+import '../../../shared/utils/birth_date.dart';
 import '../../dashboard/dashboard_page.dart';
 import '../../waiting_approval/pages/waiting_approval_page.dart';
 import '../entry_visual.dart';
@@ -32,6 +36,8 @@ class ProfessionalProfileController extends GetxController
   String phone = '';
   String cpfDocument = '';
   ProfessionalType? professionalType;
+  String birthText = '';
+  Gender? gender;
   String councilNumber = '';
   String councilRegion = '';
   bool termsAccepted = false;
@@ -55,6 +61,8 @@ class ProfessionalProfileController extends GetxController
     fullName = args['fullName'] ?? '';
     phone = args['phone'] ?? '';
     cpfDocument = args['cpfDocument'] ?? '';
+    birthText = args['birthText'] ?? '';
+    gender = Gender.fromValue(args['gender'] as String?);
     final type = args['professionalType'] as String?;
     professionalType = type == null ? null : ProfessionalType.fromString(type);
     councilNumber = args['councilNumber'] ?? '';
@@ -149,6 +157,7 @@ class ProfessionalProfileController extends GetxController
         'validation-document-${DateTime.now().millisecondsSinceEpoch}.${_ext(cardName!)}';
 
     try {
+      var personalDataSaved = true;
       if (addToExistingAccount) {
         final response = await _userRepository.addProfessionalProfile(
           professionalType: professionalType!.value,
@@ -196,10 +205,20 @@ class ProfessionalProfileController extends GetxController
           return;
         }
         await EntryVisual.onAccountCreated(professional: true);
+        personalDataSaved = await UserPersonalDataRepository().saveAfterSignUp(
+          birthDate: BirthDate.parse(birthText),
+          gender: gender,
+        );
       }
 
       await _saveCouncilAndDiploma();
       Get.offAllNamed(WaitingApprovalPage.route);
+      if (!personalDataSaved) {
+        AppSnackbar.to.show(
+          'Conta criada, mas a data de nascimento não foi salva. '
+          'Preencha em Perfil → Editar.',
+        );
+      }
     } catch (e) {
       error = 'Não foi possível enviar seu cadastro. Tente de novo.';
     } finally {

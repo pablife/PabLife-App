@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../infra/models/professional_type.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../controllers/sign_up_controller.dart';
+import 'widgets/personal_data_fields.dart';
 import 'widgets/registration_layout.dart';
 
 /// "Criar conta" (canvas E3) para o usuário; para o profissional, "Seus
@@ -92,6 +93,12 @@ class _SignUpPageState extends State<SignUpPage> {
               ],
               helper: 'Usado no pagamento e para proteger sua conta.',
             ),
+            BirthDateField(
+              initialValue: c.birthText,
+              onChanged: c.updateBirthText,
+              error: c.birthError,
+            ),
+            GenderField(value: c.gender, onChanged: c.updateGender),
             RegField(
               label: 'Senha',
               hint: pro ? 'Pelo menos 8 caracteres' : 'Mínimo de 8 caracteres',
