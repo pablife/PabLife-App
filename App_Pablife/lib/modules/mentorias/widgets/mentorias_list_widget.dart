@@ -1,5 +1,6 @@
 import 'package:pablife/shared/themes/app_palette.dart';
 import 'package:flutter/material.dart';
+import 'package:pablife/modules/dashboard/widgets/dashboard_navbar.dart';
 import '../../../infra/models/mentoria_model.dart';
 import '../../../widgets/design_system/empty_state_widget.dart';
 import 'mentoria_tile.dart';
@@ -56,7 +57,12 @@ class MentoriasListWidget extends StatelessWidget {
         // Computador: cartões lado a lado.
         if (constraints.maxWidth >= 720) {
           return GridView.builder(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+            padding: EdgeInsets.fromLTRB(
+              24,
+              16,
+              24,
+              32 + FloatingNavSpace.of(context),
+            ),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 400,
               mainAxisExtent: 410,
@@ -68,7 +74,12 @@ class MentoriasListWidget extends StatelessWidget {
           );
         }
         return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            24 + FloatingNavSpace.of(context),
+          ),
           itemCount: mentorias.length,
           separatorBuilder: (_, _) => const SizedBox(height: 14),
           itemBuilder: (_, index) => tile(mentorias[index]),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pablife/modules/dashboard/widgets/dashboard_navbar.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -274,7 +275,12 @@ class _ProfessionalPatientsPageState extends State<ProfessionalPatientsPage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            12,
+            16,
+            24 + FloatingNavSpace.of(context),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

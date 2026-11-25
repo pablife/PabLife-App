@@ -64,10 +64,11 @@ class DashboardPage extends StatelessWidget {
           );
         }
 
-        return Scaffold(
+        return FloatingNavScaffold(
           body: pages[controller.currentIndex],
-          bottomNavigationBar: DashboardNavbar(
-            controller: controller,
+          navbar: DashboardNavbar(
+            currentIndex: controller.currentIndex,
+            onTab: controller.changeTab,
             isProfessional: isProfessional,
           ),
         );

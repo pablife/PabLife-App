@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pablife/modules/dashboard/widgets/dashboard_navbar.dart';
 import 'package:get/get.dart';
 
 import '../../infra/models/professional_schedule_slot.dart';
@@ -121,7 +122,12 @@ class _ProfessionalAgendaPageState extends State<ProfessionalAgendaPage> {
               children: [
                 _header(context, c, days, selected, monthLabel, freeWeek),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    14,
+                    16,
+                    24 + FloatingNavSpace.of(context),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [

@@ -1,7 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../shared/themes/pab_colors.dart';
-import '../dashboard_controller.dart';
 
 /// Abas na ordem da barra (e do menu lateral): Profissionais (Pacientes para
 /// o profissional), Dashboard, Agenda, Mentorias e Perfil. O índice é o da
@@ -26,38 +27,120 @@ List<({int index, IconData icon, String label})> dashboardTabs({
         (index: 4, icon: Icons.person_outline, label: 'Perfil'),
       ];
 
-/// Barra inferior do celular: fundo escuro, ícone com nome e o item ativo
-/// numa cápsula.
+/// Espaço que a barra flutuante ocupa no fim da tela (celular). Cada aba soma
+/// isso ao fim da rolagem, para o último item não ficar atrás da barra. Sem
+/// barra flutuante (computador), é zero.
+class FloatingNavSpace extends InheritedWidget {
+  final double height;
+
+  const FloatingNavSpace({
+    super.key,
+    required this.height,
+    required super.child,
+  });
+
+  static double of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<FloatingNavSpace>()?.height ??
+      0;
+
+  @override
+  bool updateShouldNotify(FloatingNavSpace oldWidget) =>
+      height != oldWidget.height;
+}
+
+/// Tela do celular com a barra flutuante: o conteúdo passa por trás dela.
+class FloatingNavScaffold extends StatelessWidget {
+  final Widget body;
+  final Widget navbar;
+
+  const FloatingNavScaffold({
+    super.key,
+    required this.body,
+    required this.navbar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBody: true,
+      body: Builder(
+        // Com extendBody, a altura da barra chega no espaçamento de baixo. Ele
+        // é retirado daqui para não mexer nas listas e áreas seguras de dentro
+        // das abas; quem precisa lê FloatingNavSpace.
+        builder: (context) => FloatingNavSpace(
+          height: MediaQuery.paddingOf(context).bottom,
+          child: MediaQuery.removePadding(
+            context: context,
+            removeBottom: true,
+            child: body,
+          ),
+        ),
+      ),
+      bottomNavigationBar: navbar,
+    );
+  }
+}
+
+/// Barra flutuante do celular: branca, solta das bordas, só com os ícones. O
+/// item ativo fica numa cápsula; o nome aparece ao segurar o ícone e é lido
+/// pelos leitores de tela.
 class DashboardNavbar extends StatelessWidget {
-  final DashboardController controller;
+  final int currentIndex;
+  final ValueChanged<int> onTab;
   final bool isProfessional;
 
   const DashboardNavbar({
     super.key,
-    required this.controller,
+    required this.currentIndex,
+    required this.onTab,
     this.isProfessional = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: PabColors.ink,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(6, 6, 6, 8),
-          child: Row(
-            children: [
-              for (final tab in dashboardTabs(isProfessional: isProfessional))
-                Expanded(
-                  child: DashboardNavbarItem(
-                    icon: tab.icon,
-                    label: tab.label,
-                    isSelected: controller.currentIndex == tab.index,
-                    onTap: () => controller.changeTab(tab.index),
-                  ),
+    final safe = MediaQuery.viewPaddingOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 0, 16, math.max(14, safe + 8)),
+      child: Center(
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: PabColors.card,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: PabColors.line),
+              boxShadow: [
+                BoxShadow(
+                  color: PabColors.ink.withValues(alpha: 0.2),
+                  blurRadius: 28,
+                  offset: const Offset(0, 10),
                 ),
-            ],
+              ],
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              borderRadius: BorderRadius.circular(28),
+              clipBehavior: Clip.antiAlias,
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  children: [
+                    for (final tab in dashboardTabs(
+                      isProfessional: isProfessional,
+                    ))
+                      Expanded(
+                        child: DashboardNavbarItem(
+                          icon: tab.icon,
+                          label: tab.label,
+                          isSelected: currentIndex == tab.index,
+                          onTap: () => onTab(tab.index),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -81,47 +164,36 @@ class DashboardNavbarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: isSelected,
-      label: label,
-      excludeSemantics: true,
-      child: InkWell(
+    return Tooltip(
+      message: label,
+      excludeFromSemantics: true,
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: label,
+        excludeSemantics: true,
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 54),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedContainer(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(22),
+          child: SizedBox(
+            height: 52,
+            child: Center(
+              child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
-                width: 52,
-                height: 30,
+                width: 56,
+                height: 40,
                 decoration: BoxDecoration(
                   color: isSelected ? PabColors.accent : Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Icon(
                   icon,
-                  size: 20,
-                  color: isSelected ? PabColors.ink : PabColors.navIdle,
+                  size: 24,
+                  color: isSelected ? PabColors.ink : PabColors.muted,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                  color: isSelected ? Colors.white : PabColors.navIdle,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

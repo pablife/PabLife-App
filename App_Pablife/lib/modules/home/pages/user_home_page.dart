@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pablife/modules/dashboard/widgets/dashboard_navbar.dart';
 import 'package:get/get.dart';
 
 import '../../../infra/models/professional_appointment_model.dart';
@@ -206,7 +207,7 @@ class _HomeBody extends StatelessWidget {
                           bannersPerView: wide ? 2 : null,
                         ),
                       ],
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24 + FloatingNavSpace.of(context)),
                     ],
                   ),
                 ),
