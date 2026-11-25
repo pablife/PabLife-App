@@ -1,7 +1,7 @@
 name: pablife
 description: "A new Flutter project."
 publish_to: "none"
-version: 1.1.0+21
+version: 1.2.0+23
 
 environment:
   sdk: ^3.8.1
