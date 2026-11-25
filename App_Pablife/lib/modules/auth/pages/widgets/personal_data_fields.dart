@@ -39,7 +39,9 @@ class BirthDateField extends StatelessWidget {
         DataInputFormatter(),
       ],
       error: error,
-      helper: 'O Pablife é para maiores de 18 anos. Só você vê esta data.',
+      helper:
+          'O Pablife é para maiores de 18 anos. As profissionais não '
+          'veem esta data.',
     );
   }
 }
