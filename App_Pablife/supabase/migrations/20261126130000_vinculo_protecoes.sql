@@ -94,11 +94,6 @@ alter function public.redeem_org_invite(text, text) rename to redeem_org_invite_
 revoke all on function public.validate_org_invite_unlimited(text) from public, anon, authenticated;
 revoke all on function public.redeem_org_invite_unlimited(text, text) from public, anon, authenticated;
 
--- As originais convertem o código com ::citext, que fica no esquema
--- "extensions"; sem ele no caminho, a conversão falha.
-alter function public.validate_org_invite_unlimited(text) set search_path = public, extensions, pg_temp;
-alter function public.redeem_org_invite_unlimited(text, text) set search_path = public, extensions, pg_temp;
-
 create or replace function public.validate_org_invite(p_code text)
 returns jsonb language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare

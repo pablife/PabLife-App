@@ -208,7 +208,7 @@ create policy "Own affiliation update" on public.tb_user_affiliations
 -- antes de a conta existir.
 create or replace function public.list_organizations(p_kinds text[] default null, p_search text default null)
 returns table (id uuid, name text, kind text, city text, state text)
-language sql stable security definer set search_path = public, pg_temp as $$
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select o.id, o.name, o.kind, o.city, o.state::text
   from public.tb_organizations o
   where o.is_active
@@ -227,7 +227,7 @@ $$;
 -- Confere o código de convite sem gravar nada (para preencher a tela).
 -- Liberada para anon pelo mesmo motivo; devolve só nome, tipo, cidade e o nome do plano.
 create or replace function public.validate_org_invite(p_code text)
-returns jsonb language plpgsql stable security definer set search_path = public, pg_temp as $$
+returns jsonb language plpgsql stable security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_org public.tb_organizations;
   v_plan_name text;
@@ -255,7 +255,7 @@ $$;
 -- Usa o código de convite: vincula o usuário à organização e, se houver plano no contrato,
 -- libera o plano (mesma lógica do cupom: assinatura ativa de valor zero).
 create or replace function public.redeem_org_invite(p_code text, p_role_title text default null)
-returns jsonb language plpgsql security definer set search_path = public, pg_temp as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_user uuid := auth.uid();
   v_org public.tb_organizations;
