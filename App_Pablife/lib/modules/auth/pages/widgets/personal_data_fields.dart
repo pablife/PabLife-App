@@ -60,13 +60,48 @@ class GenderField extends StatelessWidget {
   });
 
   @override
+  Widget build(BuildContext context) => RegPillChoice<Gender>(
+    label: 'Gênero (opcional)',
+    options: Gender.values,
+    labelOf: (g) => g.label,
+    value: value,
+    onChanged: onChanged,
+    enabled: enabled,
+  );
+}
+
+/// Escolha única em botões de pílula (Gênero, "Você é"). Com [allowClear],
+/// tocar de novo na opção marcada desmarca.
+class RegPillChoice<T> extends StatelessWidget {
+  final String label;
+  final List<T> options;
+  final String Function(T) labelOf;
+  final T? value;
+  final ValueChanged<T?> onChanged;
+  final bool enabled;
+  final bool allowClear;
+  final String? helper;
+
+  const RegPillChoice({
+    super.key,
+    required this.label,
+    required this.options,
+    required this.labelOf,
+    required this.value,
+    required this.onChanged,
+    this.enabled = true,
+    this.allowClear = true,
+    this.helper,
+  });
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Gênero (opcional)',
-          style: TextStyle(
+        Text(
+          label,
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
             color: PabColors.ink,
@@ -76,14 +111,25 @@ class GenderField extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: [for (final g in Gender.values) _option(g)],
+          children: [for (final o in options) _option(o)],
         ),
+        if (helper != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            helper!,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: PabColors.muted,
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  Widget _option(Gender gender) {
-    final on = value == gender;
+  Widget _option(T option) {
+    final on = value == option;
     return Semantics(
       button: true,
       selected: on,
@@ -94,7 +140,9 @@ class GenderField extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: enabled ? () => onChanged(on ? null : gender) : null,
+          onTap: enabled
+              ? () => onChanged(on && allowClear ? null : option)
+              : null,
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 44),
             child: Padding(
@@ -103,7 +151,7 @@ class GenderField extends StatelessWidget {
                 widthFactor: 1,
                 heightFactor: 1,
                 child: Text(
-                  gender.label,
+                  labelOf(option),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,

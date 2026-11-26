@@ -132,7 +132,7 @@ class _StudentProofPageState extends State<StudentProofPage> {
         onSecondary: c.isLoading
             ? null
             : () => c.createAccount(sendProof: false),
-        step: 'Passo 2 de 2',
+        step: c.studentStep,
       ),
     );
   }
