@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../infra/models/user_role.dart';
 import '../../infra/services/auth_service.dart';
 import '../auth/entry_visual.dart';
+import '../consultations/rating_prompt.dart';
 import '../home/controllers/user_home_controller.dart';
 import '../profile/profile_controller.dart';
 import '../../shared/mixins/loader_manager.dart';
@@ -29,6 +30,15 @@ class DashboardController extends GetxController with LoaderManagerMixin {
     super.onReady();
     // Questionário da Saúde da Mulher (conta nova) ou o aviso único.
     EntryVisual.onDashboardReady();
+    _askRating(delay: const Duration(seconds: 2));
+  }
+
+  /// Paciente: sessão concluída sem nota abre "Como foi sua consulta?".
+  void _askRating({Duration delay = Duration.zero}) {
+    if (AuthService.instance.currentUser?.role == UserRole.professional) {
+      return;
+    }
+    Future.delayed(delay, RatingPrompt.maybeShow);
   }
 
   void changeTab(int index) {
@@ -45,6 +55,7 @@ class DashboardController extends GetxController with LoaderManagerMixin {
         if (Get.isRegistered<UserHomeController>()) {
           Get.find<UserHomeController>().refreshDataSilent();
         }
+        _askRating();
       }
     }
 
