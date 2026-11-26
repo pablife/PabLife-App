@@ -11,6 +11,7 @@ import '../../widgets/pab_logo.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../notifications/notifications_page.dart';
 import 'appointment_outcome.dart';
+import 'create_slot_request.dart';
 import 'professional_area_controller.dart';
 import 'professional_room_page.dart';
 
@@ -229,6 +230,12 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = controller;
+    final warning = [
+      if (c.showNoSlotsWarning) ...[
+        const NoSlotsWarning(onCreate: _openCreateSlot),
+        const SizedBox(height: 12),
+      ],
+    ];
     final left = [
       _NextCard(controller: c),
       const SizedBox(height: 12),
@@ -242,10 +249,10 @@ class _Body extends StatelessWidget {
     if (!wide) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [...left, const SizedBox(height: 12), ...right],
+        children: [...warning, ...left, const SizedBox(height: 12), ...right],
       );
     }
-    return Row(
+    final row = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
@@ -263,6 +270,102 @@ class _Body extends StatelessWidget {
           ),
         ),
       ],
+    );
+    if (warning.isEmpty) return row;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [...warning, row],
+    );
+  }
+}
+
+/// Aviso do Dashboard: vai para a Agenda com "Criar horário" aberto.
+void _openCreateSlot() {
+  CreateSlotRequest.ask();
+  ProfessionalDashboardPage.goToTab(1);
+}
+
+/// "Você não tem horários abertos": aparece enquanto o profissional aprovado
+/// não tiver nenhum horário aberto, porque ninguém consegue marcar.
+class NoSlotsWarning extends StatelessWidget {
+  final VoidCallback onCreate;
+
+  const NoSlotsWarning({super.key, required this.onCreate});
+
+  static const _bg = Color(0xFFFFF1D6);
+  static const _fg = Color(0xFF6B4A00);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _bg,
+        border: Border.all(color: const Color(0xFFF2D58F)),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: PabColors.card,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.event_busy_outlined,
+                  size: 22,
+                  color: _fg,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Você não tem horários abertos',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: PabColors.ink,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Os pacientes não conseguem marcar consulta com você. '
+                      'Abra pelo menos um horário.',
+                      style: TextStyle(fontSize: 13, height: 1.4, color: _fg),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: onCreate,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+              backgroundColor: PabColors.accent,
+              foregroundColor: PabColors.ink,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            icon: const Icon(Icons.add_rounded),
+            label: const Text(
+              'Criar horário',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

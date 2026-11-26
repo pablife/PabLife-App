@@ -35,6 +35,13 @@ class ProfessionalAreaController extends GetxController {
   bool visible = true;
   List<ProfessionalAppointmentModel> appointments = [];
   int freeToday = 0;
+
+  /// Horários abertos, semanais ou avulsos de hoje em diante (null = ainda não sabe ou falhou: sem aviso).
+  int? openSlots;
+
+  /// Aprovado e sem nenhum horário aberto: ninguém consegue marcar.
+  bool get showNoSlotsWarning =>
+      openSlots == 0 && professional?.validationStatus == 'approved';
   bool loading = true;
   String? registering;
 
@@ -84,6 +91,7 @@ class ProfessionalAreaController extends GetxController {
         ),
         _consultations.myMeetingUrl(id),
         _loadCouncil(id),
+        _loadOpenSlots(id),
       ]);
       appointments =
           ((results[0] as dynamic).data as List?)
@@ -95,12 +103,34 @@ class ProfessionalAreaController extends GetxController {
           .length;
       meetingUrl = results[2] as String?;
       council = results[3] as String?;
+      openSlots = results[4] as int?;
     } catch (e) {
       debugPrint('Área do profissional: $e');
     } finally {
       loading = false;
       update();
     }
+  }
+
+  Future<int?> _loadOpenSlots(String professionalId) async {
+    try {
+      final value = await Supabase.instance.client.rpc(
+        'professional_open_slots',
+        params: {'p_professional_id': professionalId},
+      );
+      return (value as num?)?.toInt();
+    } catch (e) {
+      debugPrint('Horários abertos indisponíveis: $e');
+      return null;
+    }
+  }
+
+  /// Depois de criar um horário na Agenda: some o aviso do Dashboard.
+  Future<void> refreshOpenSlots() async {
+    final id = professional?.id;
+    if (id == null) return;
+    openSlots = await _loadOpenSlots(id);
+    update();
   }
 
   Future<String?> _loadCouncil(String professionalId) async {

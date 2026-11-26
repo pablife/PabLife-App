@@ -8,6 +8,8 @@ import '../../shared/utils/brazil_holidays.dart';
 import '../../widgets/pab_logo.dart';
 import '../calendar/controllers/professional_wide_calendar_controller.dart';
 import 'agenda_service.dart';
+import 'create_slot_request.dart';
+import 'professional_area_controller.dart';
 import 'professional_dashboard_page.dart' show firstNameAndInitial, hhmm;
 import 'professional_room_page.dart';
 import 'professional_wide_agenda_page.dart' show ClearAllSlotsButton;
@@ -63,6 +65,27 @@ class _ProfessionalAgendaPageState extends State<ProfessionalAgendaPage> {
     if (c.view != WideAgendaView.week) {
       c.setView(WideAgendaView.week);
     }
+    _takeCreateRequest();
+    CreateSlotRequest.tick.addListener(_onCreateRequest);
+  }
+
+  @override
+  void dispose() {
+    CreateSlotRequest.tick.removeListener(_onCreateRequest);
+    super.dispose();
+  }
+
+  /// Veio do aviso "Você não tem horários abertos": abre o formulário já
+  /// repetindo toda semana.
+  void _takeCreateRequest() {
+    if (!CreateSlotRequest.take()) return;
+    _creating = true;
+    _everyWeek = true;
+  }
+
+  void _onCreateRequest() {
+    if (!mounted) return;
+    setState(_takeCreateRequest);
   }
 
   static bool _same(DateTime a, DateTime b) =>
@@ -77,6 +100,9 @@ class _ProfessionalAgendaPageState extends State<ProfessionalAgendaPage> {
       service: _c.agenda,
     );
     if (changed) await _c.load();
+    if (Get.isRegistered<ProfessionalAreaController>()) {
+      ProfessionalAreaController.to.refreshOpenSlots();
+    }
   }
 
   Future<void> _add(DateTime day) async {
@@ -90,6 +116,9 @@ class _ProfessionalAgendaPageState extends State<ProfessionalAgendaPage> {
       _adding = false;
       if (ok) _creating = false;
     });
+    if (ok && Get.isRegistered<ProfessionalAreaController>()) {
+      ProfessionalAreaController.to.refreshOpenSlots();
+    }
   }
 
   @override

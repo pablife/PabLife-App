@@ -12,6 +12,8 @@ import '../../widgets/design_system/app_dialog.dart';
 import '../calendar/controllers/professional_wide_calendar_controller.dart';
 import '../calendar/widgets/wide_agenda_views.dart';
 import 'agenda_service.dart';
+import 'create_slot_request.dart';
+import 'professional_area_controller.dart';
 import 'professional_dashboard_page.dart' show firstNameAndInitial, hhmm;
 import 'professional_room_page.dart';
 
@@ -66,6 +68,20 @@ class _ProfessionalWideAgendaPageState
     }
     _createDay = DateTime.now().weekday % 7;
     _loadPattern();
+    if (CreateSlotRequest.take()) _creating = true;
+    CreateSlotRequest.tick.addListener(_onCreateRequest);
+  }
+
+  @override
+  void dispose() {
+    CreateSlotRequest.tick.removeListener(_onCreateRequest);
+    super.dispose();
+  }
+
+  /// Veio do aviso "Você não tem horários abertos" do Dashboard.
+  void _onCreateRequest() {
+    if (!mounted || !CreateSlotRequest.take()) return;
+    setState(() => _creating = true);
   }
 
   Future<void> _loadPattern() async {
@@ -159,6 +175,9 @@ class _ProfessionalWideAgendaPageState
     await _loadPattern();
     await _c.load();
     if (mounted) setState(() => _savingDay = null);
+    if (Get.isRegistered<ProfessionalAreaController>()) {
+      ProfessionalAreaController.to.refreshOpenSlots();
+    }
   }
 
   Future<void> _add() async {
@@ -178,6 +197,9 @@ class _ProfessionalWideAgendaPageState
       _adding = false;
       if (ok) _creating = false;
     });
+    if (ok && Get.isRegistered<ProfessionalAreaController>()) {
+      ProfessionalAreaController.to.refreshOpenSlots();
+    }
   }
 
   @override
