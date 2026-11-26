@@ -108,8 +108,11 @@ class _ProfessionalRoomPageState extends State<ProfessionalRoomPage> {
     if (text.isEmpty) return;
     setState(() => _savingNote = true);
     final repo = PatientRecordRepository();
-    final patient = await repo.getPatientIdByAppointment(_a.id);
-    final patientId = patient.data;
+    final patientId = await repo.getPatientIdForPair(
+      userId: _a.scheduledBy,
+      professionalId: _a.professionalId,
+      appointmentId: _a.id,
+    );
     String? error;
     if (patientId == null) {
       error = 'Ficha do paciente não encontrada para esta consulta.';

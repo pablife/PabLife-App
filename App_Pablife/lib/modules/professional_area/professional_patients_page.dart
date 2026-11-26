@@ -491,14 +491,18 @@ class _PatientDetailState extends State<_PatientDetail> {
     if (text.isEmpty) return;
     setState(() => _saving = true);
     final repo = PatientRecordRepository();
-    final patient = await repo.getPatientIdByAppointment(p.latest.id);
+    final patientId = await repo.getPatientIdForPair(
+      userId: p.id,
+      professionalId: p.latest.professionalId,
+      appointmentId: p.latest.id,
+    );
     String? error;
-    if (patient.data == null) {
+    if (patientId == null) {
       error = 'Ficha do paciente não encontrada.';
     } else {
       final today = DateTime.now();
       final created = await repo.createPatientRecord(
-        patientId: patient.data!,
+        patientId: patientId,
         type: PatientRecordType.note,
         title:
             'Anotação de ${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}',
