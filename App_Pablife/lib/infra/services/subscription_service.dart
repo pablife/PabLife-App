@@ -49,8 +49,8 @@ class UserAccessInfo {
   });
 
   /// Retorna quantas consultas ainda restam
-  int get consultationsRemaining =>
-      (consultationsAvailable - consultationsUsed).clamp(0, consultationsAvailable);
+  int get consultationsRemaining => (consultationsAvailable - consultationsUsed)
+      .clamp(0, consultationsAvailable);
 
   /// Verifica se o usuário pode agendar mais consultas
   bool get hasConsultationsRemaining => consultationsRemaining > 0;
@@ -130,10 +130,14 @@ class SubscriptionService {
   static SubscriptionService get instance => _instance;
 
   final SupabaseClient _client = Supabase.instance.client;
-  final SubscriptionPlanRepository _planRepository = SubscriptionPlanRepository();
+  final SubscriptionPlanRepository _planRepository =
+      SubscriptionPlanRepository();
 
   /// Ligado quando o profissional está no lado usuário.
   bool freeAccess = false;
+
+  /// Sócio da Pablife: acesso vitalício, sem plano e sem limite de consultas.
+  bool lifetimeMember = false;
 
   UserAccessInfo? _cachedAccessInfo;
   DateTime? _lastCheck;
@@ -192,8 +196,8 @@ class SubscriptionService {
         status: isSubscriber
             ? SubscriptionAccessStatus.active
             : isTrial
-                ? SubscriptionAccessStatus.trial
-                : SubscriptionAccessStatus.none,
+            ? SubscriptionAccessStatus.trial
+            : SubscriptionAccessStatus.none,
         consultationsAvailable: consultationsTotal,
         consultationsUsed: consultationsUsed,
         canAccessPlanner: true,

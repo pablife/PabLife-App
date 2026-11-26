@@ -63,10 +63,25 @@ class AuthService {
   }
 
   Future<void> _applyActiveProfile() async {
+    final lifetime = await _isLifetimeMember();
+    _subscriptionService.lifetimeMember = lifetime;
     _subscriptionService.freeAccess =
-        _actingAsUser && await _isApprovedProfessional();
+        lifetime || (_actingAsUser && await _isApprovedProfessional());
     _subscriptionService.clearCache();
     await _loadUserAccessInfo();
+  }
+
+  /// Sócio da Pablife (lista no banco): acesso vitalício e consultas sem
+  /// limite, como o profissional aprovado.
+  Future<bool> _isLifetimeMember() async {
+    if (_currentUser?.id == null) return false;
+    try {
+      final value = await _client.rpc('am_i_lifetime_member');
+      return value == true;
+    } catch (e) {
+      debugPrint('Erro ao verificar acesso de sócio: $e');
+      return false;
+    }
   }
 
   /// O acesso gratuito do lado usuário é benefício de quem já foi aprovado.
@@ -90,6 +105,7 @@ class AuthService {
     _actingAsUser = false;
     _hasChosenProfile = false;
     _subscriptionService.freeAccess = false;
+    _subscriptionService.lifetimeMember = false;
   }
 
   UserAccessInfo? get userAccessInfo => _userAccessInfo;

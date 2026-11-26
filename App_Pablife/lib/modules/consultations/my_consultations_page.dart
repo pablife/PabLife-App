@@ -34,6 +34,9 @@ class _MyConsultationsPageState extends State<MyConsultationsPage> {
   List<ProfessionalAppointmentModel> _past = [];
   Set<String> _rated = {};
   int _balance = 0;
+
+  /// Sócio ou profissional no lado usuário: consultas sem limite.
+  bool get _unlimited => SubscriptionService.instance.freeAccess;
   DateTime? _expires;
 
   @override
@@ -130,7 +133,7 @@ class _MyConsultationsPageState extends State<MyConsultationsPage> {
           child: Row(
             children: [
               Text(
-                '$_balance',
+                _unlimited ? '∞' : '$_balance',
                 style: const TextStyle(
                   fontSize: 30,
                   height: 1,
@@ -144,7 +147,9 @@ class _MyConsultationsPageState extends State<MyConsultationsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _balance == 1
+                      _unlimited
+                          ? 'consultas sem limite'
+                          : _balance == 1
                           ? 'consulta no saldo'
                           : 'consultas no saldo',
                       style: const TextStyle(
@@ -153,7 +158,15 @@ class _MyConsultationsPageState extends State<MyConsultationsPage> {
                         color: PabColors.onInk,
                       ),
                     ),
-                    if (_expires != null)
+                    if (SubscriptionService.instance.lifetimeMember)
+                      const Text(
+                        'Acesso vitalício de sócio',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: PabColors.navIdle,
+                        ),
+                      )
+                    else if (_expires != null && !_unlimited)
                       Text(
                         'Válidas até ${DateFormat('dd/MM/yyyy').format(_expires!.toLocal())}',
                         style: const TextStyle(
