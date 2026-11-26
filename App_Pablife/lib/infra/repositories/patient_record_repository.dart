@@ -53,6 +53,52 @@ class PatientRecordRepository extends StrautilsTryThis {
     }, action: 'buscar registros do paciente.');
   }
 
+  /// Ficha do paciente com a profissional: a mais antiga do par (paciente +
+  /// profissional). Hoje o app cria uma ficha por consulta; usando sempre a
+  /// mais antiga, as anotações ficam juntas. Sem ficha do par, cai na ficha
+  /// da consulta (como antes).
+  Future<String?> getPatientIdForPair({
+    required String userId,
+    required String professionalId,
+    String? appointmentId,
+  }) {
+    return resolvePatientId(
+      byPair: () async {
+        try {
+          final row = await _client
+              .from('tb_patients')
+              .select('id')
+              .eq('user_id', userId)
+              .eq('professional_id', professionalId)
+              .isFilter('deleted_at', null)
+              .order('created_at', ascending: true)
+              .limit(1)
+              .maybeSingle();
+          return row?['id']?.toString();
+        } on PostgrestException catch (e) {
+          debugPrint('❌ [PatientRecordRepo] Ficha do par: ${e.message}');
+          return null;
+        }
+      },
+      byAppointment: appointmentId == null
+          ? null
+          : () async => (await getPatientIdByAppointment(appointmentId)).data,
+    );
+  }
+
+  /// Regra da escolha, separada para os testes: primeiro o par, depois a
+  /// consulta.
+  static Future<String?> resolvePatientId({
+    required Future<String?> Function() byPair,
+    Future<String?> Function()? byAppointment,
+  }) async {
+    final pair = await byPair();
+    if (pair != null && pair.isNotEmpty) return pair;
+    if (byAppointment == null) return null;
+    final single = await byAppointment();
+    return (single == null || single.isEmpty) ? null : single;
+  }
+
   FStrautilsResponse<String?> getPatientIdByAppointment(String appointmentId) {
     return tryThis(() async {
       debugPrint(
