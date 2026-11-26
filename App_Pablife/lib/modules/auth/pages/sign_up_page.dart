@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../infra/models/affiliation.dart';
 import '../../../infra/models/professional_type.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../controllers/sign_up_controller.dart';
@@ -41,11 +42,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
         return RegistrationLayout(
           title: pro ? 'Seus dados' : 'Criar conta',
-          step: pro
-              ? 'Cadastro do profissional · passo 1 de 3'
-              : c.isStudent
-              ? 'Passo 1 de 2 · seus dados'
-              : 'Seus dados',
+          step: pro ? 'Cadastro do profissional · passo 1 de 3' : c.firstStep,
           progress: pro ? 1 : null,
           maxWidth: pro ? 560 : 520,
           onBack: () => Get.back<void>(),
@@ -107,6 +104,18 @@ class _SignUpPageState extends State<SignUpPage> {
               autofillHints: const [AutofillHints.newPassword],
               suffix: passwordSuffix,
             ),
+            if (!pro)
+              RegPillChoice<AffiliationKind>(
+                label: 'Você é',
+                options: AffiliationKind.values,
+                labelOf: (k) => k.label,
+                value: c.affiliation.kind,
+                allowClear: false,
+                onChanged: c.updateAffiliationKind,
+                helper:
+                    'Se a Pablife vem pelo seu trabalho, você informa de onde '
+                    'no próximo passo.',
+              ),
             if (pro) ..._professionalFields(c) else _StudentCard(controller: c),
             RegCheckbox(
               value: c.termsAccepted,
@@ -122,11 +131,7 @@ class _SignUpPageState extends State<SignUpPage> {
           ],
           footer: [
             RegPrimaryButton(
-              label: pro
-                  ? 'Continuar'
-                  : c.isStudent
-                  ? 'Continuar para o comprovante'
-                  : 'Criar minha conta',
+              label: pro ? 'Continuar' : c.firstStepButton,
               loading: c.isLoading,
               dim: c.missing.isNotEmpty,
               onTap: c.continueFirstStep,

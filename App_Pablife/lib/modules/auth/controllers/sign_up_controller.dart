@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../infra/models/affiliation.dart';
 import '../../../infra/models/gender.dart';
 import '../../../infra/models/professional_type.dart';
 import '../../../infra/models/user_model.dart';
@@ -16,7 +17,9 @@ import '../../../infra/services/auth_service.dart';
 import '../../../shared/mixins/loader_manager.dart';
 import '../../../shared/utils/app_snackbar.dart';
 import '../../../shared/utils/birth_date.dart';
+import '../affiliation_draft.dart';
 import '../entry_visual.dart';
+import '../pages/affiliation_page.dart';
 import '../pages/account_created_page.dart';
 import '../pages/professional_profile_page.dart';
 import '../pages/student_proof_page.dart';
@@ -57,6 +60,28 @@ class SignUpController extends GetxController with LoaderManagerMixin {
 
   bool get isProfessional => accountType == 'profissional';
 
+  /// "Você é" e o passo "Seu vínculo" (só para usuário).
+  final AffiliationDraft affiliation = AffiliationDraft();
+
+  bool get worksAtOrganization =>
+      !isProfessional && affiliation.worksAtOrganization;
+
+  /// Passos do cadastro de usuário: dados, vínculo e comprovante.
+  int get totalSteps => 1 + (worksAtOrganization ? 1 : 0) + (isStudent ? 1 : 0);
+
+  String get firstStep =>
+      totalSteps == 1 ? 'Seus dados' : 'Passo 1 de $totalSteps · seus dados';
+
+  String get affiliationStep => 'Passo 2 de $totalSteps';
+
+  String get studentStep => 'Passo $totalSteps de $totalSteps';
+
+  String get firstStepButton => worksAtOrganization
+      ? 'Continuar para o vínculo'
+      : isStudent
+      ? 'Continuar para o comprovante'
+      : 'Criar minha conta';
+
   @override
   void onInit() {
     super.onInit();
@@ -80,6 +105,8 @@ class SignUpController extends GetxController with LoaderManagerMixin {
       _set(() => cpfDocument = UtilBrasilFields.removeCaracteres(v));
   void updateBirthText(String v) => _set(() => birthText = v.trim());
   void updateGender(Gender? v) => _set(() => gender = v);
+  void updateAffiliationKind(AffiliationKind? v) =>
+      _set(() => affiliation.setKind(v));
   void updatePassword(String v) => _set(() => password = v);
   void updateTerms(bool v) => _set(() => termsAccepted = v);
   void toggleStudent() => _set(() => isStudent = !isStudent);
@@ -101,6 +128,7 @@ class SignUpController extends GetxController with LoaderManagerMixin {
     if (!UtilBrasilFields.isCPFValido(cpfDocument)) 'CPF',
     if (BirthDate.errorFor(birthText) != null) 'data de nascimento',
     if (password.length < 8) 'senha',
+    if (!isProfessional && affiliation.kind == null) 'vínculo',
     if (isProfessional && profession == null) 'profissão',
     if (isProfessional && councilNumber.length < 3) 'registro',
     if (!termsAccepted) 'aceite dos termos',
@@ -144,6 +172,21 @@ class SignUpController extends GetxController with LoaderManagerMixin {
       );
       return;
     }
+    if (worksAtOrganization) {
+      Get.toNamed(AffiliationPage.route);
+      return;
+    }
+    if (isStudent) {
+      Get.toNamed(StudentProofPage.route);
+      return;
+    }
+    await createAccount(sendProof: false);
+  }
+
+  /// Rodapé de "Seu vínculo". Com [skip] ("Preencher depois"), fica só o
+  /// tipo de vínculo.
+  Future<void> continueAfterAffiliation({required bool skip}) async {
+    if (skip) affiliation.skipDetails();
     if (isStudent) {
       Get.toNamed(StudentProofPage.route);
       return;
@@ -219,6 +262,8 @@ class SignUpController extends GetxController with LoaderManagerMixin {
             gender: gender,
           );
 
+      final affiliationSaved = await saveAffiliation(affiliation);
+
       String? proofError;
       if (sendProof) {
         final name = proofName!;
@@ -234,8 +279,15 @@ class SignUpController extends GetxController with LoaderManagerMixin {
         arguments: {
           'proofSent': sendProof && proofError == null,
           'proofError': proofError,
+          ...affiliationSaved.toArguments(),
         },
       );
+      if (affiliationSaved.error != null) {
+        AppSnackbar.to.show(
+          'Conta criada, mas o vínculo não foi salvo. Preencha em '
+          'Perfil → Meu vínculo.',
+        );
+      }
       if (!personalDataSaved) {
         AppSnackbar.to.show(
           'Conta criada, mas a data de nascimento não foi salva. '

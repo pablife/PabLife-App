@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../../shared/themes/app_palette.dart';
 import '../../../shared/themes/pab_colors.dart';
 import '../../../shared/utils/wide_layout.dart';
 import '../../dashboard/dashboard_page.dart';
+import '../../profile/pages/my_subscription_page.dart';
 import '../../profile/pages/subscription_page.dart';
 import 'widgets/registration_layout.dart';
 
@@ -23,6 +25,43 @@ class AccountCreatedPage extends StatelessWidget {
     final proofSent = args['proofSent'] == true;
     final proofError = args['proofError'] as String?;
     final wide = isWideLayout(context);
+    final affiliation = args['affiliation'] as String?;
+    final orgName = args['orgName'] as String? ?? '';
+    final planName = args['planName'] as String? ?? '';
+    final planEndsAt = args['planEndsAt'] as DateTime?;
+    final roleTitle = args['roleTitle'] as String?;
+    final byAgreement = affiliation == 'convenio';
+    final affiliationCard = switch (affiliation) {
+      'convenio' => _InfoCard(
+        icon: Icons.verified,
+        iconBg: PabColors.soft,
+        iconFg: PabColors.accentText,
+        title: 'Plano $planName pelo convênio',
+        text: planEndsAt == null
+            ? 'Liberado pela $orgName.'
+            : 'Liberado pela $orgName. Válido até '
+                  '${DateFormat('dd/MM/yyyy').format(planEndsAt)}.',
+      ),
+      'lista' => _InfoCard(
+        icon: Icons.account_balance,
+        iconBg: PabColors.lilac,
+        iconFg: PabColors.lilacText,
+        title: 'Vínculo registrado',
+        text:
+            '${[orgName, if ((roleTitle ?? '').isNotEmpty) roleTitle].join(' · ')}. '
+            'Se receber um código de convite, use em Perfil → Meu vínculo.',
+      ),
+      'analise' => _InfoCard(
+        icon: Icons.schedule,
+        iconBg: const Color(0xFFFFF1D6),
+        iconFg: const Color(0xFF6B4A00),
+        title: 'Organização em análise',
+        text:
+            'Vamos conferir $orgName e adicionar à lista. Avisamos por '
+            'notificação.',
+      ),
+      _ => null,
+    };
 
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -56,10 +95,13 @@ class AccountCreatedPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Bem-vindo(a) à Pablife. Agora é só escolher seu plano.',
+                Text(
+                  byAgreement
+                      ? 'Bem-vindo(a) à Pablife. Seu plano do convênio já está '
+                            'ativo.'
+                      : 'Bem-vindo(a) à Pablife. Agora é só escolher seu plano.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 15,
                     height: 1.5,
                     color: PabColors.navIdle,
@@ -73,6 +115,10 @@ class AccountCreatedPage extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
             children: [
+              if (affiliationCard != null) ...[
+                affiliationCard,
+                const SizedBox(height: 12),
+              ],
               if (proofSent)
                 const _InfoCard(
                   icon: Icons.schedule,
@@ -92,10 +138,12 @@ class AccountCreatedPage extends StatelessWidget {
                   text: '$proofError Você pode enviar de novo pelo Perfil.',
                 ),
               if (proofSent || proofError != null) const SizedBox(height: 12),
-              const _InfoCard(
-                title: 'Próximo passo: escolher seu plano',
-                text: 'Lite, Plus ou Premium, com 1, 3 ou 5 consultas online.',
-              ),
+              if (!byAgreement)
+                const _InfoCard(
+                  title: 'Próximo passo: escolher seu plano',
+                  text:
+                      'Lite, Plus ou Premium, com 1, 3 ou 5 consultas online.',
+                ),
             ],
           ),
         ),
@@ -107,18 +155,33 @@ class AccountCreatedPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                RegPrimaryButton(
-                  label: 'Ver planos',
-                  onTap: () {
-                    Get.offAllNamed(DashboardPage.route);
-                    Get.toNamed(SubscriptionPage.route);
-                  },
-                ),
-                const SizedBox(height: 4),
-                RegTextButton(
-                  label: 'Ir para o Dashboard',
-                  onTap: () => Get.offAllNamed(DashboardPage.route),
-                ),
+                if (byAgreement) ...[
+                  RegPrimaryButton(
+                    label: 'Ir para o Dashboard',
+                    onTap: () => Get.offAllNamed(DashboardPage.route),
+                  ),
+                  const SizedBox(height: 4),
+                  RegTextButton(
+                    label: 'Ver meu plano',
+                    onTap: () {
+                      Get.offAllNamed(DashboardPage.route);
+                      Get.toNamed(MySubscriptionPage.route);
+                    },
+                  ),
+                ] else ...[
+                  RegPrimaryButton(
+                    label: 'Ver planos',
+                    onTap: () {
+                      Get.offAllNamed(DashboardPage.route);
+                      Get.toNamed(SubscriptionPage.route);
+                    },
+                  ),
+                  const SizedBox(height: 4),
+                  RegTextButton(
+                    label: 'Ir para o Dashboard',
+                    onTap: () => Get.offAllNamed(DashboardPage.route),
+                  ),
+                ],
               ],
             ),
           ),
