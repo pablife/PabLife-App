@@ -469,11 +469,7 @@ class _AffiliationPageState extends State<AffiliationPage> {
             ),
           ),
         ],
-        if (d.codeInvalid)
-          const RegError(
-            'Código não encontrado. Confira com o RH ou escolha na lista '
-            'abaixo.',
-          ),
+        if (d.codeInvalid) RegError(d.codeErrorText),
       ],
     );
   }

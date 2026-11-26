@@ -70,6 +70,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                   _item('Agenda pessoal: tarefas, metas diárias e lembretes que você cria.'),
                   _item('Profissionais: registro no conselho, documentos de validação, especialização e descrição.'),
                   _item('Estudantes: instituição, curso e comprovante, ao pedir o plano estudante.'),
+                  _item('Vínculo de trabalho: se você é servidor(a) público(a), colaborador(a) de empresa parceira ou particular; a organização (prefeitura, câmara ou empresa) e o cargo, que é opcional. Se usar um código de convite, registramos que o plano veio do convênio.'),
                   _item('Pagamentos: plano, valor, datas, situação do pagamento e cupom usado.'),
                   _item('Aparelho e uso do app: identificador para notificações e relatórios de falha (modelo do aparelho, versão do sistema).'),
                   _p(
@@ -86,6 +87,8 @@ class PrivacyPolicyPage extends StatelessWidget {
                   _item('Acompanhar ciclo, humor, diário e gestação: consentimento específico e destacado (art. 11, I), registrado no app.'),
                   _item('Registros de saúde feitos pela profissional: tutela da saúde, em procedimento realizado por profissional de saúde (art. 11, II, f).'),
                   _item('Validar profissionais e estudantes e evitar fraudes: cumprimento de obrigação legal e legítimo interesse (art. 7º, II e IX).'),
+                  _item('Liberar o plano do convênio da sua organização: execução de contrato (art. 7º, V).'),
+                  _item('Relatórios para a sua organização, só com números somados e sem identificar ninguém: legítimo interesse (art. 7º, IX).'),
                   _item('Cobrar planos e guardar comprovantes: execução de contrato e obrigação legal fiscal (art. 7º, V e II).'),
                   _item('E-mails sobre novidades e benefícios: legítimo interesse (art. 7º, IX), com opção de sair em todo e-mail.'),
                   _item('Corrigir falhas do app: legítimo interesse (art. 7º, IX).'),
@@ -95,6 +98,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                   _h('4. Com quem compartilhamos'),
                   _p(
                     'Profissionais que você escolhe: ao agendar, a profissional vê seu nome, telefone, CPF e os dados da consulta. Diário e registros da gestação só chegam a ela se você escolher compartilhar.',
+                  ),
+                  _p(
+                    'Sua organização (prefeitura, câmara ou empresa parceira): recebe só números somados, como quantas pessoas usam o PabLife. Nunca recebe seu nome, seus dados de saúde, suas consultas nem qualquer dado que identifique você.',
                   ),
                   _p(
                     'Empresas que operam o serviço para nós, que só podem usar os dados para prestar o serviço ao PabLife:',
@@ -114,7 +120,8 @@ class PrivacyPolicyPage extends StatelessWidget {
                   _item('Senhas não ficam guardadas em texto aberto.'),
                   _item('O acesso da equipe aos dados é restrito.'),
                   _p('Por quanto tempo guardamos:'),
-                  _item('Conta, Saúde da Mulher e agenda: enquanto a conta existir; apagados ao excluir a conta.'),
+                  _item('Conta, vínculo de trabalho, Saúde da Mulher e agenda: enquanto a conta existir; apagados ao excluir a conta.'),
+                  _item('Códigos de convite digitados errado: até 1 dia, de forma embaralhada, só para bloquear tentativas em massa.'),
                   _item('Registros de pagamento, sem nome nem e-mail: pelo prazo da lei fiscal (em geral, 5 anos).'),
                   _item('Datas de consultas já realizadas, sem dados pessoais: pelo tempo necessário à prestação de contas e ao exercício regular de direitos.'),
                   _item('Registros feitos pela profissional: anonimizados ao excluir a conta, respeitadas as regras de guarda do conselho profissional.'),

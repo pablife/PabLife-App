@@ -61,6 +61,9 @@ class _FakeRepo extends AffiliationRepository {
         planName: 'Lite',
       );
     }
+    if (code == 'BLOQ-1') {
+      return const InviteCheck.invalid('too_many_attempts');
+    }
     return const InviteCheck.invalid('not_found');
   }
 
@@ -202,6 +205,23 @@ void main() {
         ),
         findsOneWidget,
       );
+      expect(c.affiliation.organization, isNull);
+    });
+
+    testWidgets('muitas tentativas pede para esperar', (tester) async {
+      await open(tester);
+      await tester.enterText(
+        field('Código de convite (opcional)').first,
+        'BLOQ-1',
+      );
+      await tester.tap(find.text('Aplicar'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Muitas tentativas. Tente de novo em alguns minutos.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Código não encontrado'), findsNothing);
       expect(c.affiliation.organization, isNull);
     });
 

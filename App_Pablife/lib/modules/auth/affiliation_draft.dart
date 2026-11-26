@@ -12,6 +12,15 @@ class AffiliationDraft {
   bool checking = false;
   bool codeInvalid = false;
 
+  /// Por que o código não valeu (too_many_attempts, not_found...).
+  String? codeReason;
+
+  /// Texto do erro embaixo do código.
+  String get codeErrorText => codeReason == 'too_many_attempts'
+      ? 'Muitas tentativas. Tente de novo em alguns minutos.'
+      : 'Código não encontrado. Confira com o RH ou escolha na lista '
+            'abaixo.';
+
   /// Organização escolhida na lista (ou preenchida pelo código).
   Organization? organization;
 
@@ -45,12 +54,14 @@ class AffiliationDraft {
     code = value;
     check = null;
     codeInvalid = false;
+    codeReason = null;
   }
 
   /// Código válido: preenche a organização e ajusta o tipo de vínculo.
   void applyCheck(InviteCheck result) {
     check = result.valid ? result : null;
     codeInvalid = !result.valid;
+    codeReason = result.valid ? null : result.reason;
     if (result.valid) {
       if (result.kind != null) kind = result.kind;
       organization = result.organization;
@@ -64,6 +75,7 @@ class AffiliationDraft {
     code = '';
     check = null;
     codeInvalid = false;
+    codeReason = null;
   }
 
   /// "Preencher depois": fica só o tipo de vínculo.
@@ -132,8 +144,11 @@ Future<AffiliationSaved> saveAffiliation(
   if (draft.usesCode) {
     final result = await repo.redeemInvite(draft.code, roleTitle: role);
     if (result == null || !result.valid) {
-      return const AffiliationSaved.failed(
-        'Não foi possível usar o código de convite. Tente de novo.',
+      return AffiliationSaved.failed(
+        result?.reason == 'too_many_attempts'
+            ? 'Muitas tentativas com códigos de convite. Tente de novo em '
+                  'alguns minutos.'
+            : 'Não foi possível usar o código de convite. Tente de novo.',
       );
     }
     final orgName = draft.check?.organization?.name;
